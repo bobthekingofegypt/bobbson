@@ -1,0 +1,57 @@
+plugins {
+    id 'bobbson.java-conventions'
+    id 'java-library'
+    id 'maven-publish'
+}
+
+dependencies {
+    testImplementation 'com.google.guava:guava:31.1-jre'
+    testImplementation 'org.mongodb:mongodb-driver-core:4.3.2'
+    testImplementation 'org.mongodb:bson:4.3.2'
+}
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = 'org.bobstuff.bobbson'
+            artifactId = 'core'
+            version = '1.0'
+
+            from components.java
+
+            artifact sourceJar {
+                classifier "sources"
+            }
+        }
+    }
+}
+
+testing {
+    suites {
+        integrationTest(JvmTestSuite) {
+            tasks["pmdIntegrationTest"].enabled = false
+            dependencies {
+                implementation project
+                implementation 'org.mongodb:mongodb-driver-core:4.3.2'
+                implementation 'org.mongodb:bson:4.3.2'
+                implementation 'com.google.guava:guava:31.1-jre'
+                implementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.8.2'
+                implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.1'
+            }
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    // Don't run the checker on generated code.
+    if (name.equals("compileMainGeneratedDataTemplateJava") || name.equals("compileIntegrationTestJava")
+            || name.equals("compileMainGeneratedRestJava")) {
+        checkerFramework {
+            skipCheckerFramework = true
+        }
+    }
+}

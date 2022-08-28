@@ -1,0 +1,31 @@
+
+plugins {
+    id 'bobbson.java-conventions'
+    id 'application'
+}
+
+dependencies {
+    implementation project(':bobbson')
+    implementation project(':activej')
+    implementation project(':processor')
+
+    implementation group: 'io.activej', name: 'activej-bytebuf', version: '5.1'
+    implementation 'org.mongodb:bson:4.3.2'
+
+    annotationProcessor project(':processor')
+}
+
+test {
+    jacoco {
+//        excludes = [ "**/_*" ]
+
+    }
+}
+
+checkerFramework {
+    skipCheckerFramework = true
+}
+
+application {
+    mainClass = 'org.bobstuff.bobbson.Main'
+}

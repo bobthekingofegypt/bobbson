@@ -1,0 +1,37 @@
+plugins {
+    id 'bobbson.java-conventions'
+    id 'java-library'
+    id 'maven-publish'
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = 'org.bobstuff.bobbson'
+            artifactId = 'processor'
+            version = '1.0'
+
+            from components.java
+        }
+    }
+}
+
+task copyTestSources(type: Copy) {
+    from file("${project.projectDir}/src/test/java/")
+    into file("${project.projectDir}/build/classes/java/test/")
+}
+
+test {
+    dependsOn 'copyTestSources'
+}
+
+dependencies {
+    implementation project(':bobbson')
+
+    implementation 'org.apache.commons:commons-lang3:3.9'
+    implementation 'com.squareup:javapoet:1.10.0'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+    testImplementation 'com.karuslabs:elementary:1.1.2'
+}
