@@ -1,7 +1,10 @@
 package org.bobstuff.bobbson.reflection;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import org.bobstuff.bobbson.*;
+import org.bobstuff.bobbson.writer.BsonWriter;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class ReflectionBasedConverter implements BobBsonConverter<Object> {
   private BobBson bobBson;
@@ -13,6 +16,45 @@ public class ReflectionBasedConverter implements BobBsonConverter<Object> {
     this.bobBson = bobBson;
     this.fields = fields;
     this.instanceClazz = instanceClazz;
+  }
+
+  @Override
+  public void write(BsonWriter bsonWriter, byte @Nullable [] key, Object instance) {
+    if (instance == null) {
+      if (key == null) {
+        bsonWriter.writeNull();
+      } else {
+        bsonWriter.writeNull(key);
+      }
+      return;
+    }
+
+    if (key == null) {
+      bsonWriter.writeStartDocument();
+    } else {
+      bsonWriter.writeStartDocument(key);
+    }
+
+    for (var field : fields) {
+      BobBsonConverter converter = bobBson.tryFindConverter(field.getType());
+      if (converter == null) {
+        throw new IllegalStateException("broken because no converter for type");
+      }
+      try {
+        var value = field.getGetter().invoke(instance);
+        converter.write(bsonWriter, field.nameBytes, value);
+      } catch (IllegalAccessException e) {
+        e.printStackTrace();
+      } catch (InvocationTargetException e) {
+        e.printStackTrace();
+      }
+    }
+    bsonWriter.writeEndDocument();
+  }
+
+  @Override
+  public void write(BsonWriter bsonWriter, Object instance) {
+    this.write(bsonWriter, (byte[]) null, instance);
   }
 
   @Override

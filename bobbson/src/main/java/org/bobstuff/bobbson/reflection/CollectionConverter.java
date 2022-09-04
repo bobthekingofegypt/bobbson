@@ -5,6 +5,7 @@ import java.util.Collection;
 import org.bobstuff.bobbson.BobBsonConverter;
 import org.bobstuff.bobbson.BsonReader;
 import org.bobstuff.bobbson.BsonType;
+import org.bobstuff.bobbson.writer.BsonWriter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class CollectionConverter<E, T extends Collection<E>> implements BobBsonConverter<T> {
@@ -17,6 +18,25 @@ public class CollectionConverter<E, T extends Collection<E>> implements BobBsonC
     this.converter = converter;
     this.instanceFactory = instanceFactory;
     this.manifest = manifest;
+  }
+
+  @Override
+  public void write(BsonWriter bsonWriter, byte @Nullable [] key, T values) {
+    if (key != null) {
+      bsonWriter.writeStartArray(key);
+    } else {
+      bsonWriter.writeStartArray();
+    }
+
+    for (var value : values) {
+      if (value == null) {
+        bsonWriter.writeNull();
+      } else {
+        converter.write(bsonWriter, value);
+      }
+    }
+
+    bsonWriter.writeEndArray();
   }
 
   @Override

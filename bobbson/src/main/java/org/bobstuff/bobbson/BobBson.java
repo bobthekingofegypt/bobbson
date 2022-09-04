@@ -14,8 +14,14 @@ public class BobBson {
   private final List<BobBsonConverterFactory<BobBsonConverter>> converterFactories;
   private final ConcurrentMap<String, BobBsonConverter> keyConverters;
   private final ExternalConverterLookup externalConverterLookup;
+  private final BobBsonConfig config;
 
   public BobBson() {
+    this(new BobBsonConfig(true));
+  }
+
+  public BobBson(BobBsonConfig config) {
+    this.config = config;
     converterFactories = new CopyOnWriteArrayList<>();
 
     keyConverters = new ConcurrentHashMap<>();
@@ -45,7 +51,7 @@ public class BobBson {
       return converter;
     }
 
-    if (manifest instanceof Class<?>) {
+    if (manifest instanceof Class<?> && config.isAllowExternalLookup()) {
       var found = externalConverterLookup.lookupFromClasspath((Class<?>) manifest, this);
       if (found) {
         converter = converters.get(manifest);

@@ -35,6 +35,10 @@ public class ReflectionField {
     return field.getGenericType();
   }
 
+  public Class<?> getClazz() {
+    return field.getGenericType().getClass();
+  }
+
   public Method getGetter() {
     return getter;
   }

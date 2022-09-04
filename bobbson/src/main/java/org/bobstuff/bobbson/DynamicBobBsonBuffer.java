@@ -101,7 +101,7 @@ public class DynamicBobBsonBuffer implements BobBsonBuffer {
       this.writeBuffer = buffers.get(currentWriteBufferIndex);
       this.writeBuffer.setTail(0);
     } else {
-      limits[currentWriteBufferIndex] = this.buffer.getLimit();
+      limits[currentWriteBufferIndex] = this.writeBuffer.getLimit();
       currentWriteBufferIndex += 1;
       this.writeBuffer = pool.allocate(DEFAULT_BUFFER_SIZE << Math.min(this.buffers.size(), 20));
       buffers.add(this.writeBuffer);
@@ -323,7 +323,7 @@ public class DynamicBobBsonBuffer implements BobBsonBuffer {
         buffers.get(bufferIndex).setTail(lastJump);
         current += lastJump;
       } else {
-        var limit = writeBuffer.getLimit();
+        var limit = this.buffers.get(bufferIndex).getLimit(); // writeBuffer.getLimit();
         var remainingSteps = newTail - current;
         //        var writeRemaining = writeBuffer.getWriteRemaining();
         lastJump = Math.min(limit, remainingSteps);
