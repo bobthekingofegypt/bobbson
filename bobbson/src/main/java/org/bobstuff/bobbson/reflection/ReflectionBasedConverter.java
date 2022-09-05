@@ -1,6 +1,5 @@
 package org.bobstuff.bobbson.reflection;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import org.bobstuff.bobbson.*;
 import org.bobstuff.bobbson.writer.BsonWriter;
@@ -36,18 +35,21 @@ public class ReflectionBasedConverter implements BobBsonConverter<Object> {
     }
 
     for (var field : fields) {
-      BobBsonConverter converter = bobBson.tryFindConverter(field.getType());
+      var converter = field.getConverter();
+      if (converter == null) {
+        converter = bobBson.tryFindConverter(field.getType());
+      }
       if (converter == null) {
         throw new IllegalStateException("broken because no converter for type");
       }
-      try {
-        var value = field.getGetter().invoke(instance);
-        converter.write(bsonWriter, field.nameBytes, value);
-      } catch (IllegalAccessException e) {
-        e.printStackTrace();
-      } catch (InvocationTargetException e) {
-        e.printStackTrace();
-      }
+      //      try {
+      var value = field.getGetterFunction().apply(instance);
+      converter.write(bsonWriter, field.nameBytes, value);
+      //      } catch (IllegalAccessException e) {
+      //        e.printStackTrace();
+      //      } catch (InvocationTargetException e) {
+      //        e.printStackTrace();
+      //      }
     }
     bsonWriter.writeEndDocument();
   }
@@ -75,10 +77,17 @@ public class ReflectionBasedConverter implements BobBsonConverter<Object> {
 
     BobBsonBuffer.ByteRangeComparitor nameComparitor = bsonReader.getFieldName();
     while (bsonReader.readBsonType() != BsonType.END_OF_DOCUMENT) {
+      if (bsonReader.getCurrentBsonType() == BsonType.NULL) {
+        bsonReader.readNull();
+        continue;
+      }
       boolean found = false;
       for (var field : fields) {
         if (nameComparitor.equalsArray(field.nameBytes, field.weakHash)) {
-          var converter = bobBson.tryFindConverter(field.getType());
+          var converter = field.getConverter();
+          if (converter == null) {
+            converter = bobBson.tryFindConverter(field.getType());
+          }
           if (converter == null) {
             throw new IllegalStateException("broken because no converter for type");
           }

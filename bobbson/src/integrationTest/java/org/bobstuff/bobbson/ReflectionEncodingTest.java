@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.ByteArrayOutputStream;
 import java.util.*;
+import org.bobstuff.bobbson.annotations.BsonAttribute;
+import org.bobstuff.bobbson.annotations.BsonConverter;
 import org.bobstuff.bobbson.buffer.BobBufferBobBsonBuffer;
 import org.bobstuff.bobbson.reflection.CollectionConverterFactory;
 import org.bobstuff.bobbson.reflection.MapConverterFactory;
@@ -38,6 +40,58 @@ public class ReflectionEncodingTest {
 
     assertEquals("bob", result.getName());
     assertEquals(3, result.getAge());
+  }
+
+  @Test
+  public void testReflectionBasedEncodingAlias() throws Exception {
+    var bobBson = new BobBson();
+    bobBson.registerFactory(new ObjectConverterFactory());
+
+    var simple = new AliasTest();
+    simple.setNames("bob");
+
+    BufferDataPool pool =
+        new NoopBufferDataPool((size) -> new BobBufferBobBsonBuffer(new byte[size], 0, 0));
+    DynamicBobBsonBuffer buffer = new DynamicBobBsonBuffer(pool);
+
+    var bsonWriter = new BsonWriter(buffer);
+    bobBson.serialise(simple, AliasTest.class, bsonWriter);
+
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    buffer.pipe(bos);
+    var data = bos.toByteArray();
+
+    var reader = new BsonReader(new BobBufferBobBsonBuffer(data, 0, data.length));
+    var result = bobBson.deserialise(AliasTest.class, reader);
+
+    assertEquals("bob", result.getNames());
+  }
+
+  @Test
+  public void testReflectionBasedEncodingConverter() throws Exception {
+    var bobBson = new BobBson();
+    bobBson.registerFactory(new ObjectConverterFactory());
+
+    var simple = new CustomConverterTest();
+    simple.setNames("custom: bob");
+
+    BufferDataPool pool =
+        new NoopBufferDataPool((size) -> new BobBufferBobBsonBuffer(new byte[size], 0, 0));
+    DynamicBobBsonBuffer buffer = new DynamicBobBsonBuffer(pool);
+
+    var bsonWriter = new BsonWriter(buffer);
+    bobBson.serialise(simple, CustomConverterTest.class, bsonWriter);
+
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    buffer.pipe(bos);
+    var data = bos.toByteArray();
+
+    var reader = new BsonReader(new BobBufferBobBsonBuffer(data, 0, data.length));
+    reader.readStartDocument();
+    reader.readBsonType();
+    var result = reader.readString();
+
+    assertEquals("bob", result);
   }
 
   @Test
@@ -170,6 +224,32 @@ public class ReflectionEncodingTest {
 
     public void setRecursive(Map<String, Map<String, Map<String, String>>> recursive) {
       this.recursive = recursive;
+    }
+  }
+
+  public static class AliasTest {
+    @BsonAttribute("notnames")
+    private String names;
+
+    public String getNames() {
+      return names;
+    }
+
+    public void setNames(String names) {
+      this.names = names;
+    }
+  }
+
+  public static class CustomConverterTest {
+    @BsonConverter(target = CustomConverter.class)
+    private String names;
+
+    public String getNames() {
+      return names;
+    }
+
+    public void setNames(String names) {
+      this.names = names;
     }
   }
 }

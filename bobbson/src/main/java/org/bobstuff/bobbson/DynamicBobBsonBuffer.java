@@ -52,7 +52,7 @@ public class DynamicBobBsonBuffer implements BobBsonBuffer {
 
   public DynamicBobBsonBuffer(BufferDataPool pool, BobBsonBuffer startingBuffer) {
     this.pool = pool;
-    this.limits = new int[30];
+    this.limits = new int[100];
     this.buffers = new ArrayList<>();
     this.currentBufferIndex = 0;
     this.currentWriteBufferIndex = 0;
@@ -300,6 +300,20 @@ public class DynamicBobBsonBuffer implements BobBsonBuffer {
   @Override
   public void skipTail(int size) {
     // Need to hard limit a roll if we are skipping beyond a boundary
+    var checkSize = writeBuffer.getTail();
+    if (size < 0 && checkSize + size > 0) {
+      // shortcut logic as current buffer can handle the shift
+      writeBuffer.setTail(checkSize + size);
+      tail = tail + size;
+      return;
+    }
+    if (size > 0 && checkSize + size < writeBuffer.getLimit()) {
+      // shortcut logic as current buffer can handle the shift
+      writeBuffer.setTail(checkSize + size);
+      tail = tail + size;
+      return;
+    }
+
     var newTail = tail + size;
     var current = 0;
     tail = newTail;

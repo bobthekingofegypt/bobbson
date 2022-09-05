@@ -17,7 +17,7 @@ public class ObjectConverterFactory implements BobBsonConverterFactory<Reflectio
 
   private ReflectionBasedConverter analyse(Type manifest, Class<?> clazz, BobBson bobBson)
       throws Exception {
-    var beanFields = ReflectionTools.parseBeanFields(clazz);
+    var beanFields = ReflectionTools.parseBeanFields(clazz, bobBson);
     return new ReflectionBasedConverter(bobBson, clazz, beanFields);
   }
 }

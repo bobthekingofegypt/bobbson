@@ -22,10 +22,11 @@ public class StringBsonConverter implements BobBsonConverter<String> {
 
   @Override
   public void write(@NonNull BsonWriter bsonWriter, byte @Nullable [] key, @NonNull String value) {
-    if (value == null) {
-      value = "";
-    }
-    if (key == null) {
+    if (value == null && key == null) {
+      bsonWriter.writeNull();
+    } else if (value == null && key != null) {
+      bsonWriter.writeNull(key);
+    } else if (key == null) {
       bsonWriter.writeString(value);
     } else {
       bsonWriter.writeString(key, value);

@@ -26,7 +26,7 @@ public class CompiledBsonAnnotationProcessor extends AbstractProcessor {
   @Override
   public synchronized void init(ProcessingEnvironment processingEnv) {
     super.init(processingEnv);
-    messager = new BobMessager(processingEnv.getMessager(), false);
+    messager = new BobMessager(processingEnv.getMessager(), true);
     types = processingEnv.getTypeUtils();
     elements = processingEnv.getElementUtils();
   }
@@ -63,6 +63,7 @@ public class CompiledBsonAnnotationProcessor extends AbstractProcessor {
         }
       } catch (Exception e) {
         messager.error("failed writing out file : " + e.getMessage());
+        messager.error(e);
       }
     }
 

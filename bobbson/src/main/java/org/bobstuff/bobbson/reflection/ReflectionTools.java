@@ -5,6 +5,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
+
+import org.bobstuff.bobbson.BobBson;
+import org.bobstuff.bobbson.annotations.BsonAttribute;
 
 public class ReflectionTools {
   public static final Map<Class<?>, Class<?>> map = new HashMap<>();
@@ -21,7 +25,7 @@ public class ReflectionTools {
   }
 
   @SuppressWarnings("PMD.AvoidCatchingThrowable")
-  public static List<ReflectionField> parseBeanFields(Class<?> clazz) throws Exception {
+  public static List<ReflectionField> parseBeanFields(Class<?> clazz, BobBson bobBson) throws Exception {
     var beanFields = new ArrayList<ReflectionField>();
     var methods = clazz.getMethods();
     var fields = clazz.getDeclaredFields();
@@ -30,6 +34,8 @@ public class ReflectionTools {
       if (Modifier.isTransient(field.getModifiers())) {
         continue;
       }
+
+      var bsonAttribute = field.getAnnotation(BsonAttribute.class);
 
       var name = field.getName();
       var capitalisedName =
@@ -83,7 +89,45 @@ public class ReflectionTools {
         if (listenerMethod == null) {
           throw new RuntimeException("biconsumer creation failed");
         }
-        beanFields.add(new ReflectionField(field, getter, setter, listenerMethod));
+        MethodHandle target2 = null;
+
+        if (field.getType().isPrimitive()) {
+          var fieldType = map.get(field.getType());
+          if (fieldType == null) {
+            throw new RuntimeException("can't find primitive type in type map");
+          }
+          target2 =
+              caller.findVirtual(clazz, getter.getName(), MethodType.methodType(field.getType()));
+        } else {
+          target2 =
+              caller.findVirtual(clazz, getter.getName(), MethodType.methodType(field.getType()));
+        }
+        MethodType type2 = target2.type();
+        //        if (field.getType().isPrimitive()) {
+        //          var fieldType = map.get(field.getType());
+        //          if (fieldType == null) {
+        //            throw new RuntimeException("can't find primitive type in type map");
+        //          }
+        //          type2 = type2.changeParameterType(0, fieldType);
+        //        }
+        CallSite site2 =
+            LambdaMetafactory.metafactory(
+                caller,
+                "apply",
+                MethodType.methodType(Function.class),
+                MethodType.methodType(Object.class, Object.class),
+                target2,
+                type2);
+        Function getterFunction = null;
+        try {
+          getterFunction = (Function) site2.getTarget().invokeExact();
+        } catch (Throwable e) {
+          e.printStackTrace();
+        }
+        if (getterFunction == null) {
+          throw new RuntimeException("oh dear");
+        }
+        beanFields.add(new ReflectionField(field, getter, setter, listenerMethod, getterFunction, bobBson));
       }
     }
     return beanFields;

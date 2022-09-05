@@ -3,6 +3,7 @@ package org.bobstuff.bobbson;
 import org.bobstuff.bobbson.annotations.CompiledBson;
 
 import java.util.List;
+import java.util.Objects;
 
 @CompiledBson
 public class LargeObject {
@@ -186,5 +187,39 @@ public class LargeObject {
 
     public void setString9(String string9) {
         this.string9 = string9;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        LargeObject that = (LargeObject) o;
+        return Double.compare(that.double1, double1) == 0 && Double.compare(
+                that.double2, double2) == 0 && Double.compare(that.double3,
+                                                              double3) == 0 && Double.compare(
+                that.double4, double4) == 0 && Double.compare(that.double5,
+                                                              double5) == 0 && Double.compare(
+                that.double6, double6) == 0 && Double.compare(that.double7,
+                                                              double7) == 0 && Double.compare(
+                that.double8, double8) == 0 && Double.compare(that.double9,
+                                                              double9) == 0 && Objects.equals(
+                mediumObjects, that.mediumObjects) && Objects.equals(smallObject,
+                                                                     that.smallObject) && Objects.equals(
+                string1, that.string1) && Objects.equals(string2,
+                                                         that.string2) && Objects.equals(
+                string3, that.string3) && Objects.equals(string4,
+                                                         that.string4) && Objects.equals(
+                string5, that.string5) && Objects.equals(string6,
+                                                         that.string6) && Objects.equals(
+                string7, that.string7) && Objects.equals(string8,
+                                                         that.string8) && Objects.equals(
+                string9, that.string9);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mediumObjects, smallObject, double1, double2, double3, double4, double5,
+                            double6, double7, double8, double9, string1, string2, string3, string4,
+                            string5, string6, string7, string8, string9);
     }
 }

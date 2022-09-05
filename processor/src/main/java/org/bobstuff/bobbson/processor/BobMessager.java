@@ -24,6 +24,20 @@ public class BobMessager {
     }
   }
 
+  public void error(Throwable t) {
+      try {
+        for (var s : t.getStackTrace()) {
+          if (fos != null) {
+            fos.write(s.toString().getBytes(StandardCharsets.UTF_8));
+            fos.write("\r\n".getBytes(StandardCharsets.UTF_8));
+            fos.flush();
+          }
+        }
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+  }
+
   public void error(String text) {
     if (fos != null) {
       try {

@@ -2,6 +2,8 @@ package org.bobstuff.bobbson;
 
 import org.bobstuff.bobbson.annotations.CompiledBson;
 
+import java.util.Objects;
+
 @CompiledBson
 public class SmallObject {
     private String name;
@@ -57,5 +59,20 @@ public class SmallObject {
 
     public void setNumber3(long number3) {
         this.number3 = number3;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SmallObject that = (SmallObject) o;
+        return number1 == that.number1 && Double.compare(that.number2,
+                                                         number2) == 0 && option == that.option && number3 == that.number3 && Objects.equals(
+                name, that.name) && Objects.equals(description, that.description);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, description, number1, number2, option, number3);
     }
 }

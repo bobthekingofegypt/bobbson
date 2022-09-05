@@ -2,6 +2,8 @@ package org.bobstuff.bobbson;
 
 import org.bobstuff.bobbson.annotations.CompiledBson;
 
+import java.util.Objects;
+
 @CompiledBson
 public class MediumObject {
     private SmallObject smallObject;
@@ -138,5 +140,26 @@ public class MediumObject {
 
     public void setString4(String string4) {
         this.string4 = string4;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MediumObject that = (MediumObject) o;
+        return number1 == that.number1 && number2 == that.number2 && number3 == that.number3 && number4 == that.number4 && option1 == that.option1 && option2 == that.option2 && option3 == that.option3 && option4 == that.option4 && Objects.equals(
+                smallObject, that.smallObject) && Objects.equals(lotsOfText,
+                                                                 that.lotsOfText) && Objects.equals(
+                moreText, that.moreText) && Objects.equals(string1,
+                                                           that.string1) && Objects.equals(
+                string2, that.string2) && Objects.equals(string3,
+                                                         that.string3) && Objects.equals(
+                string4, that.string4);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(smallObject, lotsOfText, moreText, number1, number2, number3, number4,
+                            option1, option2, option3, option4, string1, string2, string3, string4);
     }
 }
