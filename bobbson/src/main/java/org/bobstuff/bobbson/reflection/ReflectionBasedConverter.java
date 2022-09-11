@@ -1,5 +1,6 @@
 package org.bobstuff.bobbson.reflection;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import org.bobstuff.bobbson.*;
 import org.bobstuff.bobbson.writer.BsonWriter;
@@ -18,6 +19,7 @@ public class ReflectionBasedConverter implements BobBsonConverter<Object> {
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public void write(BsonWriter bsonWriter, byte @Nullable [] key, Object instance) {
     if (instance == null) {
       if (key == null) {
@@ -42,14 +44,8 @@ public class ReflectionBasedConverter implements BobBsonConverter<Object> {
       if (converter == null) {
         throw new IllegalStateException("broken because no converter for type");
       }
-      //      try {
       var value = field.getGetterFunction().apply(instance);
       converter.write(bsonWriter, field.nameBytes, value);
-      //      } catch (IllegalAccessException e) {
-      //        e.printStackTrace();
-      //      } catch (InvocationTargetException e) {
-      //        e.printStackTrace();
-      //      }
     }
     bsonWriter.writeEndDocument();
   }
@@ -60,17 +56,16 @@ public class ReflectionBasedConverter implements BobBsonConverter<Object> {
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public Object read(BsonReader bsonReader) {
     Object instance = null;
     try {
-      instance = instanceClazz.newInstance();
-    } catch (InstantiationException e) {
-      e.printStackTrace();
-    } catch (IllegalAccessException e) {
-      e.printStackTrace();
-    }
-    if (instance == null) {
-      throw new RuntimeException("failed to initialise instance");
+      instance = instanceClazz.getConstructor().newInstance();
+    } catch (InvocationTargetException
+        | InstantiationException
+        | IllegalAccessException
+        | NoSuchMethodException e) {
+      throw new RuntimeException("failed to initialise instance " + instanceClazz, e);
     }
 
     bsonReader.readStartDocument();

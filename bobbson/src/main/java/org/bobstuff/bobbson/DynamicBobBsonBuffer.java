@@ -105,6 +105,10 @@ public class DynamicBobBsonBuffer implements BobBsonBuffer {
       currentWriteBufferIndex += 1;
       this.writeBuffer = pool.allocate(DEFAULT_BUFFER_SIZE << Math.min(this.buffers.size(), 20));
       buffers.add(this.writeBuffer);
+      if ((long) tail + this.writeBuffer.getLimit() > Integer.MAX_VALUE) {
+        throw new RuntimeException(
+            "dynamicbobbsonbuffer has an upper limit of " + Integer.MAX_VALUE + " size");
+      }
     }
   }
 
@@ -625,7 +629,7 @@ public class DynamicBobBsonBuffer implements BobBsonBuffer {
   }
 
   public List<BobBsonBuffer> getBuffers() {
-    return buffers;
+    return buffers.subList(0, currentWriteBufferIndex + 1);
   }
 
   private class DynamicByteRangeComparitor implements ByteRangeComparitor {
@@ -635,6 +639,10 @@ public class DynamicBobBsonBuffer implements BobBsonBuffer {
     public void set(int start, int size) {
       this.start = start;
       this.size = size;
+    }
+
+    public int weakHash() {
+      return -1;
     }
 
     @Override

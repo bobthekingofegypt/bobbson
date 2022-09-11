@@ -2,20 +2,30 @@ package org.bobstuff.bobbson.reflection;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.lang.reflect.Type;
+import org.bobstuff.bobbson.BobBson;
+import org.bobstuff.bobbson.BobBsonConverter;
 import org.bobstuff.bobbson.annotations.BsonAttribute;
+import org.bobstuff.bobbson.converters.StringBsonConverter;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 public class ReflectionToolsTest {
 
   @Test
   public void testParseBeanFieldsIgnoresNoSetters() throws Exception {
-    var result = ReflectionTools.parseBeanFields(NoSetters.class);
+    var bobBson = Mockito.mock(BobBson.class);
+    var result = ReflectionTools.parseBeanFields(NoSetters.class, bobBson);
     assertEquals(0, result.size());
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void testParseBeanFieldsOneSetter() throws Exception {
-    var result = ReflectionTools.parseBeanFields(OneSetter.class);
+    var bobBson = Mockito.mock(BobBson.class);
+    Mockito.when(bobBson.tryFindConverter((Type) String.class))
+        .thenReturn((BobBsonConverter) new StringBsonConverter());
+    var result = ReflectionTools.parseBeanFields(OneSetter.class, bobBson);
     assertEquals(1, result.size());
     var field = result.get(0);
     assertEquals("name", field.getName());
@@ -23,7 +33,10 @@ public class ReflectionToolsTest {
 
   @Test
   public void testParseBeanFieldsAlias() throws Exception {
-    var result = ReflectionTools.parseBeanFields(AliasFields.class);
+    var bobBson = Mockito.mock(BobBson.class);
+    Mockito.when(bobBson.tryFindConverter((Type) String.class))
+        .thenReturn((BobBsonConverter) new StringBsonConverter());
+    var result = ReflectionTools.parseBeanFields(AliasFields.class, bobBson);
     assertEquals(1, result.size());
     var field = result.get(0);
     assertEquals("notnames", field.getAlias());

@@ -1,6 +1,8 @@
 package org.bobstuff.bobbson;
 
 public interface FieldName {
+  int weakHash();
+
   String name();
 
   boolean equalsArray(byte[] array);

@@ -3,6 +3,7 @@ package org.bobstuff.bobbson.reflection;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.google.common.reflect.TypeToken;
+import java.lang.reflect.Type;
 import java.util.*;
 import org.bobstuff.bobbson.BobBson;
 import org.bobstuff.bobbson.BobBsonConverter;
@@ -18,7 +19,7 @@ public class CollectionConverterFactoryTest {
   @Test
   public void testTryCreateList() {
     var bobBson = Mockito.mock(BobBson.class);
-    Mockito.when(bobBson.tryFindConverter(Integer.class))
+    Mockito.when(bobBson.tryFindConverter((Type) Integer.class))
         .thenReturn((BobBsonConverter) new IntegerBsonConverter());
     var sut = new CollectionConverterFactory();
     var converter =
@@ -30,7 +31,7 @@ public class CollectionConverterFactoryTest {
   @Test
   public void testTryCreateSet() {
     var bobBson = Mockito.mock(BobBson.class);
-    Mockito.when(bobBson.tryFindConverter(Integer.class))
+    Mockito.when(bobBson.tryFindConverter((Type) Integer.class))
         .thenReturn((BobBsonConverter) new IntegerBsonConverter());
     var sut = new CollectionConverterFactory();
     var converter =
@@ -42,7 +43,7 @@ public class CollectionConverterFactoryTest {
   @Test
   public void testTryCreateSetInterface() {
     var bobBson = Mockito.mock(BobBson.class);
-    Mockito.when(bobBson.tryFindConverter(Integer.class))
+    Mockito.when(bobBson.tryFindConverter((Type) Integer.class))
         .thenReturn((BobBsonConverter) new IntegerBsonConverter());
     var sut = new CollectionConverterFactory();
     var converter = sut.tryCreate(new TypeToken<Set<Integer>>() {}.getType(), bobBson);
@@ -53,7 +54,7 @@ public class CollectionConverterFactoryTest {
   @Test
   public void testTryCreateListInterface() {
     var bobBson = Mockito.mock(BobBson.class);
-    Mockito.when(bobBson.tryFindConverter(Integer.class))
+    Mockito.when(bobBson.tryFindConverter((Type) Integer.class))
         .thenReturn((BobBsonConverter) new IntegerBsonConverter());
     var sut = new CollectionConverterFactory();
     var converter = sut.tryCreate(new TypeToken<List<Integer>>() {}.getType(), bobBson);
@@ -64,7 +65,7 @@ public class CollectionConverterFactoryTest {
   @Test
   public void testTryCreateQueueInterface() {
     var bobBson = Mockito.mock(BobBson.class);
-    Mockito.when(bobBson.tryFindConverter(Integer.class))
+    Mockito.when(bobBson.tryFindConverter((Type) Integer.class))
         .thenReturn((BobBsonConverter) new IntegerBsonConverter());
     var sut = new CollectionConverterFactory();
     var converter = sut.tryCreate(new TypeToken<Queue<Integer>>() {}.getType(), bobBson);
@@ -75,7 +76,7 @@ public class CollectionConverterFactoryTest {
   @Test
   public void testTryCreateNonCollectionInterface() {
     var bobBson = Mockito.mock(BobBson.class);
-    Mockito.when(bobBson.tryFindConverter(Integer.class))
+    Mockito.when(bobBson.tryFindConverter((Type) Integer.class))
         .thenReturn((BobBsonConverter) new IntegerBsonConverter());
     var sut = new CollectionConverterFactory();
     var converter = sut.tryCreate(new TypeToken<Map<String, Integer>>() {}.getType(), bobBson);
@@ -86,7 +87,7 @@ public class CollectionConverterFactoryTest {
   @Test
   public void testTryCreateNonGenericType() {
     var bobBson = Mockito.mock(BobBson.class);
-    Mockito.when(bobBson.tryFindConverter(Integer.class))
+    Mockito.when(bobBson.tryFindConverter((Type) Integer.class))
         .thenReturn((BobBsonConverter) new IntegerBsonConverter());
     var sut = new CollectionConverterFactory();
     var converter = sut.tryCreate(new TypeToken<List>() {}.getType(), bobBson);

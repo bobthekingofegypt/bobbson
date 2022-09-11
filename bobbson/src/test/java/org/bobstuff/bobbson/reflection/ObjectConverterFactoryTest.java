@@ -2,6 +2,7 @@ package org.bobstuff.bobbson.reflection;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.lang.reflect.Type;
 import org.bobstuff.bobbson.BobBson;
 import org.bobstuff.bobbson.BobBsonConverter;
 import org.bobstuff.bobbson.BsonReader;
@@ -38,9 +39,9 @@ public class ObjectConverterFactoryTest {
   @SuppressWarnings("unchecked")
   public void testTryCreate() {
     var bobBson = Mockito.mock(BobBson.class);
-    Mockito.when(bobBson.tryFindConverter(String.class))
+    Mockito.when(bobBson.tryFindConverter((Type) String.class))
         .thenReturn((BobBsonConverter) new StringBsonConverter());
-    Mockito.when(bobBson.tryFindConverter(int.class))
+    Mockito.when(bobBson.tryFindConverter((Type) int.class))
         .thenReturn((BobBsonConverter) new IntegerBsonConverter());
     var sut = new ObjectConverterFactory();
     var converter = sut.tryCreate(BasicTypes.class, bobBson);

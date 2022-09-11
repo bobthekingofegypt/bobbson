@@ -45,6 +45,11 @@ public class BobBson {
     externalConverterLookup = new ExternalConverterLookup(classLoaders);
   }
 
+  @SuppressWarnings("unchecked")
+  public @Nullable <T> BobBsonConverter<T> tryFindConverter(Class<T> clazz) {
+    return (BobBsonConverter<T>) tryFindConverter((Type) clazz);
+  }
+
   public @Nullable BobBsonConverter<?> tryFindConverter(final Type manifest) {
     var converter = converters.get(manifest);
     if (converter != null) {

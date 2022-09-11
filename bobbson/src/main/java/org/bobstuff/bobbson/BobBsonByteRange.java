@@ -20,6 +20,10 @@ public class BobBsonByteRange implements BobBsonBuffer.ByteRangeComparitor {
     this.weakHash = weakHash;
   }
 
+  public int weakHash() {
+    return weakHash;
+  }
+
   public String name() {
     return new String(data, start, size - 1, StandardCharsets.UTF_8);
   }

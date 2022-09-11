@@ -1,12 +1,12 @@
 package org.bobstuff.bobbson.reflection;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
-
 import org.bobstuff.bobbson.BobBson;
 import org.bobstuff.bobbson.BobBsonConverter;
 import org.bobstuff.bobbson.annotations.BsonAttribute;
@@ -40,16 +40,17 @@ public class ReflectionField {
     var customConverter = field.getAnnotation(BsonConverter.class);
     if (customConverter != null && customConverter.target() != null) {
       try {
-        converter = (BobBsonConverter) customConverter.target().newInstance();
-      } catch (InstantiationException e) {
-        e.printStackTrace();
-      } catch (IllegalAccessException e) {
-        e.printStackTrace();
+        converter = customConverter.target().getConstructor().newInstance();
+      } catch (NoSuchMethodException
+          | IllegalAccessException
+          | InstantiationException
+          | InvocationTargetException e) {
+        throw new RuntimeException("failed to create instance of " + customConverter.target());
       }
     } else {
       var t = bobBson.tryFindConverter(field.getGenericType());
       if (t == null) {
-        throw new RuntimeException();
+        throw new RuntimeException("no converter found for type " + field.getGenericType());
       }
       converter = t;
     }
