@@ -32,5 +32,6 @@ public class BsonValueConverters {
     bobBson.registerConverter(
         BsonJavaScriptWithScope.class, new BsonJavaScriptWithScopeConverter(bobBson));
     bobBson.registerConverter(BsonRegularExpression.class, new BsonRegularExpressionConverter());
+    bobBson.registerConverter(RawList.class, new RawListConverter(bobBson));
   }
 }

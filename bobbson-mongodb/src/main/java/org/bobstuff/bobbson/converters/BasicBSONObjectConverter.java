@@ -1,11 +1,10 @@
 package org.bobstuff.bobbson.converters;
 
 import org.bobstuff.bobbson.*;
+import org.bobstuff.bobbson.BsonReader;
+import org.bobstuff.bobbson.BsonType;
 import org.bobstuff.bobbson.writer.BsonWriter;
-import org.bson.BasicBSONObject;
-import org.bson.BsonNull;
-import org.bson.BsonTimestamp;
-import org.bson.Document;
+import org.bson.*;
 import org.bson.types.Binary;
 import org.bson.types.Code;
 import org.bson.types.Decimal128;
@@ -25,7 +24,7 @@ public class BasicBSONObjectConverter implements BobBsonConverter<BasicBSONObjec
   static {
     bsonTypeClassMap.put(BsonType.STRING, String.class);
     bsonTypeClassMap.put(BsonType.NULL, BsonNull.class);
-    bsonTypeClassMap.put(BsonType.ARRAY, List.class);
+    bsonTypeClassMap.put(BsonType.ARRAY, BsonArray.class);
     bsonTypeClassMap.put(BsonType.BOOLEAN, Boolean.class);
     bsonTypeClassMap.put(BsonType.INT32, Integer.class);
     bsonTypeClassMap.put(BsonType.INT64, Long.class);
@@ -57,6 +56,7 @@ public class BasicBSONObjectConverter implements BobBsonConverter<BasicBSONObjec
 //    cache.setMaxCacheEntries(100);
 //    cache.setMaxCacheLength(100);
 //  }
+  // TODO remove this test
   private static Map<Integer, String> cache = new HashMap<Integer, String>();
 
   @Override

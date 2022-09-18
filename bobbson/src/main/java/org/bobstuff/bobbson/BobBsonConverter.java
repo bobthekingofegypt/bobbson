@@ -6,6 +6,10 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface BobBsonConverter<T> {
+//  boolean containsMongoId();
+//
+//  ObjectId mongoId
+//
   default @Nullable T read(BsonReader bsonReader) {
     throw new IllegalStateException("override read to create custom reader");
   }

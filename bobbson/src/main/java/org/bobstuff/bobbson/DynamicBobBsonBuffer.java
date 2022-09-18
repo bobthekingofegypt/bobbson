@@ -52,7 +52,7 @@ public class DynamicBobBsonBuffer implements BobBsonBuffer {
 
   public DynamicBobBsonBuffer(BufferDataPool pool, BobBsonBuffer startingBuffer) {
     this.pool = pool;
-    this.limits = new int[100];
+    this.limits = new int[10];
     this.buffers = new ArrayList<>();
     this.currentBufferIndex = 0;
     this.currentWriteBufferIndex = 0;
@@ -62,6 +62,19 @@ public class DynamicBobBsonBuffer implements BobBsonBuffer {
     this.head = 0;
     this.tail = 0;
     this.byteRangeComparitor = new DynamicByteRangeComparitor();
+  }
+
+  public void reset() {
+    this.currentBufferIndex = 0;
+    this.currentWriteBufferIndex = 0;
+    this.buffer = this.buffers.get(0);
+    this.head = 0;
+    this.tail = 0;
+
+    for (var buf : buffers) {
+      buf.setHead(0);
+      buf.setTail(0);
+    }
   }
 
   public void release() {

@@ -245,7 +245,7 @@ public class ParserGenerator {
         }
       }
     }
-    block.nextControlFlow("else").addStatement("reader.skipValue()");
+    block.nextControlFlow("else").addStatement("System.out.println(range.name())").addStatement("reader.skipValue()");
     block.endControlFlow();
 
     block.beginControlFlow(

@@ -1,7 +1,6 @@
 package org.bobstuff.bobbson.converters;
 
-import org.bobstuff.bobbson.BobBson;
-import org.bobstuff.bobbson.BobBsonConverter;
+import org.bobstuff.bobbson.*;
 import org.bobstuff.bobbson.BsonReader;
 import org.bobstuff.bobbson.BsonType;
 import org.bobstuff.bobbson.writer.BsonWriter;
@@ -21,11 +20,12 @@ public class DocumentConverter implements BobBsonConverter<Document> {
   static {
     bsonTypeClassMap.put(BsonType.STRING, String.class);
     bsonTypeClassMap.put(BsonType.NULL, BsonNull.class);
-    bsonTypeClassMap.put(BsonType.ARRAY, List.class);
+    // TODO this is not a bson array, need a non bson converter somehow for array
+    bsonTypeClassMap.put(BsonType.ARRAY, RawList.class);
     bsonTypeClassMap.put(BsonType.BOOLEAN, Boolean.class);
     bsonTypeClassMap.put(BsonType.INT32, Integer.class);
     bsonTypeClassMap.put(BsonType.INT64, Long.class);
-    bsonTypeClassMap.put(BsonType.BINARY, Binary.class);
+    bsonTypeClassMap.put(BsonType.BINARY, BobBsonBinary.class);
     bsonTypeClassMap.put(BsonType.DOCUMENT, Document.class);
     bsonTypeClassMap.put(BsonType.DOUBLE, Double.class);
     bsonTypeClassMap.put(BsonType.DATE_TIME, Date.class);
