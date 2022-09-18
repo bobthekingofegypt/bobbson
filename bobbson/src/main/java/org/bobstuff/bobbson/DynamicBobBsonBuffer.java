@@ -481,7 +481,7 @@ public class DynamicBobBsonBuffer implements BobBsonBuffer {
     int bytesToWrite = size - offset;
     int remaining = writeBuffer.getWriteRemaining();
     if (remaining >= bytesToWrite) {
-      writeBuffer.writeBytes(bytes);
+      writeBuffer.writeBytes(bytes, offset, size);
       return;
     }
 
