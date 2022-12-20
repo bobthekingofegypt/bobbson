@@ -119,6 +119,39 @@ public class AnalysisTest {
     assertNull(name.converterType);
   }
 
+
+  @Test
+  public void testIsIsGetterByLombok(Cases cases) {
+    var sample = cases.one("isiscase");
+
+    var sut =
+            new Analysis(Tools.types(), Tools.elements(), new BobMessager(Tools.messager(), false));
+    var result = sut.analyse(new HashSet<>(List.of(sample)));
+    var si = result.get("org.bobstuff.bobbson.processor.AnalysisTest.IsIsCase");
+
+    assertEquals("org.bobstuff.bobbson.processor.AnalysisTest$IsIsCase", si.binaryName);
+    assertEquals(
+            "org.bobstuff.bobbson.annotations.CompiledBson",
+            si.annotation.getAnnotationType().toString());
+    assertEquals("org.bobstuff.bobbson.annotations.CompiledBson", si.discoveredBy.toString());
+
+    var attributes = si.attributes;
+    assertTrue(attributes.containsKey("isName"));
+    var name = attributes.get("isName");
+    assertEquals("isName", name.getReadMethod().getSimpleName().toString());
+    assertEquals("boolean", name.getReadMethod().getReturnType().toString());
+    assertEquals("setName", name.getWriteMethod().getSimpleName().toString());
+    assertEquals(
+            "boolean", name.getWriteMethod().getParameters().get(0).asType().toString());
+    assertEquals("void", name.getWriteMethod().getReturnType().toString());
+    assertFalse(name.list);
+    assertFalse(name.set);
+    assertFalse(name.map);
+    assertNull(name.annotation);
+    assertNull(name.converter);
+    assertNull(name.converterType);
+  }
+
   @Test
   public void testSimpleConverterAnalysis(Cases cases) {
     var sample = cases.one("converter");
@@ -213,6 +246,20 @@ public class AnalysisTest {
 
     public void setName(String name) {
       this.name = name;
+    }
+  }
+
+  @Case("isiscase")
+  @CompiledBson
+  static class IsIsCase {
+    private boolean isName;
+
+    public boolean isName() {
+      return isName;
+    }
+
+    public void setName(boolean name) {
+      this.isName = name;
     }
   }
 }

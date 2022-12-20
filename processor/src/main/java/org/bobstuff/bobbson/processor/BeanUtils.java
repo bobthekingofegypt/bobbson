@@ -18,10 +18,16 @@ public class BeanUtils {
           && !modifiers.contains(Modifier.TRANSIENT)
           && !modifiers.contains(Modifier.ABSTRACT)
           && method.getReturnType().getKind().equals(type.getKind())
-          && (method
+          && ((method
               .getSimpleName()
               .toString()
-              .equals("get" + StringUtils.capitalize(fieldName)))) {
+              .equals("get" + StringUtils.capitalize(fieldName)) || method
+              .getSimpleName()
+              .toString()
+              .equals("is" + StringUtils.capitalize(fieldName))) || (fieldName.startsWith("is") && method
+              .getSimpleName()
+              .toString()
+              .equals(fieldName)))) {
         return method;
       }
     }
@@ -46,7 +52,8 @@ public class BeanUtils {
           && (method
               .getSimpleName()
               .toString()
-              .equals("set" + StringUtils.capitalize(fieldName)))) {
+              .equals("set" + StringUtils.capitalize(fieldName)) ||
+              (fieldName.startsWith("is") && method.getSimpleName().toString().equals("set" + StringUtils.capitalize(fieldName.substring(2))) ) )) {
         return method;
       }
     }
