@@ -245,7 +245,8 @@ public class ParserGenerator {
         }
       }
     }
-    block.nextControlFlow("else").addStatement("System.out.println(range.name())").addStatement("reader.skipValue()");
+    block.nextControlFlow("else").addStatement("reader.skipValue()");
+//    block.nextControlFlow("else").addStatement("System.out.println(range.name())").addStatement("reader.skipValue()");
     block.endControlFlow();
 
     block.beginControlFlow(
@@ -301,17 +302,22 @@ public class ParserGenerator {
         .addParameter(BsonWriter.class, "writer")
         .addParameter(byte[].class, "key")
         .addParameter(model, "obj")
+        .addParameter(boolean.class, "writeEnvolope")
         .beginControlFlow("if (obj == null)")
         .addStatement("writer.writeNull(key)")
         .addStatement("return")
         .endControlFlow()
+        .beginControlFlow("if (writeEnvolope)")
         .beginControlFlow("if (key != null)")
         .addStatement("writer.writeStartDocument(key)")
         .nextControlFlow("else")
         .addStatement("writer.writeStartDocument()")
         .endControlFlow()
+        .endControlFlow()
         .addCode(generateWriterCode(structInfo))
+        .beginControlFlow("if (writeEnvolope)")
         .addStatement("writer.writeEndDocument()")
+        .endControlFlow()
         .build();
   }
 
