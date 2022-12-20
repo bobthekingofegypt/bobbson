@@ -322,7 +322,7 @@ public class BsonReader {
         buffer.skipHead(4);
         contextStack.adjustRemaining(4);
       }
-      case INT64, DOUBLE, DATE_TIME -> {
+      case INT64, DOUBLE, DATE_TIME, TIMESTAMP -> {
         buffer.skipHead(8);
         contextStack.adjustRemaining(8);
       }
@@ -374,7 +374,7 @@ public class BsonReader {
         contextStack.adjustRemaining(size);
       }
       default -> throw new UnsupportedOperationException(
-          format("todo add support for %s", currentBsonType));
+          format("todo add skip support for %s", currentBsonType));
     }
 
     state = getNextState();
