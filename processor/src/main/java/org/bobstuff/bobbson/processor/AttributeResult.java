@@ -167,6 +167,20 @@ public class AttributeResult {
     return name;
   }
 
+  public int getOrder() {
+    if (annotation == null) {
+      return -1;
+    }
+
+    for (ExecutableElement ee : annotation.getElementValues().keySet()) {
+      if (ee.toString().equals("order()")) {
+        return (int) annotation.getElementValues().get(ee).getValue();
+      }
+    }
+
+    return -1;
+  }
+
   public boolean isList() {
     return list;
   }

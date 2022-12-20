@@ -9,4 +9,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.CLASS)
 public @interface BsonAttribute {
   String value();
+
+  int order() default -1;
 }
