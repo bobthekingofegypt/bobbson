@@ -11,6 +11,7 @@ import com.squareup.javapoet.ClassName;
 import java.net.URL;
 import java.util.*;
 import javax.lang.model.element.Element;
+import org.bobstuff.bobbson.annotations.BsonAttribute;
 import org.bobstuff.bobbson.annotations.BsonConverter;
 import org.bobstuff.bobbson.annotations.CompiledBson;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,10 +23,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 public class ParserGeneratorTest {
   Element sample;
   Element sampleMultipleFields;
+
+  Element sampleMultipleFieldsOrderedOne;
+  Element sampleMultipleFieldsOrderedTwo;
   Element sampleCollections;
   Element sampleConverter;
   StructInfo sampleStructInfo;
   StructInfo sampleMultipleFieldsStructInfo;
+  StructInfo sampleMultipleFieldsOrderedOneStructInfo;
+  StructInfo sampleMultipleFieldsOrderedTwoStructInfo;
   StructInfo sampleCollectionsStructInfo;
   StructInfo sampleConverterStructInfo;
   ParserGenerator sut;
@@ -34,6 +40,8 @@ public class ParserGeneratorTest {
   public void setUp(Cases cases) {
     sample = cases.one("first");
     sampleMultipleFields = cases.one("multipleFields");
+    sampleMultipleFieldsOrderedOne = cases.one("multipleFieldsOrdered1");
+    sampleMultipleFieldsOrderedTwo = cases.one("multipleFieldsOrdered2");
     sampleCollections = cases.one("collections");
     sampleConverter = cases.one("converter");
     var analysis =
@@ -41,10 +49,22 @@ public class ParserGeneratorTest {
     var result =
         analysis.analyse(
             new HashSet<>(
-                List.of(sample, sampleMultipleFields, sampleConverter, sampleCollections)));
+                List.of(
+                    sample,
+                    sampleMultipleFields,
+                    sampleConverter,
+                    sampleCollections,
+                    sampleMultipleFieldsOrderedOne,
+                    sampleMultipleFieldsOrderedTwo)));
     sampleStructInfo = result.get("org.bobstuff.bobbson.processor.ParserGeneratorTest.Sample");
     sampleMultipleFieldsStructInfo =
         result.get("org.bobstuff.bobbson.processor.ParserGeneratorTest.SampleMultipleFields");
+    sampleMultipleFieldsOrderedOneStructInfo =
+        result.get(
+            "org.bobstuff.bobbson.processor.ParserGeneratorTest.SampleMultipleFieldsOrdered1");
+    sampleMultipleFieldsOrderedTwoStructInfo =
+        result.get(
+            "org.bobstuff.bobbson.processor.ParserGeneratorTest.SampleMultipleFieldsOrdered2");
     sampleCollectionsStructInfo =
         result.get("org.bobstuff.bobbson.processor.ParserGeneratorTest.SampleCollections");
     sampleConverterStructInfo =
@@ -278,6 +298,32 @@ public class ParserGeneratorTest {
   }
 
   @Test
+  public void testGenerateParserCodeMultipleFieldsOrderedOne() {
+    var code = sut.generateParserCode(sampleMultipleFieldsOrderedOneStructInfo);
+    assertEquals(
+        """
+                    var range = reader.getFieldName();
+                    if (!occupationCheck && range.equalsArray(occupationBytes, 1077)) {
+                      occupationCheck = readAllValues ? false : true;
+                      result.setOccupation(converter_java_lang_String().read(reader));
+                    } else if (!nameCheck && range.equalsArray(nameBytes, 417)) {
+                      nameCheck = readAllValues ? false : true;
+                      result.setName(converter_java_lang_String().read(reader));
+                    } else if (!ageCheck && range.equalsArray(ageBytes, 301)) {
+                      ageCheck = readAllValues ? false : true;
+                      result.setAge(converter_int().read(reader));
+                    } else {
+                      reader.skipValue();
+                    }
+                    if (!readAllValues && occupationCheck && nameCheck && ageCheck) {
+                      reader.skipContext();
+                      break;
+                    }
+                        """,
+        code.toString());
+  }
+
+  @Test
   public void testGenerateParserCodeCollectionFields() {
     var code = sut.generateParserCode(sampleCollectionsStructInfo);
     assertEquals(
@@ -372,6 +418,32 @@ public class ParserGeneratorTest {
                     }
                         """,
         code.toString());
+  }
+
+  @Test
+  public void testGenerateWriterCodeMultipleFieldsOrderedOne() {
+    var code = sut.generateWriterCode(sampleMultipleFieldsOrderedOneStructInfo);
+    assertEquals(
+        """
+                    converter_java_lang_String().write(writer, occupationBytes, obj.getOccupation());
+                    converter_int().write(writer, ageBytes, obj.getAge());
+                    converter_java_lang_String().write(writer, nameBytes, obj.getName());
+            """
+            .replaceAll("\\s+", ""),
+        code.toString().replaceAll("\\s+", ""));
+  }
+
+  @Test
+  public void testGenerateWriterCodeMutlipleFieldsOrderedTwo() {
+    var code = sut.generateWriterCode(sampleMultipleFieldsOrderedTwoStructInfo);
+    assertEquals(
+        """
+                    converter_java_lang_String().write(writer, nameBytes, obj.getName());
+                    converter_java_lang_String().write(writer, occupationBytes, obj.getOccupation());
+                    converter_int().write(writer, ageBytes, obj.getAge());
+            """
+            .replaceAll("\\s+", ""),
+        code.toString().replaceAll("\\s+", ""));
   }
 
   @Test
@@ -637,6 +709,80 @@ public class ParserGeneratorTest {
   static class SampleMultipleFields {
     private String name;
     private int age;
+    private String occupation;
+
+    public String getName() {
+      return name;
+    }
+
+    public void setName(String name) {
+      this.name = name;
+    }
+
+    public int getAge() {
+      return age;
+    }
+
+    public void setAge(int age) {
+      this.age = age;
+    }
+
+    public String getOccupation() {
+      return occupation;
+    }
+
+    public void setOccupation(String occupation) {
+      this.occupation = occupation;
+    }
+  }
+
+  @Case("multipleFieldsOrdered1")
+  @CompiledBson
+  static class SampleMultipleFieldsOrdered1 {
+    @BsonAttribute(value = "name", order = 3)
+    private String name;
+
+    @BsonAttribute(value = "age", order = 2)
+    private int age;
+
+    @BsonAttribute(value = "occupation", order = 1)
+    private String occupation;
+
+    public String getName() {
+      return name;
+    }
+
+    public void setName(String name) {
+      this.name = name;
+    }
+
+    public int getAge() {
+      return age;
+    }
+
+    public void setAge(int age) {
+      this.age = age;
+    }
+
+    public String getOccupation() {
+      return occupation;
+    }
+
+    public void setOccupation(String occupation) {
+      this.occupation = occupation;
+    }
+  }
+
+  @Case("multipleFieldsOrdered2")
+  @CompiledBson
+  static class SampleMultipleFieldsOrdered2 {
+    @BsonAttribute(value = "name", order = 1)
+    private String name;
+
+    @BsonAttribute(value = "age", order = 3)
+    private int age;
+
+    @BsonAttribute(value = "occupation", order = 2)
     private String occupation;
 
     public String getName() {

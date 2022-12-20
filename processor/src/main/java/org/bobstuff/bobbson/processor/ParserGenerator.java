@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
@@ -132,7 +133,18 @@ public class ParserGenerator {
 
   public CodeBlock generateWriterCode(StructInfo structInfo) {
     CodeBlock.Builder block = CodeBlock.builder();
-    for (var entry : structInfo.attributes.entrySet()) {
+
+    Map<String, AttributeResult> result =
+        structInfo.attributes.entrySet().stream()
+            .sorted(Comparator.comparingInt(a -> a.getValue().getOrder()))
+            .collect(
+                Collectors.toMap(
+                    Map.Entry::getKey,
+                    Map.Entry::getValue,
+                    (oldValue, newValue) -> oldValue,
+                    LinkedHashMap::new));
+
+    for (var entry : result.entrySet()) {
       var attribute = entry.getValue();
       var attributeName = entry.getKey();
       String fieldName = attribute.getConverterFieldName();
