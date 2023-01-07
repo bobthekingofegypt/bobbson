@@ -8,6 +8,10 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public interface BobBsonConverter<T> {
 
   default @Nullable T read(BsonReader bsonReader) {
+    return this.read(bsonReader, true);
+  }
+
+  default @Nullable T read(BsonReader bsonReader, boolean readEnvelope) {
     throw new IllegalStateException("override read to create custom reader");
   }
 
@@ -19,7 +23,8 @@ public interface BobBsonConverter<T> {
     write(bsonWriter, (byte[]) null, value, writeEnvelope);
   }
 
-  default void write(BsonWriter bsonWriter, byte @Nullable [] key, @NonNull T value, boolean writeEnvolope) {
+  default void write(
+      BsonWriter bsonWriter, byte @Nullable [] key, @NonNull T value, boolean writeEnvolope) {
     throw new IllegalStateException("override write to create custom writer");
   }
 

@@ -1,18 +1,16 @@
 package org.bobstuff.bobbson.converters;
 
+import java.util.*;
 import org.bobstuff.bobbson.*;
 import org.bobstuff.bobbson.BsonReader;
 import org.bobstuff.bobbson.BsonType;
 import org.bobstuff.bobbson.writer.BsonWriter;
 import org.bson.*;
-import org.bson.types.Binary;
 import org.bson.types.Code;
 import org.bson.types.Decimal128;
 import org.bson.types.ObjectId;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-
-import java.util.*;
 
 public class DocumentConverter implements BobBsonConverter<Document> {
   public static final Map<BsonType, Class<?>> bsonTypeClassMap = new HashMap<>();
@@ -30,16 +28,16 @@ public class DocumentConverter implements BobBsonConverter<Document> {
     bsonTypeClassMap.put(BsonType.DOUBLE, Double.class);
     bsonTypeClassMap.put(BsonType.DATE_TIME, Date.class);
     bsonTypeClassMap.put(BsonType.TIMESTAMP, BsonTimestamp.class);
-//    bsonTypeClassMap.put(BsonType.SYMBOL, BsonSymbol.class);
+    //    bsonTypeClassMap.put(BsonType.SYMBOL, BsonSymbol.class);
     bsonTypeClassMap.put(BsonType.OBJECT_ID, ObjectId.class);
-//    bsonTypeClassMap.put(BsonType.MAX_KEY, BsonMaxKey.class);
-//    bsonTypeClassMap.put(BsonType.MIN_KEY, BsonMinKey.class);
+    //    bsonTypeClassMap.put(BsonType.MAX_KEY, BsonMaxKey.class);
+    //    bsonTypeClassMap.put(BsonType.MIN_KEY, BsonMinKey.class);
     bsonTypeClassMap.put(BsonType.DECIMAL128, Decimal128.class);
-//    bsonTypeClassMap.put(BsonType.DB_POINTER, DbPointer.class);
+    //    bsonTypeClassMap.put(BsonType.DB_POINTER, DbPointer.class);
     bsonTypeClassMap.put(BsonType.JAVASCRIPT, Code.class);
-//    bsonTypeClassMap.put(BsonType.REGULAR_EXPRESSION, BsonRegularExpression.class);
-//    bsonTypeClassMap.put(BsonType.UNDEFINED, Undefined.class);
-//    bsonTypeClassMap.put(BsonType.JAVASCRIPT_WITH_SCOPE, BsonJavaScriptWithScope.class);
+    //    bsonTypeClassMap.put(BsonType.REGULAR_EXPRESSION, BsonRegularExpression.class);
+    //    bsonTypeClassMap.put(BsonType.UNDEFINED, Undefined.class);
+    //    bsonTypeClassMap.put(BsonType.JAVASCRIPT_WITH_SCOPE, BsonJavaScriptWithScope.class);
   }
 
   private BobBson bobBson;

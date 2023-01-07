@@ -1,17 +1,14 @@
 package org.bobstuff.bobbson.converters;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.bobstuff.bobbson.BobBson;
 import org.bobstuff.bobbson.BobBsonConverter;
 import org.bobstuff.bobbson.BsonReader;
 import org.bobstuff.bobbson.BsonType;
 import org.bobstuff.bobbson.writer.BsonWriter;
-import org.bson.BsonArray;
-import org.bson.BsonValue;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class RawListConverter implements BobBsonConverter<List> {
   private BobBson bobBson;
@@ -31,8 +28,7 @@ public class RawListConverter implements BobBsonConverter<List> {
       Class<?> clazz = DocumentConverter.bsonTypeClassMap.get(type);
       if (clazz == null) {
         throw new IllegalStateException(
-            String.format(
-                "No type map entry registered for value type %s", type.toString()));
+            String.format("No type map entry registered for value type %s", type.toString()));
       }
       var converter = bobBson.tryFindConverter(clazz);
       if (converter == null) {
@@ -51,8 +47,7 @@ public class RawListConverter implements BobBsonConverter<List> {
   }
 
   @Override
-  public void write(
-      @NonNull BsonWriter bsonWriter, byte @Nullable [] key, @NonNull List value) {
+  public void write(@NonNull BsonWriter bsonWriter, byte @Nullable [] key, @NonNull List value) {
     if (key == null) {
       bsonWriter.writeStartArray();
     } else {

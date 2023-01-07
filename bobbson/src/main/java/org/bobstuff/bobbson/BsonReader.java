@@ -349,10 +349,11 @@ public class BsonReader {
       case BINARY -> {
         var size = buffer.getInt();
         buffer.skipHead(size + 1);
-//        byte nullByte = buffer.getByte();
-//        if (nullByte != 0) {
-//          throw new IllegalStateException("readBinary value was not terminated with null byte");
-//        }
+        //        byte nullByte = buffer.getByte();
+        //        if (nullByte != 0) {
+        //          throw new IllegalStateException("readBinary value was not terminated with null
+        // byte");
+        //        }
         contextStack.adjustRemaining(size + 5);
       }
       case DOCUMENT -> {

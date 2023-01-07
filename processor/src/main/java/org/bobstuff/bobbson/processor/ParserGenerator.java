@@ -258,7 +258,8 @@ public class ParserGenerator {
       }
     }
     block.nextControlFlow("else").addStatement("reader.skipValue()");
-//    block.nextControlFlow("else").addStatement("System.out.println(range.name())").addStatement("reader.skipValue()");
+    //
+    // block.nextControlFlow("else").addStatement("System.out.println(range.name())").addStatement("reader.skipValue()");
     block.endControlFlow();
 
     block.beginControlFlow(
@@ -286,15 +287,19 @@ public class ParserGenerator {
     ClassName model = ClassName.get(structInfo.element);
 
     return MethodSpec.methodBuilder("read")
+//        .addAnnotation(Nullable.class)
         .addModifiers(Modifier.PUBLIC)
         .addParameter(BsonReader.class, "reader")
+        .addParameter(boolean.class, "readEnvolope")
         .returns(model)
         .beginControlFlow("if (reader.getCurrentBsonType() == BsonType.NULL)", BsonType.class)
         .addStatement("reader.readNull()")
         .addStatement("return null")
         .endControlFlow()
         .addStatement("$T result = new $T()", model, model)
+        .beginControlFlow("if (readEnvolope)")
         .addStatement("reader.readStartDocument()")
+        .endControlFlow()
         .addStatement("var type = $T.NOT_SET", BsonType.class)
         .addCode(generateParserPreamble(structInfo, types))
         .beginControlFlow(
@@ -302,20 +307,31 @@ public class ParserGenerator {
             BsonType.class)
         .addCode(generateParserCode(structInfo))
         .endControlFlow()
+        .beginControlFlow("if (readEnvolope)")
         .addStatement("reader.readEndDocument()")
+        .endControlFlow()
         .addStatement("return result")
         .build();
   }
 
   protected MethodSpec generateWriteMethodWithKey(
       StructInfo structInfo, ClassName model, Types types) {
+
+    TypeName arrayTypeName = ArrayTypeName.of(byte.class);
+//    TypeName annotatedTypeName =
+//        arrayTypeName.annotated(AnnotationSpec.builder(Nullable.class).build());
+
     return MethodSpec.methodBuilder("write")
         .addModifiers(Modifier.PUBLIC)
         .addParameter(BsonWriter.class, "writer")
-        .addParameter(byte[].class, "key")
+        .addParameter(ParameterSpec.builder(arrayTypeName, "key").build())
+        //        .addParameter(byte[].class, "key")
         .addParameter(model, "obj")
         .addParameter(boolean.class, "writeEnvolope")
         .beginControlFlow("if (obj == null)")
+        .beginControlFlow("if (key == null)")
+        .addStatement("throw new $T(\"key and object cannot be null\")", RuntimeException.class)
+        .endControlFlow()
         .addStatement("writer.writeNull(key)")
         .addStatement("return")
         .endControlFlow()
@@ -381,8 +397,7 @@ public class ParserGenerator {
     javaFile.writeTo(writer);
   }
 
-  @NonNull
-  protected MethodSpec generateWriteMethodNoKey(ClassName model) {
+  protected @NonNull MethodSpec generateWriteMethodNoKey(ClassName model) {
     return MethodSpec.methodBuilder("write")
         .addModifiers(Modifier.PUBLIC)
         .addParameter(BsonWriter.class, "writer")

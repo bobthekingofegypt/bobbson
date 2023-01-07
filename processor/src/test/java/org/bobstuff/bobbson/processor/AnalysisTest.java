@@ -119,20 +119,19 @@ public class AnalysisTest {
     assertNull(name.converterType);
   }
 
-
   @Test
   public void testIsIsGetterByLombok(Cases cases) {
     var sample = cases.one("isiscase");
 
     var sut =
-            new Analysis(Tools.types(), Tools.elements(), new BobMessager(Tools.messager(), false));
+        new Analysis(Tools.types(), Tools.elements(), new BobMessager(Tools.messager(), false));
     var result = sut.analyse(new HashSet<>(List.of(sample)));
     var si = result.get("org.bobstuff.bobbson.processor.AnalysisTest.IsIsCase");
 
     assertEquals("org.bobstuff.bobbson.processor.AnalysisTest$IsIsCase", si.binaryName);
     assertEquals(
-            "org.bobstuff.bobbson.annotations.CompiledBson",
-            si.annotation.getAnnotationType().toString());
+        "org.bobstuff.bobbson.annotations.CompiledBson",
+        si.annotation.getAnnotationType().toString());
     assertEquals("org.bobstuff.bobbson.annotations.CompiledBson", si.discoveredBy.toString());
 
     var attributes = si.attributes;
@@ -141,8 +140,7 @@ public class AnalysisTest {
     assertEquals("isName", name.getReadMethod().getSimpleName().toString());
     assertEquals("boolean", name.getReadMethod().getReturnType().toString());
     assertEquals("setName", name.getWriteMethod().getSimpleName().toString());
-    assertEquals(
-            "boolean", name.getWriteMethod().getParameters().get(0).asType().toString());
+    assertEquals("boolean", name.getWriteMethod().getParameters().get(0).asType().toString());
     assertEquals("void", name.getWriteMethod().getReturnType().toString());
     assertFalse(name.list);
     assertFalse(name.set);

@@ -10,5 +10,5 @@ import java.lang.annotation.Target;
 public @interface BsonAttribute {
   String value();
 
-  int order() default -1;
+  int order() default Integer.MAX_VALUE;
 }

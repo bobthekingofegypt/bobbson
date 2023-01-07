@@ -169,7 +169,7 @@ public class AttributeResult {
 
   public int getOrder() {
     if (annotation == null) {
-      return -1;
+      return Integer.MAX_VALUE;
     }
 
     for (ExecutableElement ee : annotation.getElementValues().keySet()) {
@@ -178,7 +178,7 @@ public class AttributeResult {
       }
     }
 
-    return -1;
+    return Integer.MAX_VALUE;
   }
 
   public boolean isList() {
