@@ -20,7 +20,7 @@ public class BobBsonByteRange implements BobBsonBuffer.ByteRangeComparitor {
     this.weakHash = weakHash;
   }
 
-  public int weakHash() {
+  public int getWeakHash() {
     return weakHash;
   }
 

@@ -45,7 +45,9 @@ public class ReflectionBasedConverter implements BobBsonConverter<Object> {
         throw new IllegalStateException("broken because no converter for type");
       }
       var value = field.getGetterFunction().apply(instance);
-      converter.write(bsonWriter, field.nameBytes, value);
+      if (value != null || field.isWriteNull()) {
+        converter.write(bsonWriter, field.nameBytes, value);
+      }
     }
     bsonWriter.writeEndDocument();
   }

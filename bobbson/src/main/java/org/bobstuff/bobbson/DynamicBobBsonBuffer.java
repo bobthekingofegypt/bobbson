@@ -654,7 +654,7 @@ public class DynamicBobBsonBuffer implements BobBsonBuffer {
       this.size = size;
     }
 
-    public int weakHash() {
+    public int getWeakHash() {
       return -1;
     }
 

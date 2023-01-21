@@ -11,6 +11,7 @@ import org.bobstuff.bobbson.BobBson;
 import org.bobstuff.bobbson.BobBsonConverter;
 import org.bobstuff.bobbson.annotations.BsonAttribute;
 import org.bobstuff.bobbson.annotations.BsonConverter;
+import org.bobstuff.bobbson.annotations.BsonWriterOptions;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class ReflectionField {
@@ -24,6 +25,8 @@ public class ReflectionField {
   private transient Function getterFunction;
   private transient @Nullable BobBsonConverter converter;
 
+  private boolean writeNull = true;
+
   public ReflectionField(
       Field field,
       Method getter,
@@ -36,6 +39,11 @@ public class ReflectionField {
     this.setter = setter;
     this.biConsumerSetter = biConsumerSetter;
     this.getterFunction = getterFunction;
+
+    var bsonWriterOptions = field.getAnnotation(BsonWriterOptions.class);
+    if (bsonWriterOptions != null) {
+      this.writeNull = bsonWriterOptions.writeNull();
+    }
 
     var customConverter = field.getAnnotation(BsonConverter.class);
     if (customConverter != null && customConverter.target() != null) {
@@ -106,5 +114,9 @@ public class ReflectionField {
 
   public Function getGetterFunction() {
     return getterFunction;
+  }
+
+  public boolean isWriteNull() {
+    return writeNull;
   }
 }

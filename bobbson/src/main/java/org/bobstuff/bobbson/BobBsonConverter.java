@@ -33,7 +33,7 @@ public interface BobBsonConverter<T> {
   }
 
   default void write(BsonWriter bsonWriter, String key, @NonNull T value) {
-    write(bsonWriter, key.getBytes(StandardCharsets.UTF_8), value, true);
+    write(bsonWriter, key.getBytes(StandardCharsets.UTF_8), value);
   }
 
   default void write(BsonWriter bsonWriter, String key, @NonNull T value, boolean writeEnvelope) {

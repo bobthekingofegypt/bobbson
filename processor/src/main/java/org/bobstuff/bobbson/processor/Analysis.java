@@ -13,6 +13,7 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import org.bobstuff.bobbson.annotations.BsonAttribute;
 import org.bobstuff.bobbson.annotations.BsonConverter;
+import org.bobstuff.bobbson.annotations.BsonWriterOptions;
 import org.bobstuff.bobbson.annotations.CompiledBson;
 
 public class Analysis {
@@ -25,6 +26,8 @@ public class Analysis {
   private DeclaredType attributeType;
   private TypeElement converterElement;
   private DeclaredType converterType;
+  private TypeElement writerOptionsElement;
+  private DeclaredType writerOptionsType;
 
   public Analysis(Types types, Elements elements, BobMessager bobMessager) {
     this.types = types;
@@ -36,6 +39,8 @@ public class Analysis {
     this.attributeType = types.getDeclaredType(attributeElement);
     this.converterElement = elements.getTypeElement(BsonConverter.class.getName());
     this.converterType = types.getDeclaredType(converterElement);
+    this.writerOptionsElement = elements.getTypeElement(BsonWriterOptions.class.getName());
+    this.writerOptionsType = types.getDeclaredType(writerOptionsElement);
   }
 
   public Map<String, AttributeResult> getAttributes(TypeElement typeElement) {
@@ -95,6 +100,7 @@ public class Analysis {
 
         var annotation = findAnnotationMirror(field, attributeType, types);
         var converter = findAnnotationMirror(field, converterType, types);
+        var writerOptions = findAnnotationMirror(field, writerOptionsType, types);
         TypeMirror converterType = null;
         if (converter != null) {
           for (ExecutableElement ee : converter.getElementValues().keySet()) {
@@ -143,6 +149,7 @@ public class Analysis {
                 isMap,
                 annotation,
                 converter,
+                writerOptions,
                 converterType));
       }
     }

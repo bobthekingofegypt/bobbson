@@ -3,9 +3,8 @@ package org.bobstuff.bobbson.reflection;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.lang.reflect.Type;
-import org.bobstuff.bobbson.BobBson;
-import org.bobstuff.bobbson.BobBsonConverter;
-import org.bobstuff.bobbson.BsonReader;
+import org.bobstuff.bobbson.*;
+import org.bobstuff.bobbson.annotations.BsonWriterOptions;
 import org.bobstuff.bobbson.buffer.BobBufferBobBsonBuffer;
 import org.bobstuff.bobbson.converters.IntegerBsonConverter;
 import org.bobstuff.bobbson.converters.StringBsonConverter;
@@ -35,6 +34,38 @@ public class ObjectConverterFactoryTest {
     }
   }
 
+  public static class DontWriteNulls {
+    @BsonWriterOptions(writeNull = false)
+    private String name;
+
+    private String other;
+    private String otherNull;
+
+    public String getName() {
+      return name;
+    }
+
+    public void setName(String name) {
+      this.name = name;
+    }
+
+    public String getOther() {
+      return other;
+    }
+
+    public void setOther(String other) {
+      this.other = other;
+    }
+
+    public String getOtherNull() {
+      return otherNull;
+    }
+
+    public void setOtherNull(String otherNull) {
+      this.otherNull = otherNull;
+    }
+  }
+
   @Test
   @SuppressWarnings("unchecked")
   public void testTryCreate() {
@@ -58,5 +89,31 @@ public class ObjectConverterFactoryTest {
     var result = (BasicTypes) converter.read(reader);
     assertEquals("bob", result.getName());
     assertEquals(23, result.getAge());
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void testTryWrite() {
+    var bobBson = Mockito.mock(BobBson.class);
+    Mockito.when(bobBson.tryFindConverter((Type) String.class))
+        .thenReturn((BobBsonConverter) new StringBsonConverter());
+    var sut = new ObjectConverterFactory();
+    var converter = sut.tryCreate(DontWriteNulls.class, bobBson);
+
+    var testModel = new DontWriteNulls();
+    testModel.setOther("othervalue");
+    var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
+    var bsonWriter = new BsonWriter(buffer);
+    converter.write(bsonWriter, testModel);
+
+    var reader = new BsonReader(buffer);
+    reader.readStartDocument();
+    assertEquals(BsonType.STRING, reader.readBsonType());
+    assertEquals("other", reader.getFieldName().name());
+    assertEquals("othervalue", reader.readString());
+    assertEquals(BsonType.NULL, reader.readBsonType());
+    assertEquals("otherNull", reader.getFieldName().name());
+    reader.readNull();
+    reader.readEndDocument();
   }
 }

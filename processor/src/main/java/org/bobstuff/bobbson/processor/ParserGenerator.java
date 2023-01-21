@@ -148,9 +148,14 @@ public class ParserGenerator {
       var attribute = entry.getValue();
       var attributeName = entry.getKey();
       String fieldName = attribute.getConverterFieldName();
+      var writeNull = attribute.writerOptionWriteNull();
 
       if (fieldName == null) {
         throw new RuntimeException("broken fieldName is null");
+      }
+
+      if (!writeNull) {
+        block.beginControlFlow("if (obj.$N() != null)", attribute.readMethod.getSimpleName());
       }
 
       if ((attribute.isList() || attribute.isSet()) && attribute.getConverterType() == null) {
@@ -171,6 +176,10 @@ public class ParserGenerator {
               attributeName,
               attribute.readMethod.getSimpleName());
         }
+      }
+
+      if (!writeNull) {
+        block.endControlFlow();
       }
     }
 
@@ -287,7 +296,7 @@ public class ParserGenerator {
     ClassName model = ClassName.get(structInfo.element);
 
     return MethodSpec.methodBuilder("read")
-//        .addAnnotation(Nullable.class)
+        //        .addAnnotation(Nullable.class)
         .addModifiers(Modifier.PUBLIC)
         .addParameter(BsonReader.class, "reader")
         .addParameter(boolean.class, "readEnvolope")
@@ -318,8 +327,8 @@ public class ParserGenerator {
       StructInfo structInfo, ClassName model, Types types) {
 
     TypeName arrayTypeName = ArrayTypeName.of(byte.class);
-//    TypeName annotatedTypeName =
-//        arrayTypeName.annotated(AnnotationSpec.builder(Nullable.class).build());
+    //    TypeName annotatedTypeName =
+    //        arrayTypeName.annotated(AnnotationSpec.builder(Nullable.class).build());
 
     return MethodSpec.methodBuilder("write")
         .addModifiers(Modifier.PUBLIC)

@@ -5,6 +5,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class AttributeResult {
@@ -23,6 +24,7 @@ public class AttributeResult {
   public final boolean map;
   public final @Nullable AnnotationMirror annotation;
   public final @Nullable AnnotationMirror converter;
+  public final @MonotonicNonNull AnnotationMirror writerOptions;
   public final @Nullable TypeMirror converterType;
   public final String converterFieldName;
   public final String param;
@@ -38,6 +40,7 @@ public class AttributeResult {
       boolean map,
       @Nullable AnnotationMirror annotation,
       @Nullable AnnotationMirror converter,
+      @Nullable AnnotationMirror writerOptions,
       @Nullable TypeMirror converterType) {
     this.name = name;
     this.readMethod = readMethod;
@@ -49,6 +52,7 @@ public class AttributeResult {
     this.map = map;
     this.annotation = annotation;
     this.converter = converter;
+    this.writerOptions = writerOptions;
     this.converterType = converterType;
 
     String fieldName1 = null;
@@ -165,6 +169,20 @@ public class AttributeResult {
     }
 
     return name;
+  }
+
+  public boolean writerOptionWriteNull() {
+    if (writerOptions == null) {
+      return true;
+    }
+
+    for (ExecutableElement ee : writerOptions.getElementValues().keySet()) {
+      if (ee.toString().equals("writeNull()")) {
+        return (boolean) writerOptions.getElementValues().get(ee).getValue();
+      }
+    }
+
+    return true;
   }
 
   public int getOrder() {

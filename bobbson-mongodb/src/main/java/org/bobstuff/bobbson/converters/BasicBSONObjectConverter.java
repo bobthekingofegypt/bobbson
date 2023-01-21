@@ -66,10 +66,11 @@ public class BasicBSONObjectConverter implements BobBsonConverter<BasicBSONObjec
     BobBsonBuffer.ByteRangeComparitor rangeComparitor = bsonReader.getFieldName();
     while ((type = bsonReader.readBsonType()) != BsonType.END_OF_DOCUMENT) {
 
-      String fieldName = cache.get(rangeComparitor.weakHash());
+      // TODO why did I write this caching solution and is it worth keeping
+      String fieldName = cache.get(rangeComparitor.getWeakHash());
       if (fieldName == null) {
         fieldName = rangeComparitor.name();
-        cache.put(rangeComparitor.weakHash(), fieldName);
+        cache.put(rangeComparitor.getWeakHash(), fieldName);
       }
 
       //      bsonReader.currentFieldName();

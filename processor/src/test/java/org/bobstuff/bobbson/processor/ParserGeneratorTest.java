@@ -451,34 +451,38 @@ public class ParserGeneratorTest {
     var code = sut.generateReadMethod(sampleStructInfo, Tools.types());
     assertEquals(
         """
-      public org.bobstuff.bobbson.processor.ParserGeneratorTest.Sample read(
-          org.bobstuff.bobbson.BsonReader reader) {
-        if (reader.getCurrentBsonType() == BsonType.NULL) {
-          reader.readNull();
-          return null;
-        }
-        org.bobstuff.bobbson.processor.ParserGeneratorTest.Sample result = new org.bobstuff.bobbson.processor.ParserGeneratorTest.Sample();
-        reader.readStartDocument();
-        var type = org.bobstuff.bobbson.BsonType.NOT_SET;
-        var readAllValues = false;
-        boolean nameCheck = false;
-        while ((type = reader.readBsonType()) != org.bobstuff.bobbson.BsonType.END_OF_DOCUMENT) {
-          var range = reader.getFieldName();
-          if (!nameCheck && range.equalsArray(nameBytes, 417)) {
-            nameCheck = readAllValues ? false : true;
-            result.setName(converter_java_lang_String().read(reader));
-          } else {
-            reader.skipValue();
-          }
-          if (!readAllValues && nameCheck) {
-            reader.skipContext();
-            break;
-          }
-        }
-        reader.readEndDocument();
-        return result;
-      }
-                        """,
+                               public org.bobstuff.bobbson.processor.ParserGeneratorTest.Sample read(
+                                   org.bobstuff.bobbson.BsonReader reader, boolean readEnvolope) {
+                                 if (reader.getCurrentBsonType() == BsonType.NULL) {
+                                   reader.readNull();
+                                   return null;
+                                 }
+                                 org.bobstuff.bobbson.processor.ParserGeneratorTest.Sample result = new org.bobstuff.bobbson.processor.ParserGeneratorTest.Sample();
+                                 if (readEnvolope) {
+                                   reader.readStartDocument();
+                                 }
+                                 var type = org.bobstuff.bobbson.BsonType.NOT_SET;
+                                 var readAllValues = false;
+                                 boolean nameCheck = false;
+                                 while ((type = reader.readBsonType()) != org.bobstuff.bobbson.BsonType.END_OF_DOCUMENT) {
+                                   var range = reader.getFieldName();
+                                   if (!nameCheck && range.equalsArray(nameBytes, 417)) {
+                                     nameCheck = readAllValues ? false : true;
+                                     result.setName(converter_java_lang_String().read(reader));
+                                   } else {
+                                     reader.skipValue();
+                                   }
+                                   if (!readAllValues && nameCheck) {
+                                     reader.skipContext();
+                                     break;
+                                   }
+                                 }
+                                 if (readEnvolope) {
+                                   reader.readEndDocument();
+                                 }
+                                 return result;
+                               }
+                                      """,
         code.toString());
   }
 
@@ -601,21 +605,28 @@ public class ParserGeneratorTest {
             sampleStructInfo, ClassName.get(Sample.class), Tools.types());
     assertEquals(
         """
-                         public void write(org.bobstuff.bobbson.writer.BsonWriter writer, byte[] key,
-                             org.bobstuff.bobbson.processor.ParserGeneratorTest.Sample obj) {
-                           if (obj == null) {
-                             writer.writeNull(key);
-                             return;
-                           }
-                           if (key != null) {
-                             writer.writeStartDocument(key);
-                           } else {
-                             writer.writeStartDocument();
-                           }
-                           converter_java_lang_String().write(writer, nameBytes, obj.getName());
-                           writer.writeEndDocument();
-                         }
-                         """,
+                    public void write(org.bobstuff.bobbson.writer.BsonWriter writer, byte[] key,
+                        org.bobstuff.bobbson.processor.ParserGeneratorTest.Sample obj, boolean writeEnvolope) {
+                      if (obj == null) {
+                        if (key == null) {
+                          throw new java.lang.RuntimeException("key and object cannot be null");
+                        }
+                        writer.writeNull(key);
+                        return;
+                      }
+                      if (writeEnvolope) {
+                        if (key != null) {
+                          writer.writeStartDocument(key);
+                        } else {
+                          writer.writeStartDocument();
+                        }
+                      }
+                      converter_java_lang_String().write(writer, nameBytes, obj.getName());
+                      if (writeEnvolope) {
+                        writer.writeEndDocument();
+                      }
+                    }
+                             """,
         result.toString());
   }
 

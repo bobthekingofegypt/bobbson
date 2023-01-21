@@ -77,7 +77,7 @@ public class DynamicBobBsonBufferTest {
     assertEquals(3, readSut.getBuffers().get(readSut.getBuffers().size() - 1).getTail());
     readSut.skipTail(-53);
     assertEquals(0, readSut.getTail());
-    assertEquals(6, readSut.getBuffers().size());
+    assertEquals(1, readSut.getBuffers().size());
     assertEquals(0, readSut.getBuffers().get(0).getTail());
   }
 
@@ -92,7 +92,7 @@ public class DynamicBobBsonBufferTest {
     assertEquals(3, readSut.getBuffers().get(readSut.getBuffers().size() - 1).getTail());
     readSut.skipTail(-49);
     assertEquals(4, readSut.getTail());
-    assertEquals(6, readSut.getBuffers().size());
+    assertEquals(1, readSut.getBuffers().size());
     assertEquals(4, readSut.getBuffers().get(0).getTail());
   }
 
@@ -107,7 +107,7 @@ public class DynamicBobBsonBufferTest {
     assertEquals(3, readSut.getBuffers().get(readSut.getBuffers().size() - 1).getTail());
     readSut.skipTail(-40);
     assertEquals(13, readSut.getTail());
-    assertEquals(6, readSut.getBuffers().size());
+    assertEquals(2, readSut.getBuffers().size());
     assertEquals(3, readSut.getBuffers().get(1).getTail());
   }
 

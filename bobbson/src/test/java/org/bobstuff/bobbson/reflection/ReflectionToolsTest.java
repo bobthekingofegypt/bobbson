@@ -1,11 +1,13 @@
 package org.bobstuff.bobbson.reflection;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.lang.reflect.Type;
 import org.bobstuff.bobbson.BobBson;
 import org.bobstuff.bobbson.BobBsonConverter;
 import org.bobstuff.bobbson.annotations.BsonAttribute;
+import org.bobstuff.bobbson.annotations.BsonWriterOptions;
 import org.bobstuff.bobbson.converters.StringBsonConverter;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -42,6 +44,17 @@ public class ReflectionToolsTest {
     assertEquals("notnames", field.getAlias());
   }
 
+  @Test
+  public void testParseBeanFieldsDontWriteNull() throws Exception {
+    var bobBson = Mockito.mock(BobBson.class);
+    Mockito.when(bobBson.tryFindConverter((Type) String.class))
+        .thenReturn((BobBsonConverter) new StringBsonConverter());
+    var result = ReflectionTools.parseBeanFields(DontWriteNull.class, bobBson);
+    assertEquals(1, result.size());
+    var field = result.get(0);
+    assertFalse(field.isWriteNull());
+  }
+
   public static class NoSetters {
     private String name;
     private int age;
@@ -74,6 +87,19 @@ public class ReflectionToolsTest {
 
   public static class AliasFields {
     @BsonAttribute("notnames")
+    private String names;
+
+    public String getNames() {
+      return names;
+    }
+
+    public void setNames(String names) {
+      this.names = names;
+    }
+  }
+
+  public static class DontWriteNull {
+    @BsonWriterOptions(writeNull = false)
     private String names;
 
     public String getNames() {
