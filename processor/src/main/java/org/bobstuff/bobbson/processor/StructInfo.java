@@ -35,6 +35,9 @@ public class StructInfo {
 
   public String getPackageName() {
     int dotIndex = binaryName.lastIndexOf('.');
+    if (dotIndex == -1) {
+      return "";
+    }
     return binaryName.substring(0, dotIndex);
   }
 
