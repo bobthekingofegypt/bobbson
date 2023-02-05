@@ -5,6 +5,8 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
+
+import com.squareup.javapoet.ClassName;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -78,7 +80,7 @@ public class AttributeResult {
         }
       }
     } else {
-      fieldName1 = CONVERTER_PRE + type.toString().replaceAll(ESCAPED_DOT, "_");
+      fieldName1 = CONVERTER_PRE + ClassName.get(type).toString().replaceAll(ESCAPED_DOT, "_");
       param1 = "";
     }
 

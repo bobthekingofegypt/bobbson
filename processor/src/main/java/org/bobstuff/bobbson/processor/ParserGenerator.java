@@ -69,7 +69,7 @@ public class ParserGenerator {
       } else {
         MethodSpec methodSpec = lookupData.lookupMethods.get(attributeType);
         if (methodSpec == null) {
-          String fieldName = CONVERTER_PRE + attributeType.toString().replaceAll(ESCAPED_DOT, "_");
+          String fieldName = CONVERTER_PRE + typeName.toString().replaceAll(ESCAPED_DOT, "_");
           lookupData.fields.add(FieldSpec.builder(converter, fieldName, Modifier.PRIVATE).build());
 
           methodSpec = generateLookupMethod(attributeType, types);
@@ -84,7 +84,7 @@ public class ParserGenerator {
   private MethodSpec generateLookupMethod(TypeMirror type, Types types) {
     TypeName model = TypeName.get(type);
     TypeName boxSafeModel = model;
-    String fieldName = CONVERTER_PRE + type.toString().replaceAll(ESCAPED_DOT, "_");
+    String fieldName = CONVERTER_PRE + model.toString().replaceAll(ESCAPED_DOT, "_");
     if (model.isPrimitive()) {
       boxSafeModel = TypeName.get(types.boxedClass((PrimitiveType) type).asType());
     }
