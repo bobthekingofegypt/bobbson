@@ -17,6 +17,8 @@ import org.bobstuff.bobbson.writer.BsonWriter;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import static java.util.stream.Collectors.toList;
+
 public class ParserGenerator {
   public static final String CONVERTER_PRE = "converter_";
   public static final String ESCAPED_DOT = "\\.";
@@ -37,7 +39,7 @@ public class ParserGenerator {
 
   protected static class LookupData {
     //    public Map<AttributeResult, ConverterTypeWrapper> converterLookups = new HashMap<>();
-    public Map<TypeMirror, MethodSpec> lookupMethods = new HashMap<>();
+    public Map<String, MethodSpec> lookupMethods = new HashMap<>();
     public List<FieldSpec> fields = new ArrayList<>();
   }
 
@@ -67,13 +69,13 @@ public class ParserGenerator {
                 .initializer("new $T()", converterType)
                 .build());
       } else {
-        MethodSpec methodSpec = lookupData.lookupMethods.get(attributeType);
+        MethodSpec methodSpec = lookupData.lookupMethods.get(typeName.toString());
         if (methodSpec == null) {
           String fieldName = CONVERTER_PRE + typeName.toString().replaceAll(ESCAPED_DOT, "_");
           lookupData.fields.add(FieldSpec.builder(converter, fieldName, Modifier.PRIVATE).build());
 
           methodSpec = generateLookupMethod(attributeType, types);
-          lookupData.lookupMethods.put(attributeType, methodSpec);
+          lookupData.lookupMethods.put(typeName.toString(), methodSpec);
         }
       }
     }
@@ -293,6 +295,7 @@ public class ParserGenerator {
   }
 
   protected MethodSpec generateReadMethod(StructInfo structInfo, Types types) {
+    var type = TypeName.get(structInfo.element.asType());
     ClassName model = ClassName.get(structInfo.element);
 
     return MethodSpec.methodBuilder("read")
@@ -300,12 +303,12 @@ public class ParserGenerator {
         .addModifiers(Modifier.PUBLIC)
         .addParameter(BsonReader.class, "reader")
         .addParameter(boolean.class, "readEnvolope")
-        .returns(model)
+        .returns(type)
         .beginControlFlow("if (reader.getCurrentBsonType() == BsonType.NULL)", BsonType.class)
         .addStatement("reader.readNull()")
         .addStatement("return null")
         .endControlFlow()
-        .addStatement("$T result = new $T()", model, model)
+        .addStatement("$T result = new $T()", type, type)
         .beginControlFlow("if (readEnvolope)")
         .addStatement("reader.readStartDocument()")
         .endControlFlow()
@@ -324,7 +327,7 @@ public class ParserGenerator {
   }
 
   protected MethodSpec generateWriteMethodWithKey(
-      StructInfo structInfo, ClassName model, Types types) {
+      StructInfo structInfo, TypeName model, Types types) {
 
     TypeName arrayTypeName = ArrayTypeName.of(byte.class);
     //    TypeName annotatedTypeName =
@@ -361,16 +364,32 @@ public class ParserGenerator {
   public void generate(StructInfo structInfo, Writer writer, Types types, Elements elements)
       throws Exception {
 
+    var typevars = structInfo.element.getTypeParameters().stream()
+                                              .map(TypeVariableName::get)
+                                              .collect(toList());
+//    TypeVariableName[] typeArguments = typevars.toArray(new TypeVariableName[typevars.size()]);
+//    TypeName typeClassName = ParameterizedTypeName.get(className, typeArguments);
+    TypeName type = TypeName.get(structInfo.element.asType());
     ClassName model = ClassName.get(structInfo.element);
+    var converterName = "_" + structInfo.getClassName().replaceAll("\\$", "_") + "_BobBsonConverter";
+    if (structInfo.isParameterized()) {
+//      List<String> typevars = structInfo.element.getTypeParameters().stream()
+//                                                   .map(TypeVariableName::get)
+//              .map(TypeVariableName::toString)
+//                                                   .collect(toList());
+//      var typeVarsString = String.join(",", typevars);
+//      converterName += "<" + typeVarsString + ">";
+    }
     MethodSpec readMethod = generateReadMethod(structInfo, types);
-    MethodSpec writeMethod = generateWriteMethodNoKey(model);
-    var writeMethodWithKey = generateWriteMethodWithKey(structInfo, model, types);
+    MethodSpec writeMethod = generateWriteMethodNoKey(type);
+    var writeMethodWithKey = generateWriteMethodWithKey(structInfo, type, types);
 
     var keyByteArrays = generateKeyByteArrays(structInfo);
     var lookupData = generateConverterLookupMethods(structInfo, types);
 
     TypeSpec innerStruct =
         TypeSpec.classBuilder("_" + structInfo.getClassName() + "_BobBsonConverter")
+                .addTypeVariables(typevars)
             .addAnnotation(
                 AnnotationSpec.builder(SuppressWarnings.class)
                     .addMember("value", "$S", "unchecked")
@@ -381,7 +400,7 @@ public class ParserGenerator {
             .addFields(keyByteArrays)
             .addMethods(lookupData.lookupMethods.values())
             .addSuperinterface(
-                ParameterizedTypeName.get(ClassName.get(BobBsonConverter.class), model))
+                ParameterizedTypeName.get(ClassName.get(BobBsonConverter.class), TypeName.get(structInfo.element.asType())))
             .addMethod(
                 MethodSpec.constructorBuilder()
                     .addModifiers(Modifier.PUBLIC)
@@ -406,7 +425,7 @@ public class ParserGenerator {
     javaFile.writeTo(writer);
   }
 
-  protected @NonNull MethodSpec generateWriteMethodNoKey(ClassName model) {
+  protected @NonNull MethodSpec generateWriteMethodNoKey(TypeName model) {
     return MethodSpec.methodBuilder("write")
         .addModifiers(Modifier.PUBLIC)
         .addParameter(BsonWriter.class, "writer")

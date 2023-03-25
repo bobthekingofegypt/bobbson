@@ -10,6 +10,9 @@ import com.squareup.javapoet.ClassName;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.lang.reflect.Type;
+
+
 public class AttributeResult {
   public static final String CONVERTER_PRE = "converter_";
   public static final String ESCAPED_DOT = "\\.";

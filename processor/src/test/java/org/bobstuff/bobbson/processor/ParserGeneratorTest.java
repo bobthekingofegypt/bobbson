@@ -8,12 +8,15 @@ import com.karuslabs.elementary.junit.ToolsExtension;
 import com.karuslabs.elementary.junit.annotations.Case;
 import com.karuslabs.elementary.junit.annotations.Introspect;
 import com.squareup.javapoet.ClassName;
+
+import java.io.StringWriter;
 import java.net.URL;
 import java.util.*;
 import javax.lang.model.element.Element;
 import org.bobstuff.bobbson.annotations.BsonAttribute;
 import org.bobstuff.bobbson.annotations.BsonConverter;
 import org.bobstuff.bobbson.annotations.CompiledBson;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,12 +31,16 @@ public class ParserGeneratorTest {
   Element sampleMultipleFieldsOrderedTwo;
   Element sampleCollections;
   Element sampleConverter;
+  Element sampleGenericClass;
+  Element multipleListNonListDepBug;
   StructInfo sampleStructInfo;
   StructInfo sampleMultipleFieldsStructInfo;
   StructInfo sampleMultipleFieldsOrderedOneStructInfo;
   StructInfo sampleMultipleFieldsOrderedTwoStructInfo;
   StructInfo sampleCollectionsStructInfo;
   StructInfo sampleConverterStructInfo;
+  StructInfo multipleListNonListDepBugStructInfo;
+  StructInfo sampleGenericClassStructInfo;
   ParserGenerator sut;
 
   @BeforeEach
@@ -42,6 +49,8 @@ public class ParserGeneratorTest {
     sampleMultipleFields = cases.one("multipleFields");
     sampleMultipleFieldsOrderedOne = cases.one("multipleFieldsOrdered1");
     sampleMultipleFieldsOrderedTwo = cases.one("multipleFieldsOrdered2");
+    sampleGenericClass = cases.one("genericClass");
+    multipleListNonListDepBug = cases.one("multipleListNonListDepBug");
     sampleCollections = cases.one("collections");
     sampleConverter = cases.one("converter");
     var analysis =
@@ -55,7 +64,9 @@ public class ParserGeneratorTest {
                     sampleConverter,
                     sampleCollections,
                     sampleMultipleFieldsOrderedOne,
-                    sampleMultipleFieldsOrderedTwo)));
+                    sampleMultipleFieldsOrderedTwo,
+                    sampleGenericClass,
+                    multipleListNonListDepBug)));
     sampleStructInfo = result.get("org.bobstuff.bobbson.processor.ParserGeneratorTest.Sample");
     sampleMultipleFieldsStructInfo =
         result.get("org.bobstuff.bobbson.processor.ParserGeneratorTest.SampleMultipleFields");
@@ -69,6 +80,10 @@ public class ParserGeneratorTest {
         result.get("org.bobstuff.bobbson.processor.ParserGeneratorTest.SampleCollections");
     sampleConverterStructInfo =
         result.get("org.bobstuff.bobbson.processor.ParserGeneratorTest.SampleConverter");
+    sampleGenericClassStructInfo =
+            result.get("org.bobstuff.bobbson.processor.ParserGeneratorTest.SampleGenericClass");
+    multipleListNonListDepBugStructInfo =
+            result.get("org.bobstuff.bobbson.processor.ParserGeneratorTest.SampleMultipleListNonListDepBug");
 
     sut = new ParserGenerator();
   }
@@ -686,6 +701,26 @@ public class ParserGeneratorTest {
         result.lookupMethods.get(Tools.typeMirrors().type(Double.class)).toString());
   }
 
+  @Test
+  public void testGenerateSingleConverterDefOnListNonListBug() {
+    var result = sut.generateConverterLookupMethods(multipleListNonListDepBugStructInfo, Tools.types());
+    assertEquals(1, result.fields.size());
+    assertEquals(
+            "private org.bobstuff.bobbson.BobBsonConverter<java.lang.String>"
+                    + " converter_java_lang_String;",
+            result.fields.get(0).toString().strip());
+  }
+
+  @Test
+  public void testGenericClass() throws Exception {
+    var writer = new StringWriter();
+    sut.generate(multipleListNonListDepBugStructInfo, writer, Tools.types(), Tools.elements());
+    assertEquals(
+            "private org.bobstuff.bobbson.BobBsonConverter<java.lang.String>"
+                    + " converter_java_lang_String;",
+            writer.toString());
+  }
+
   @Case("first")
   @CompiledBson
   static class Sample {
@@ -818,6 +853,57 @@ public class ParserGeneratorTest {
 
     public void setOccupation(String occupation) {
       this.occupation = occupation;
+    }
+  }
+
+  @Case("multipleListNonListDepBug")
+  @CompiledBson
+  static class SampleMultipleListNonListDepBug {
+    @BsonAttribute(value = "name", order = 1)
+    private @Nullable String name;
+
+    @BsonAttribute(value = "names", order = 2)
+    private @Nullable List<String> names;
+
+    public String getName() {
+      return name;
+    }
+
+    public void setName(String name) {
+      this.name = name;
+    }
+
+    public List<String> getNames() {
+      return names;
+    }
+
+    public void setNames(List<String> names) {
+      this.names = names;
+    }
+  }
+  @Case("genericClass")
+  @CompiledBson
+  static class SampleGenericClass<TModelCrazyName> {
+    @BsonAttribute(value = "name", order = 1)
+    private @Nullable String name;
+
+    @BsonAttribute(value = "names", order = 2)
+    private @Nullable List<String> names;
+
+    public String getName() {
+      return name;
+    }
+
+    public void setName(String name) {
+      this.name = name;
+    }
+
+    public List<String> getNames() {
+      return names;
+    }
+
+    public void setNames(List<String> names) {
+      this.names = names;
     }
   }
 

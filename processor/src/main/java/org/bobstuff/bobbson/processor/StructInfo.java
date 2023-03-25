@@ -12,6 +12,7 @@ public class StructInfo {
   public final String binaryName;
   public final AnnotationMirror annotation;
   public final Map<String, AttributeResult> attributes;
+  public boolean isParameterized;
 
   public StructInfo(
       TypeElement element,
@@ -26,11 +27,16 @@ public class StructInfo {
     this.binaryName = binaryName;
     this.annotation = annotation;
     this.attributes = attributes;
+    this.isParameterized = element.getTypeParameters() != null && !element.getTypeParameters().isEmpty();
   }
 
   public String getClassName() {
     int dotIndex = binaryName.lastIndexOf('.');
     return binaryName.substring(dotIndex + 1);
+  }
+
+  public boolean isParameterized() {
+    return isParameterized;
   }
 
   public String getPackageName() {
