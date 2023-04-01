@@ -59,7 +59,6 @@ public class Analysis {
           || modifiers.contains(Modifier.TRANSIENT))) {
         messager.debug("field type - " + field.asType());
         TypeMirror t = field.asType();
-        TypeMirror comparable = types.erasure(field.asType());
 
         boolean isList = false;
         boolean isSet = false;
@@ -142,7 +141,7 @@ public class Analysis {
                 field.getSimpleName().toString(),
                 getter,
                 setter,
-                field,
+//                field,
                 field.asType(),
                 isList,
                 isSet,
@@ -152,6 +151,63 @@ public class Analysis {
                 writerOptions,
                 converterType));
       }
+    }
+
+    for (var method : methods) {
+      var annotation = findAnnotationMirror(method, attributeType, types);
+      var methodName = method.getSimpleName().toString();
+      if (annotation == null) {
+        // method doesn't have an annotation so ignore it for now
+        continue;
+      }
+
+      var propertyName = "";
+      if (methodName.startsWith("get") && methodName.length() > 3) {
+        String propertySection = methodName.substring(3);
+        if (methodName.length() == 4) {
+          propertyName = propertySection.toLowerCase();
+        } else {
+          propertyName = propertySection.toUpperCase().equals(propertySection)
+                  ? propertySection
+                  : Character.toLowerCase(propertySection.charAt(0)) + propertySection.substring(1);
+        }
+      } else if (methodName.startsWith("is") && methodName.length() > 2) {
+        String propertySection = methodName.substring(2);
+        if (methodName.length() == 3) {
+          propertyName = propertySection.toLowerCase();
+        } else {
+          propertyName = propertySection.toUpperCase().equals(propertySection)
+                  ? propertySection
+                  : Character.toLowerCase(propertySection.charAt(0)) + propertySection.substring(1);
+        }
+      } else {
+
+        continue;
+      }
+
+      var setter = findSetter(methods, propertyName, method.getReturnType());
+
+      if (setter == null) {
+        messager.debug(
+                "Field (" + propertyName + ") excluded due to missing setter");
+        continue;
+      }
+
+      results.put(
+              propertyName,
+              new AttributeResult(
+                      propertyName,
+                      method,
+                      setter,
+//                      null,
+                      method.getReturnType(),
+                      false,
+                      false,
+                      false,
+                      annotation,
+                      null,
+                      null,
+                      null));
     }
     return results;
   }

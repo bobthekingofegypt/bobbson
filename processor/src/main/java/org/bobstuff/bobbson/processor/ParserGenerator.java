@@ -22,6 +22,7 @@ import static java.util.stream.Collectors.toList;
 public class ParserGenerator {
   public static final String CONVERTER_PRE = "converter_";
   public static final String ESCAPED_DOT = "\\.";
+  public static final String ARRAY_BRACKETS = "[]";
   public static final String END_OF_DOCUMENT_POST = ".END_OF_DOCUMENT";
 
   private static class ConverterTypeWrapper {
@@ -71,7 +72,7 @@ public class ParserGenerator {
       } else {
         MethodSpec methodSpec = lookupData.lookupMethods.get(typeName.toString());
         if (methodSpec == null) {
-          String fieldName = CONVERTER_PRE + typeName.toString().replaceAll(ESCAPED_DOT, "_");
+          String fieldName = CONVERTER_PRE + typeName.toString().replaceAll(ESCAPED_DOT, "_").replace(ARRAY_BRACKETS, "_array_");
           lookupData.fields.add(FieldSpec.builder(converter, fieldName, Modifier.PRIVATE).build());
 
           methodSpec = generateLookupMethod(attributeType, types);
@@ -86,7 +87,7 @@ public class ParserGenerator {
   private MethodSpec generateLookupMethod(TypeMirror type, Types types) {
     TypeName model = TypeName.get(type);
     TypeName boxSafeModel = model;
-    String fieldName = CONVERTER_PRE + model.toString().replaceAll(ESCAPED_DOT, "_");
+    String fieldName = CONVERTER_PRE + model.toString().replaceAll(ESCAPED_DOT, "_").replace(ARRAY_BRACKETS, "_array_");
     if (model.isPrimitive()) {
       boxSafeModel = TypeName.get(types.boxedClass((PrimitiveType) type).asType());
     }

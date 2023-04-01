@@ -15,7 +15,7 @@ import java.nio.file.Paths;
 
 public class BeanWithByteArrayTest {
   @Test
-  public void testReadWriteKeyAsByteArray(BsonDataProvider.BufferDataBuilder builder)
+  public void testReadWriteKeyAsByteArray()
       throws Exception {
     BufferDataPool pool =
             new NoopBufferDataPool((size) -> new ByteBufferBobBsonBuffer(new byte[100]));
@@ -25,7 +25,7 @@ public class BeanWithByteArrayTest {
 
     BsonWriter writer = new BsonWriter(buffer);
     writer.writeStartDocument();
-    writer.writeObjectId(id);
+    writer.writeObjectId("key", id);
     writer.writeEndDocument();
 
     ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -37,6 +37,6 @@ public class BeanWithByteArrayTest {
     BobBson bobBson = new BobBson();
     BsonReader reader = new BsonReader(new ByteBufferBobBsonBuffer(bytes));
     var result = bobBson.deserialise(BeanWithByteArray.class, reader);
-    Assertions.assertEquals(id, result.getKey());
+    Assertions.assertArrayEquals(id, result.getKey());
   }
 }
