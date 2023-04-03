@@ -155,6 +155,7 @@ public class Analysis {
 
     for (var method : methods) {
       var annotation = findAnnotationMirror(method, attributeType, types);
+      var writerOptions = findAnnotationMirror(method, writerOptionsType, types);
       var methodName = method.getSimpleName().toString();
       if (annotation == null) {
         // method doesn't have an annotation so ignore it for now
@@ -206,7 +207,7 @@ public class Analysis {
                       false,
                       annotation,
                       null,
-                      null,
+                      writerOptions,
                       null));
     }
     return results;
