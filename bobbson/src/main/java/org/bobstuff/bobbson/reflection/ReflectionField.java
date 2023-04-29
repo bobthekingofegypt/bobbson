@@ -18,7 +18,10 @@ public class ReflectionField {
   public byte[] nameBytes;
   public int weakHash;
   private String alias;
-  private transient Field field;
+  private String fieldName;
+
+  private Type type;
+//  private transient Field field;
   private transient Method getter;
   private transient Method setter;
   private transient BiConsumer biConsumerSetter;
@@ -28,24 +31,29 @@ public class ReflectionField {
   private boolean writeNull = true;
 
   public ReflectionField(
-      Field field,
+//      Field field,
+          String fieldName,
+      Type type,
       Method getter,
       Method setter,
+      @Nullable BsonAttribute bsonAttribute,
+      @Nullable BsonWriterOptions bsonWriterOptions,
+      @Nullable BsonConverter customConverter,
       BiConsumer biConsumerSetter,
       Function getterFunction,
       BobBson bobBson) {
-    this.field = field;
+//    this.field = field;
     this.getter = getter;
     this.setter = setter;
     this.biConsumerSetter = biConsumerSetter;
     this.getterFunction = getterFunction;
+    this.fieldName = fieldName;
+    this.type = type;
 
-    var bsonWriterOptions = field.getAnnotation(BsonWriterOptions.class);
     if (bsonWriterOptions != null) {
       this.writeNull = bsonWriterOptions.writeNull();
     }
 
-    var customConverter = field.getAnnotation(BsonConverter.class);
     if (customConverter != null && customConverter.target() != null) {
       try {
         converter = customConverter.target().getConstructor().newInstance();
@@ -56,9 +64,9 @@ public class ReflectionField {
         throw new RuntimeException("failed to create instance of " + customConverter.target());
       }
     } else {
-      var t = bobBson.tryFindConverter(field.getGenericType());
+      var t = bobBson.tryFindConverter(type);
       if (t == null) {
-        throw new RuntimeException("no converter found for type " + field.getGenericType());
+        throw new RuntimeException("no converter found for type " + type);
       }
       converter = t;
     }
@@ -66,13 +74,12 @@ public class ReflectionField {
     if (converter == null) {
       throw new RuntimeException("converter shouldn't be null");
     }
-    var bsonAttribute = field.getAnnotation(BsonAttribute.class);
     if (bsonAttribute != null && bsonAttribute.value() != null) {
       nameBytes = bsonAttribute.value().getBytes(StandardCharsets.UTF_8);
       alias = bsonAttribute.value();
     } else {
-      nameBytes = field.getName().getBytes(StandardCharsets.UTF_8);
-      alias = field.getName();
+      nameBytes = fieldName.getBytes(StandardCharsets.UTF_8);
+      alias = fieldName;
     }
     weakHash = 0;
     for (byte b : nameBytes) {
@@ -81,7 +88,7 @@ public class ReflectionField {
   }
 
   public String getName() {
-    return field.getName();
+    return fieldName;
   }
 
   public String getAlias() {
@@ -89,7 +96,7 @@ public class ReflectionField {
   }
 
   public Type getType() {
-    return field.getGenericType();
+    return type;
   }
 
   public @Nullable BobBsonConverter getConverter() {
@@ -97,7 +104,7 @@ public class ReflectionField {
   }
 
   public Class<?> getClazz() {
-    return field.getGenericType().getClass();
+    return type.getClass();
   }
 
   public Method getGetter() {

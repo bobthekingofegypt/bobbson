@@ -9,6 +9,9 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import org.bobstuff.bobbson.BobBson;
 import org.bobstuff.bobbson.annotations.BsonAttribute;
+import org.bobstuff.bobbson.annotations.BsonConverter;
+import org.bobstuff.bobbson.annotations.BsonWriterOptions;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class ReflectionTools {
   public static final Map<Class<?>, Class<?>> map = new HashMap<>();
@@ -31,12 +34,15 @@ public class ReflectionTools {
     var methods = clazz.getMethods();
     var fields = clazz.getDeclaredFields();
 
+    // first check fields with getters and setters
     for (var field : fields) {
       if (Modifier.isTransient(field.getModifiers())) {
         continue;
       }
 
       var bsonAttribute = field.getAnnotation(BsonAttribute.class);
+      var bsonWriterOptions = field.getAnnotation(BsonWriterOptions.class);
+      var customConverter = field.getAnnotation(BsonConverter.class);
 
       var name = field.getName();
       var capitalisedName =
@@ -60,21 +66,83 @@ public class ReflectionTools {
 
       if (getter != null && setter != null) {
         var lookup = MethodHandles.lookup();
-        var setterLambda = createLambdaFactorySetter(clazz, field, setter, lookup);
-        var getterLambda = createLabdaFactoryGetter(clazz, field, getter, lookup);
+        var setterLambda = createLambdaFactorySetter(clazz, field.getType(), setter, lookup);
+        var getterLambda = createLabdaFactoryGetter(clazz, field.getType(), getter, lookup);
+
 
         beanFields.add(
-            new ReflectionField(field, getter, setter, setterLambda, getterLambda, bobBson));
+            new ReflectionField(name, field.getGenericType(), getter, setter, bsonAttribute, bsonWriterOptions, customConverter, setterLambda, getterLambda, bobBson));
+      }
+    }
+    // now check getters with annotation but no field
+    for (var method : methods) {
+      var bsonAttribute = method.getAnnotation(BsonAttribute.class);
+      if (bsonAttribute == null) {
+        continue;
+      }
+      var bsonWriterOptions = method.getAnnotation(BsonWriterOptions.class);
+      var customConverter = method.getAnnotation(BsonConverter.class);
+      var methodName = method.getName();
+      var fieldName = extractNameFromMethod(methodName);
+      if (fieldName == null) {
+        continue;
+      }
+
+      var capitalisedName =
+              fieldName.substring(0, 1).toUpperCase(Locale.getDefault()) + fieldName.substring(1);
+      Method setter = null;
+      for (Method otherMethod : methods) {
+        // TODO check public and return types etc
+        if (otherMethod.getName().equals("set" + capitalisedName)) {
+          setter = otherMethod;
+        }
+
+        if (setter != null) {
+          break;
+        }
+      }
+      if (setter != null) {
+        var fieldType = method.getGenericReturnType();
+        var lookup = MethodHandles.lookup();
+        var setterLambda = createLambdaFactorySetter(clazz, method.getReturnType(), setter, lookup);
+        var getterLambda = createLabdaFactoryGetter(clazz, method.getReturnType(), method, lookup);
+
+        beanFields.add(
+                new ReflectionField(fieldName, fieldType, method, setter, bsonAttribute, bsonWriterOptions, customConverter, setterLambda, getterLambda, bobBson));
       }
     }
     return beanFields;
   }
 
+  private static @Nullable String extractNameFromMethod(String methodName) {
+    if (methodName.startsWith("get") && methodName.length() > 3) {
+      String propertySection = methodName.substring(3);
+      if (methodName.length() == 4) {
+        return propertySection.toLowerCase();
+      } else {
+        // handle values like getDNA as apposed to getDna
+        return propertySection.toUpperCase().equals(propertySection)
+                ? propertySection
+                : Character.toLowerCase(propertySection.charAt(0)) + propertySection.substring(1);
+      }
+    } else if (methodName.startsWith("is") && methodName.length() > 2) {
+      String propertySection = methodName.substring(2);
+      if (methodName.length() == 3) {
+        return propertySection.toLowerCase();
+      } else {
+        return propertySection.toUpperCase().equals(propertySection)
+                ? propertySection
+                : Character.toLowerCase(propertySection.charAt(0)) + propertySection.substring(1);
+      }
+    }
+    return null;
+  }
+
   @SuppressWarnings({"unchecked", "PMD.AvoidCatchingThrowable"})
   private static <T, V> Function createLabdaFactoryGetter(
-      Class<T> clazz, Field field, Method getter, MethodHandles.Lookup lookup) throws Exception {
+      Class<T> clazz, Class<?> fieldType, Method getter, MethodHandles.Lookup lookup) throws Exception {
     MethodHandle target =
-        lookup.findVirtual(clazz, getter.getName(), MethodType.methodType(field.getType()));
+        lookup.findVirtual(clazz, getter.getName(), MethodType.methodType(fieldType));
     MethodType type = target.type();
     CallSite site =
         LambdaMetafactory.metafactory(
@@ -99,19 +167,19 @@ public class ReflectionTools {
 
   @SuppressWarnings({"unchecked", "PMD.AvoidCatchingThrowable"})
   private static <T, V> BiConsumer<T, V> createLambdaFactorySetter(
-      Class<T> clazz, Field field, Method setter, MethodHandles.Lookup lookup) throws Exception {
+      Class<T> clazz, Class<?> fieldType, Method setter, MethodHandles.Lookup lookup) throws Exception {
     MethodHandle target =
         lookup.findVirtual(
             clazz,
             setter.getName(),
             MethodType.methodType(void.class, setter.getParameterTypes()[0]));
     MethodType type = target.type();
-    if (field.getType().isPrimitive()) {
-      var fieldType = map.get(field.getType());
-      if (fieldType == null) {
+    if (fieldType.isPrimitive()) {
+      var primitiveFieldType = map.get(fieldType);
+      if (primitiveFieldType== null) {
         throw new RuntimeException("can't find primitive type in type map");
       }
-      type = type.changeParameterType(1, fieldType);
+      type = type.changeParameterType(1, primitiveFieldType);
     }
 
     CallSite site =
