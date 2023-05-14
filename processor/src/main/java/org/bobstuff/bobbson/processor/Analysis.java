@@ -141,7 +141,7 @@ public class Analysis {
                 field.getSimpleName().toString(),
                 getter,
                 setter,
-//                field,
+                //                field,
                 field.asType(),
                 isList,
                 isSet,
@@ -168,7 +168,8 @@ public class Analysis {
         if (methodName.length() == 4) {
           propertyName = propertySection.toLowerCase();
         } else {
-          propertyName = propertySection.toUpperCase().equals(propertySection)
+          propertyName =
+              propertySection.toUpperCase().equals(propertySection)
                   ? propertySection
                   : Character.toLowerCase(propertySection.charAt(0)) + propertySection.substring(1);
         }
@@ -177,7 +178,8 @@ public class Analysis {
         if (methodName.length() == 3) {
           propertyName = propertySection.toLowerCase();
         } else {
-          propertyName = propertySection.toUpperCase().equals(propertySection)
+          propertyName =
+              propertySection.toUpperCase().equals(propertySection)
                   ? propertySection
                   : Character.toLowerCase(propertySection.charAt(0)) + propertySection.substring(1);
         }
@@ -189,26 +191,25 @@ public class Analysis {
       var setter = findSetter(methods, propertyName, method.getReturnType());
 
       if (setter == null) {
-        messager.debug(
-                "Field (" + propertyName + ") excluded due to missing setter");
+        messager.debug("Field (" + propertyName + ") excluded due to missing setter");
         continue;
       }
 
       results.put(
+          propertyName,
+          new AttributeResult(
               propertyName,
-              new AttributeResult(
-                      propertyName,
-                      method,
-                      setter,
-//                      null,
-                      method.getReturnType(),
-                      false,
-                      false,
-                      false,
-                      annotation,
-                      null,
-                      writerOptions,
-                      null));
+              method,
+              setter,
+              //                      null,
+              method.getReturnType(),
+              false,
+              false,
+              false,
+              annotation,
+              null,
+              writerOptions,
+              null));
     }
     return results;
   }

@@ -58,8 +58,14 @@ public class CompiledBsonAnnotationProcessor extends AbstractProcessor {
         JavaFileObject converterFile =
             processingEnv.getFiler().createSourceFile(classNamePath, structInfo.element);
         try (Writer writer = converterFile.openWriter()) {
-          ParserGenerator parserGenerator = new ParserGenerator();
-          parserGenerator.generate(structInfo, writer, types, elements);
+          if (structInfo.isEnum()) {
+            EnumGenerator enumGenerator = new EnumGenerator();
+            messager.debug("struct " + structInfo.getClassName() + ", is an enum");
+            enumGenerator.generate(structInfo, writer, types, elements);
+          } else {
+            ParserGenerator parserGenerator = new ParserGenerator();
+            parserGenerator.generate(structInfo, writer, types, elements);
+          }
         }
       } catch (Exception e) {
         messager.error("failed writing out file : " + e.getMessage());

@@ -8,7 +8,6 @@ import com.karuslabs.elementary.junit.ToolsExtension;
 import com.karuslabs.elementary.junit.annotations.Case;
 import com.karuslabs.elementary.junit.annotations.Introspect;
 import com.squareup.javapoet.ClassName;
-
 import java.io.StringWriter;
 import java.net.URL;
 import java.util.*;
@@ -81,9 +80,10 @@ public class ParserGeneratorTest {
     sampleConverterStructInfo =
         result.get("org.bobstuff.bobbson.processor.ParserGeneratorTest.SampleConverter");
     sampleGenericClassStructInfo =
-            result.get("org.bobstuff.bobbson.processor.ParserGeneratorTest.SampleGenericClass");
+        result.get("org.bobstuff.bobbson.processor.ParserGeneratorTest.SampleGenericClass");
     multipleListNonListDepBugStructInfo =
-            result.get("org.bobstuff.bobbson.processor.ParserGeneratorTest.SampleMultipleListNonListDepBug");
+        result.get(
+            "org.bobstuff.bobbson.processor.ParserGeneratorTest.SampleMultipleListNonListDepBug");
 
     sut = new ParserGenerator();
   }
@@ -703,12 +703,13 @@ public class ParserGeneratorTest {
 
   @Test
   public void testGenerateSingleConverterDefOnListNonListBug() {
-    var result = sut.generateConverterLookupMethods(multipleListNonListDepBugStructInfo, Tools.types());
+    var result =
+        sut.generateConverterLookupMethods(multipleListNonListDepBugStructInfo, Tools.types());
     assertEquals(1, result.fields.size());
     assertEquals(
-            "private org.bobstuff.bobbson.BobBsonConverter<java.lang.String>"
-                    + " converter_java_lang_String;",
-            result.fields.get(0).toString().strip());
+        "private org.bobstuff.bobbson.BobBsonConverter<java.lang.String>"
+            + " converter_java_lang_String;",
+        result.fields.get(0).toString().strip());
   }
 
   @Test
@@ -716,9 +717,9 @@ public class ParserGeneratorTest {
     var writer = new StringWriter();
     sut.generate(multipleListNonListDepBugStructInfo, writer, Tools.types(), Tools.elements());
     assertEquals(
-            "private org.bobstuff.bobbson.BobBsonConverter<java.lang.String>"
-                    + " converter_java_lang_String;",
-            writer.toString());
+        "private org.bobstuff.bobbson.BobBsonConverter<java.lang.String>"
+            + " converter_java_lang_String;",
+        writer.toString());
   }
 
   @Case("first")
@@ -881,6 +882,7 @@ public class ParserGeneratorTest {
       this.names = names;
     }
   }
+
   @Case("genericClass")
   @CompiledBson
   static class SampleGenericClass<TModelCrazyName> {

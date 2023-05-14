@@ -1,6 +1,5 @@
 package org.bobstuff.bobbson.reflection;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -21,7 +20,7 @@ public class ReflectionField {
   private String fieldName;
 
   private Type type;
-//  private transient Field field;
+  //  private transient Field field;
   private transient Method getter;
   private transient Method setter;
   private transient BiConsumer biConsumerSetter;
@@ -31,8 +30,8 @@ public class ReflectionField {
   private boolean writeNull = true;
 
   public ReflectionField(
-//      Field field,
-          String fieldName,
+      //      Field field,
+      String fieldName,
       Type type,
       Method getter,
       Method setter,
@@ -42,7 +41,7 @@ public class ReflectionField {
       BiConsumer biConsumerSetter,
       Function getterFunction,
       BobBson bobBson) {
-//    this.field = field;
+    //    this.field = field;
     this.getter = getter;
     this.setter = setter;
     this.biConsumerSetter = biConsumerSetter;

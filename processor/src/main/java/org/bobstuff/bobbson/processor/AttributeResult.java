@@ -1,17 +1,12 @@
 package org.bobstuff.bobbson.processor;
 
+import com.squareup.javapoet.ClassName;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
-
-import com.squareup.javapoet.ClassName;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-
-import java.lang.reflect.Type;
-
 
 public class AttributeResult {
   public static final String CONVERTER_PRE = "converter_";
@@ -22,7 +17,7 @@ public class AttributeResult {
   public final String name;
   public final ExecutableElement readMethod;
   public final ExecutableElement writeMethod;
-//  public final VariableElement field;
+  //  public final VariableElement field;
   public final TypeMirror type;
   public final boolean list;
   public final boolean set;
@@ -38,7 +33,7 @@ public class AttributeResult {
       String name,
       ExecutableElement readMethod,
       ExecutableElement writeMethod,
-//      VariableElement field,
+      //      VariableElement field,
       TypeMirror type,
       boolean list,
       boolean set,
@@ -50,7 +45,7 @@ public class AttributeResult {
     this.name = name;
     this.readMethod = readMethod;
     this.writeMethod = writeMethod;
-//    this.field = field;
+    //    this.field = field;
     this.type = type;
     this.list = list;
     this.set = set;
@@ -68,22 +63,45 @@ public class AttributeResult {
       var typeArguments = dclt.getTypeArguments();
       if (list) {
         if (typeArguments.size() == AttributeResult.SINGLE_GENERIC_PARAMATER) {
-          fieldName1 = CONVERTER_PRE + typeArguments.get(0).toString().replaceAll(ESCAPED_DOT, "_").replace("[]", "_array_");
+          fieldName1 =
+              CONVERTER_PRE
+                  + typeArguments
+                      .get(0)
+                      .toString()
+                      .replaceAll(ESCAPED_DOT, "_")
+                      .replace("[]", "_array_");
           param1 = typeArguments.get(0).toString();
         }
       } else if (map) {
         if (typeArguments.size() == AttributeResult.TWO_GENERIC_PARAMETERS) {
-          fieldName1 = CONVERTER_PRE + typeArguments.get(1).toString().replaceAll(ESCAPED_DOT, "_").replace("[]", "_array_");
+          fieldName1 =
+              CONVERTER_PRE
+                  + typeArguments
+                      .get(1)
+                      .toString()
+                      .replaceAll(ESCAPED_DOT, "_")
+                      .replace("[]", "_array_");
           param1 = typeArguments.get(1).toString();
         }
       } else if (set) {
         if (typeArguments.size() == AttributeResult.SINGLE_GENERIC_PARAMATER) {
-          fieldName1 = CONVERTER_PRE + typeArguments.get(0).toString().replaceAll(ESCAPED_DOT, "_").replace("[]", "_array_");
+          fieldName1 =
+              CONVERTER_PRE
+                  + typeArguments
+                      .get(0)
+                      .toString()
+                      .replaceAll(ESCAPED_DOT, "_")
+                      .replace("[]", "_array_");
           param1 = typeArguments.get(0).toString();
         }
       }
     } else {
-      fieldName1 = CONVERTER_PRE + ClassName.get(type).toString().replaceAll(ESCAPED_DOT, "_").replace("[]", "_array_");
+      fieldName1 =
+          CONVERTER_PRE
+              + ClassName.get(type)
+                  .toString()
+                  .replaceAll(ESCAPED_DOT, "_")
+                  .replace("[]", "_array_");
       param1 = "";
     }
 
@@ -123,9 +141,9 @@ public class AttributeResult {
     return writeMethod;
   }
 
-//  public VariableElement getField() {
-//    return field;
-//  }
+  //  public VariableElement getField() {
+  //    return field;
+  //  }
 
   public boolean isMap() {
     return map;
@@ -222,8 +240,8 @@ public class AttributeResult {
         + readMethod
         + ", writeMethod="
         + writeMethod
-//        + ", field="
-//        + field
+        //        + ", field="
+        //        + field
         + ", type="
         + type
         + ", list="

@@ -143,6 +143,13 @@ public class BsonReader {
     contextStack.adjustRemaining(bytes);
   }
 
+  public void readStringRaw() {
+    buffer.getInt();
+    contextStack.adjustRemaining(4);
+    readCString();
+    state = getNextState();
+  }
+
   public BobBsonBuffer.ByteRangeComparitor getFieldName() {
     return buffer.getByteRangeComparitor();
   }

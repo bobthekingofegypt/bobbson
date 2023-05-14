@@ -5,14 +5,14 @@ import org.bobstuff.bobbson.annotations.CompiledBson;
 
 @CompiledBson
 public class BeanWithByteArray {
-    @BsonConverter(target = CustomObjectIdConverter.class)
-    private byte[] key;
+  @BsonConverter(target = CustomObjectIdConverter.class)
+  private byte[] key;
 
-    public byte[] getKey() {
-        return key;
-    }
+  public byte[] getKey() {
+    return key;
+  }
 
-    public void setKey(byte[] key) {
-        this.key = key;
-    }
+  public void setKey(byte[] key) {
+    this.key = key;
+  }
 }

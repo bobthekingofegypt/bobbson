@@ -1,5 +1,7 @@
 package org.bobstuff.bobbson.processor;
 
+import static java.util.stream.Collectors.toList;
+
 import com.squareup.javapoet.*;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
@@ -16,8 +18,6 @@ import org.bobstuff.bobbson.*;
 import org.bobstuff.bobbson.writer.BsonWriter;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-
-import static java.util.stream.Collectors.toList;
 
 public class ParserGenerator {
   public static final String CONVERTER_PRE = "converter_";
@@ -72,7 +72,12 @@ public class ParserGenerator {
       } else {
         MethodSpec methodSpec = lookupData.lookupMethods.get(typeName.toString());
         if (methodSpec == null) {
-          String fieldName = CONVERTER_PRE + typeName.toString().replaceAll(ESCAPED_DOT, "_").replace(ARRAY_BRACKETS, "_array_");
+          String fieldName =
+              CONVERTER_PRE
+                  + typeName
+                      .toString()
+                      .replaceAll(ESCAPED_DOT, "_")
+                      .replace(ARRAY_BRACKETS, "_array_");
           lookupData.fields.add(FieldSpec.builder(converter, fieldName, Modifier.PRIVATE).build());
 
           methodSpec = generateLookupMethod(attributeType, types);
@@ -87,7 +92,9 @@ public class ParserGenerator {
   private MethodSpec generateLookupMethod(TypeMirror type, Types types) {
     TypeName model = TypeName.get(type);
     TypeName boxSafeModel = model;
-    String fieldName = CONVERTER_PRE + model.toString().replaceAll(ESCAPED_DOT, "_").replace(ARRAY_BRACKETS, "_array_");
+    String fieldName =
+        CONVERTER_PRE
+            + model.toString().replaceAll(ESCAPED_DOT, "_").replace(ARRAY_BRACKETS, "_array_");
     if (model.isPrimitive()) {
       boxSafeModel = TypeName.get(types.boxedClass((PrimitiveType) type).asType());
     }
@@ -365,21 +372,24 @@ public class ParserGenerator {
   public void generate(StructInfo structInfo, Writer writer, Types types, Elements elements)
       throws Exception {
 
-    var typevars = structInfo.element.getTypeParameters().stream()
-                                              .map(TypeVariableName::get)
-                                              .collect(toList());
-//    TypeVariableName[] typeArguments = typevars.toArray(new TypeVariableName[typevars.size()]);
-//    TypeName typeClassName = ParameterizedTypeName.get(className, typeArguments);
+    var typevars =
+        structInfo.element.getTypeParameters().stream()
+            .map(TypeVariableName::get)
+            .collect(toList());
+    //    TypeVariableName[] typeArguments = typevars.toArray(new
+    // TypeVariableName[typevars.size()]);
+    //    TypeName typeClassName = ParameterizedTypeName.get(className, typeArguments);
     TypeName type = TypeName.get(structInfo.element.asType());
     ClassName model = ClassName.get(structInfo.element);
-    var converterName = "_" + structInfo.getClassName().replaceAll("\\$", "_") + "_BobBsonConverter";
+    var converterName =
+        "_" + structInfo.getClassName().replaceAll("\\$", "_") + "_BobBsonConverter";
     if (structInfo.isParameterized()) {
-//      List<String> typevars = structInfo.element.getTypeParameters().stream()
-//                                                   .map(TypeVariableName::get)
-//              .map(TypeVariableName::toString)
-//                                                   .collect(toList());
-//      var typeVarsString = String.join(",", typevars);
-//      converterName += "<" + typeVarsString + ">";
+      //      List<String> typevars = structInfo.element.getTypeParameters().stream()
+      //                                                   .map(TypeVariableName::get)
+      //              .map(TypeVariableName::toString)
+      //                                                   .collect(toList());
+      //      var typeVarsString = String.join(",", typevars);
+      //      converterName += "<" + typeVarsString + ">";
     }
     MethodSpec readMethod = generateReadMethod(structInfo, types);
     MethodSpec writeMethod = generateWriteMethodNoKey(type);
@@ -390,7 +400,7 @@ public class ParserGenerator {
 
     TypeSpec innerStruct =
         TypeSpec.classBuilder("_" + structInfo.getClassName() + "_BobBsonConverter")
-                .addTypeVariables(typevars)
+            .addTypeVariables(typevars)
             .addAnnotation(
                 AnnotationSpec.builder(SuppressWarnings.class)
                     .addMember("value", "$S", "unchecked")
@@ -401,7 +411,9 @@ public class ParserGenerator {
             .addFields(keyByteArrays)
             .addMethods(lookupData.lookupMethods.values())
             .addSuperinterface(
-                ParameterizedTypeName.get(ClassName.get(BobBsonConverter.class), TypeName.get(structInfo.element.asType())))
+                ParameterizedTypeName.get(
+                    ClassName.get(BobBsonConverter.class),
+                    TypeName.get(structInfo.element.asType())))
             .addMethod(
                 MethodSpec.constructorBuilder()
                     .addModifiers(Modifier.PUBLIC)
@@ -435,7 +447,7 @@ public class ParserGenerator {
         .build();
   }
 
-  private @NonNull MethodSpec getRegisterMethod(String className, ClassName model) {
+  public static @NonNull MethodSpec getRegisterMethod(String className, ClassName model) {
     return MethodSpec.methodBuilder("register")
         .addModifiers(Modifier.PUBLIC)
         .addParameter(BobBson.class, "bobBson")

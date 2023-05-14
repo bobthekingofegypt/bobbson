@@ -11,8 +11,7 @@ public class CustomObjectIdConverter implements BobBsonConverter<byte[]> {
   }
 
   @Override
-  public void write(
-      @NonNull BsonWriter bsonWriter, byte @Nullable [] key, byte @NonNull [] value) {
+  public void write(@NonNull BsonWriter bsonWriter, byte @Nullable [] key, byte @NonNull [] value) {
     if (key == null) {
       bsonWriter.writeObjectId(value);
     } else {

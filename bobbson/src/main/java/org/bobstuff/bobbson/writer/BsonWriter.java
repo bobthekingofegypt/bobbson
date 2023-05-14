@@ -514,6 +514,35 @@ public class BsonWriter {
     setNextState();
   }
 
+  public void writeString(byte[] key, byte[] value) {
+    buffer.writeByte((byte) BsonType.STRING.getValue());
+    buffer.writeBytes(key);
+    buffer.writeByte((byte) 0);
+    buffer.writeInteger(value.length);
+    buffer.writeBytes(value);
+    buffer.writeByte((byte) 0);
+    setNextState();
+  }
+
+  public void writeString(byte[] value) {
+    buffer.writeByte((byte) BsonType.STRING.getValue());
+    writeNameValue();
+    buffer.skipTail(value.length);
+    buffer.writeBytes(value);
+    buffer.writeByte((byte) 0);
+    setNextState();
+  }
+
+  public void writeString(String field, byte[] value) {
+    buffer.writeByte((byte) BsonType.STRING.getValue());
+    buffer.writeString(field);
+    buffer.writeByte((byte) 0);
+    buffer.skipTail(value.length);
+    buffer.writeBytes(value);
+    buffer.writeByte((byte) 0);
+    setNextState();
+  }
+
   public void writeString(byte[] key, String value) {
     buffer.writeByte((byte) BsonType.STRING.getValue());
     buffer.writeBytes(key);

@@ -1,7 +1,6 @@
 package org.bobstuff.bobbson.reflection;
 
 import java.lang.invoke.*;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
@@ -69,9 +68,18 @@ public class ReflectionTools {
         var setterLambda = createLambdaFactorySetter(clazz, field.getType(), setter, lookup);
         var getterLambda = createLabdaFactoryGetter(clazz, field.getType(), getter, lookup);
 
-
         beanFields.add(
-            new ReflectionField(name, field.getGenericType(), getter, setter, bsonAttribute, bsonWriterOptions, customConverter, setterLambda, getterLambda, bobBson));
+            new ReflectionField(
+                name,
+                field.getGenericType(),
+                getter,
+                setter,
+                bsonAttribute,
+                bsonWriterOptions,
+                customConverter,
+                setterLambda,
+                getterLambda,
+                bobBson));
       }
     }
     // now check getters with annotation but no field
@@ -89,7 +97,7 @@ public class ReflectionTools {
       }
 
       var capitalisedName =
-              fieldName.substring(0, 1).toUpperCase(Locale.getDefault()) + fieldName.substring(1);
+          fieldName.substring(0, 1).toUpperCase(Locale.getDefault()) + fieldName.substring(1);
       Method setter = null;
       for (Method otherMethod : methods) {
         // TODO check public and return types etc
@@ -108,7 +116,17 @@ public class ReflectionTools {
         var getterLambda = createLabdaFactoryGetter(clazz, method.getReturnType(), method, lookup);
 
         beanFields.add(
-                new ReflectionField(fieldName, fieldType, method, setter, bsonAttribute, bsonWriterOptions, customConverter, setterLambda, getterLambda, bobBson));
+            new ReflectionField(
+                fieldName,
+                fieldType,
+                method,
+                setter,
+                bsonAttribute,
+                bsonWriterOptions,
+                customConverter,
+                setterLambda,
+                getterLambda,
+                bobBson));
       }
     }
     return beanFields;
@@ -122,8 +140,8 @@ public class ReflectionTools {
       } else {
         // handle values like getDNA as apposed to getDna
         return propertySection.toUpperCase().equals(propertySection)
-                ? propertySection
-                : Character.toLowerCase(propertySection.charAt(0)) + propertySection.substring(1);
+            ? propertySection
+            : Character.toLowerCase(propertySection.charAt(0)) + propertySection.substring(1);
       }
     } else if (methodName.startsWith("is") && methodName.length() > 2) {
       String propertySection = methodName.substring(2);
@@ -131,8 +149,8 @@ public class ReflectionTools {
         return propertySection.toLowerCase();
       } else {
         return propertySection.toUpperCase().equals(propertySection)
-                ? propertySection
-                : Character.toLowerCase(propertySection.charAt(0)) + propertySection.substring(1);
+            ? propertySection
+            : Character.toLowerCase(propertySection.charAt(0)) + propertySection.substring(1);
       }
     }
     return null;
@@ -140,7 +158,8 @@ public class ReflectionTools {
 
   @SuppressWarnings({"unchecked", "PMD.AvoidCatchingThrowable"})
   private static <T, V> Function createLabdaFactoryGetter(
-      Class<T> clazz, Class<?> fieldType, Method getter, MethodHandles.Lookup lookup) throws Exception {
+      Class<T> clazz, Class<?> fieldType, Method getter, MethodHandles.Lookup lookup)
+      throws Exception {
     MethodHandle target =
         lookup.findVirtual(clazz, getter.getName(), MethodType.methodType(fieldType));
     MethodType type = target.type();
@@ -167,7 +186,8 @@ public class ReflectionTools {
 
   @SuppressWarnings({"unchecked", "PMD.AvoidCatchingThrowable"})
   private static <T, V> BiConsumer<T, V> createLambdaFactorySetter(
-      Class<T> clazz, Class<?> fieldType, Method setter, MethodHandles.Lookup lookup) throws Exception {
+      Class<T> clazz, Class<?> fieldType, Method setter, MethodHandles.Lookup lookup)
+      throws Exception {
     MethodHandle target =
         lookup.findVirtual(
             clazz,
@@ -176,7 +196,7 @@ public class ReflectionTools {
     MethodType type = target.type();
     if (fieldType.isPrimitive()) {
       var primitiveFieldType = map.get(fieldType);
-      if (primitiveFieldType== null) {
+      if (primitiveFieldType == null) {
         throw new RuntimeException("can't find primitive type in type map");
       }
       type = type.changeParameterType(1, primitiveFieldType);
