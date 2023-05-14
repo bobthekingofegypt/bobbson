@@ -1,8 +1,7 @@
 package org.bobstuff.bobbson;
 
-import org.bobstuff.bobbson.annotations.CompiledBson;
-
 import java.util.Objects;
+import org.bobstuff.bobbson.annotations.CompiledBson;
 
 @CompiledBson
 public class EnumValue {
@@ -35,4 +34,5 @@ public class EnumValue {
   public int hashCode() {
     return Objects.hash(value);
   }
+
 }

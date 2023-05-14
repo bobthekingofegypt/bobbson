@@ -1,5 +1,6 @@
 package org.bobstuff.bobbson;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -629,6 +630,17 @@ public class DynamicBobBsonBuffer implements BobBsonBuffer {
   @Override
   public ByteRangeComparitor getByteRangeComparitor() {
     return byteRangeComparitor;
+  }
+
+  @Override
+  public byte[] toByteArray() {
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    try {
+      pipe(bos);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+    return bos.toByteArray();
   }
 
   public void pipe(final OutputStream out) throws IOException {

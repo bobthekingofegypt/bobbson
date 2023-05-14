@@ -76,6 +76,8 @@ public interface BobBsonBuffer {
    */
   ByteRangeComparitor getByteRangeComparitor();
 
+  byte[] toByteArray();
+
   interface ByteRangeComparitor {
     int getWeakHash();
 

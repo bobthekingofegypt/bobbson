@@ -3,15 +3,16 @@ package org.bobstuff.bobbson;
 import java.io.ByteArrayOutputStream;
 import org.bobstuff.bobbson.writer.BsonWriter;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ArgumentsSource;
 
 public class EnumValueTest {
-  @Test
-  public void testReadWriteBeanWithEnum() throws Exception {
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new ByteBufferBobBsonBuffer(new byte[1000]));
-    DynamicBobBsonBuffer buffer = new DynamicBobBsonBuffer(pool);
-    BobBson bobBson = new BobBson();
+  @ParameterizedTest(name = "{0}")
+  @ArgumentsSource(BobBsonComboProvider.class)
+  public void testReadWriteBeanWithEnum(
+      BobBsonComboProvider.ConfigurationProvider configurationProvider) throws Exception {
+    BobBsonBuffer buffer = configurationProvider.getBuffer(2048);
+    BobBson bobBson = configurationProvider.getBobBson();
 
     var beanWithEnum = new EnumValue();
     beanWithEnum.setValue(EnumValue.AnEnum.VALUE_ONE);
@@ -19,11 +20,7 @@ public class EnumValueTest {
     BsonWriter writer = new BsonWriter(buffer);
     bobBson.serialise(beanWithEnum, EnumValue.class, writer);
 
-    ByteArrayOutputStream os = new ByteArrayOutputStream();
-    buffer.pipe(os);
-    os.flush();
-    os.close();
-    byte[] bytes = os.toByteArray();
+    var bytes = buffer.toByteArray();
 
     BsonReader reader = new BsonReader(new ByteBufferBobBsonBuffer(bytes));
     var result = bobBson.deserialise(EnumValue.class, reader);

@@ -5,6 +5,8 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class ByteBufferBobBsonBuffer implements BobBsonBuffer {
@@ -296,6 +298,11 @@ public class ByteBufferBobBsonBuffer implements BobBsonBuffer {
   @Override
   public ByteRangeComparitor getByteRangeComparitor() {
     return byteRange;
+  }
+
+  @Override
+  public byte[] toByteArray() {
+    return Arrays.copyOf(buffer.array(), getTail());
   }
 
   public void pipe(final OutputStream out) throws IOException {
