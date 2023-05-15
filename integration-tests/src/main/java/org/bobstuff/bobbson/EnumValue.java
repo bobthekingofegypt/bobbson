@@ -34,5 +34,4 @@ public class EnumValue {
   public int hashCode() {
     return Objects.hash(value);
   }
-
 }

@@ -7,12 +7,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
 public class UnicodeChars {
-    @ParameterizedTest(name = "{0}")
-    @ArgumentsSource(BobBsonComboProvider.class)
-    public void testReadWriteStringWithUnicode(
-            BobBsonComboProvider.ConfigurationProvider configurationProvider) throws Exception {
-        BobBsonBuffer buffer = configurationProvider.getBuffer(2048);
-        System.out.println(buffer.getClass());
+  @ParameterizedTest(name = "{0}")
+  @ArgumentsSource(BobBsonComboProvider.class)
+  public void testReadWriteStringWithUnicode(
+      BobBsonComboProvider.ConfigurationProvider configurationProvider) throws Exception {
+    BobBsonBuffer buffer = configurationProvider.getBuffer(2048);
+    System.out.println(buffer.getClass());
     BobBson bobBson = configurationProvider.getBobBson();
 
     var beanWithString = new BeanWithString();
@@ -23,8 +23,8 @@ public class UnicodeChars {
 
     BsonReader reader = new BsonReader(buffer);
     var result = bobBson.deserialise(BeanWithString.class, reader);
-        System.out.println(result);
-        System.out.println(beanWithString);
+    System.out.println(result);
+    System.out.println(beanWithString);
     Assertions.assertEquals(beanWithString, result);
-    }
+  }
 }

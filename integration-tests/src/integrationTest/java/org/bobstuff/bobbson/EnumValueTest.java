@@ -1,6 +1,5 @@
 package org.bobstuff.bobbson;
 
-import java.io.ByteArrayOutputStream;
 import org.bobstuff.bobbson.writer.BsonWriter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;

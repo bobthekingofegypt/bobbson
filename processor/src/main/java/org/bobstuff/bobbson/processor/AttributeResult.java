@@ -14,6 +14,7 @@ public class AttributeResult {
 
   public static final int SINGLE_GENERIC_PARAMATER = 1;
   public static final int TWO_GENERIC_PARAMETERS = 2;
+  public static final String ARRAY_TEXT = "_array_";
   public final String name;
   public final ExecutableElement readMethod;
   public final ExecutableElement writeMethod;
@@ -69,7 +70,7 @@ public class AttributeResult {
                       .get(0)
                       .toString()
                       .replaceAll(ESCAPED_DOT, "_")
-                      .replace("[]", "_array_");
+                      .replace("[]", ARRAY_TEXT);
           param1 = typeArguments.get(0).toString();
         }
       } else if (map) {
@@ -80,7 +81,7 @@ public class AttributeResult {
                       .get(1)
                       .toString()
                       .replaceAll(ESCAPED_DOT, "_")
-                      .replace("[]", "_array_");
+                      .replace("[]", ARRAY_TEXT);
           param1 = typeArguments.get(1).toString();
         }
       } else if (set) {
@@ -91,7 +92,7 @@ public class AttributeResult {
                       .get(0)
                       .toString()
                       .replaceAll(ESCAPED_DOT, "_")
-                      .replace("[]", "_array_");
+                      .replace("[]", ARRAY_TEXT);
           param1 = typeArguments.get(0).toString();
         }
       }
@@ -101,7 +102,7 @@ public class AttributeResult {
               + ClassName.get(type)
                   .toString()
                   .replaceAll(ESCAPED_DOT, "_")
-                  .replace("[]", "_array_");
+                  .replace("[]", ARRAY_TEXT);
       param1 = "";
     }
 

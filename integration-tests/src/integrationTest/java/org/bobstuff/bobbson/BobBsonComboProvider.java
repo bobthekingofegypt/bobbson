@@ -80,17 +80,17 @@ public class BobBsonComboProvider implements ArgumentsProvider {
     ConfigurationProvider compiledBobBson =
         new ConfigurationProvider(bobBsonCompiledProvider, bobBufferBobBsonBufferProvider);
     ConfigurationProvider compiledByte =
-            new ConfigurationProvider(bobBsonCompiledProvider, byteBufferBobBsonBufferProvider);
+        new ConfigurationProvider(bobBsonCompiledProvider, byteBufferBobBsonBufferProvider);
     ConfigurationProvider compiledDynamic =
-            new ConfigurationProvider(bobBsonCompiledProvider, dynamicBobBsonBufferProvider);
+        new ConfigurationProvider(bobBsonCompiledProvider, dynamicBobBsonBufferProvider);
     ConfigurationProvider reflectionActiveJ =
         new ConfigurationProvider(bobBsonReflectionProvider, activeJBufferProvider);
     ConfigurationProvider reflectionBobBson =
         new ConfigurationProvider(bobBsonReflectionProvider, bobBufferBobBsonBufferProvider);
     ConfigurationProvider reflectionByte =
-            new ConfigurationProvider(bobBsonReflectionProvider, byteBufferBobBsonBufferProvider);
+        new ConfigurationProvider(bobBsonReflectionProvider, byteBufferBobBsonBufferProvider);
     ConfigurationProvider reflectionDynamic =
-            new ConfigurationProvider(bobBsonReflectionProvider, dynamicBobBsonBufferProvider);
+        new ConfigurationProvider(bobBsonReflectionProvider, dynamicBobBsonBufferProvider);
 
     return Stream.of(
         Arguments.of(Named.named("BobBsonCompiled_activeJ", compiledActiveJ)),
@@ -100,7 +100,7 @@ public class BobBsonComboProvider implements ArgumentsProvider {
         Arguments.of(Named.named("BobBsonReflection_activeJ", reflectionActiveJ)),
         Arguments.of(Named.named("BobBsonReflection_bobBson", reflectionBobBson)),
         Arguments.of(Named.named("BobBsonReflection_byte", reflectionByte)),
-    Arguments.of(Named.named("BobBsonReflection_dynamic", reflectionDynamic)));
+        Arguments.of(Named.named("BobBsonReflection_dynamic", reflectionDynamic)));
   }
 
   public class ConfigurationProvider {

@@ -383,14 +383,14 @@ public class ParserGenerator {
     ClassName model = ClassName.get(structInfo.element);
     var converterName =
         "_" + structInfo.getClassName().replaceAll("\\$", "_") + "_BobBsonConverter";
-    if (structInfo.isParameterized()) {
-      //      List<String> typevars = structInfo.element.getTypeParameters().stream()
-      //                                                   .map(TypeVariableName::get)
-      //              .map(TypeVariableName::toString)
-      //                                                   .collect(toList());
-      //      var typeVarsString = String.join(",", typevars);
-      //      converterName += "<" + typeVarsString + ">";
-    }
+    //    if (structInfo.isParameterized()) {
+    //      List<String> typevars = structInfo.element.getTypeParameters().stream()
+    //                                                   .map(TypeVariableName::get)
+    //              .map(TypeVariableName::toString)
+    //                                                   .collect(toList());
+    //      var typeVarsString = String.join(",", typevars);
+    //      converterName += "<" + typeVarsString + ">";
+    //    }
     MethodSpec readMethod = generateReadMethod(structInfo, types);
     MethodSpec writeMethod = generateWriteMethodNoKey(type);
     var writeMethodWithKey = generateWriteMethodWithKey(structInfo, type, types);

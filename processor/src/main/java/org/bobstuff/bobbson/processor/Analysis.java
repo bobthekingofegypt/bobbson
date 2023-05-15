@@ -43,6 +43,7 @@ public class Analysis {
     this.writerOptionsType = types.getDeclaredType(writerOptionsElement);
   }
 
+  @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
   public Map<String, AttributeResult> getAttributes(TypeElement typeElement) {
     if (typeElement == null) {
       return Collections.emptyMap();
@@ -166,20 +167,20 @@ public class Analysis {
       if (methodName.startsWith("get") && methodName.length() > 3) {
         String propertySection = methodName.substring(3);
         if (methodName.length() == 4) {
-          propertyName = propertySection.toLowerCase();
+          propertyName = propertySection.toLowerCase(Locale.getDefault());
         } else {
           propertyName =
-              propertySection.toUpperCase().equals(propertySection)
+              propertySection.toUpperCase(Locale.getDefault()).equals(propertySection)
                   ? propertySection
                   : Character.toLowerCase(propertySection.charAt(0)) + propertySection.substring(1);
         }
       } else if (methodName.startsWith("is") && methodName.length() > 2) {
         String propertySection = methodName.substring(2);
         if (methodName.length() == 3) {
-          propertyName = propertySection.toLowerCase();
+          propertyName = propertySection.toLowerCase(Locale.getDefault());
         } else {
           propertyName =
-              propertySection.toUpperCase().equals(propertySection)
+              propertySection.toUpperCase(Locale.getDefault()).equals(propertySection)
                   ? propertySection
                   : Character.toLowerCase(propertySection.charAt(0)) + propertySection.substring(1);
         }

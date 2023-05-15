@@ -2,8 +2,6 @@ package org.bobstuff.bobbson.activej;
 
 import io.activej.bytebuf.ByteBuf;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-
 import org.bobstuff.bobbson.*;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

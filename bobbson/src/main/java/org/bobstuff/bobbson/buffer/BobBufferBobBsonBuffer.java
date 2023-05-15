@@ -1,10 +1,9 @@
 package org.bobstuff.bobbson.buffer;
 
+import java.util.Arrays;
 import org.bobstuff.bobbson.BobBsonBuffer;
 import org.bobstuff.bobbson.BobBsonByteRange;
 import org.checkerframework.checker.nullness.qual.Nullable;
-
-import java.util.Arrays;
 
 public class BobBufferBobBsonBuffer implements BobBsonBuffer {
   private BobBuffer buffer;

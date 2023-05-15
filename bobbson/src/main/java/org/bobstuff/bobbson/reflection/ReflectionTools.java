@@ -132,23 +132,27 @@ public class ReflectionTools {
     return beanFields;
   }
 
+  @SuppressWarnings("PMD.UnnecessaryCaseChange")
   private static @Nullable String extractNameFromMethod(String methodName) {
+    int getPlusOneLetter = 4;
+    int isPlusOneLetter = 3;
+
     if (methodName.startsWith("get") && methodName.length() > 3) {
       String propertySection = methodName.substring(3);
-      if (methodName.length() == 4) {
-        return propertySection.toLowerCase();
+      if (methodName.length() == getPlusOneLetter) {
+        return propertySection.toLowerCase(Locale.getDefault());
       } else {
         // handle values like getDNA as apposed to getDna
-        return propertySection.toUpperCase().equals(propertySection)
+        return propertySection.toUpperCase(Locale.getDefault()).equals(propertySection)
             ? propertySection
             : Character.toLowerCase(propertySection.charAt(0)) + propertySection.substring(1);
       }
     } else if (methodName.startsWith("is") && methodName.length() > 2) {
       String propertySection = methodName.substring(2);
-      if (methodName.length() == 3) {
-        return propertySection.toLowerCase();
+      if (methodName.length() == isPlusOneLetter) {
+        return propertySection.toLowerCase(Locale.getDefault());
       } else {
-        return propertySection.toUpperCase().equals(propertySection)
+        return propertySection.toUpperCase(Locale.getDefault()).equals(propertySection)
             ? propertySection
             : Character.toLowerCase(propertySection.charAt(0)) + propertySection.substring(1);
       }

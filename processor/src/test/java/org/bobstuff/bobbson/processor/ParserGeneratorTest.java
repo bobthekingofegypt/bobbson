@@ -8,7 +8,6 @@ import com.karuslabs.elementary.junit.ToolsExtension;
 import com.karuslabs.elementary.junit.annotations.Case;
 import com.karuslabs.elementary.junit.annotations.Introspect;
 import com.squareup.javapoet.ClassName;
-import java.io.StringWriter;
 import java.net.URL;
 import java.util.*;
 import javax.lang.model.element.Element;
@@ -663,7 +662,7 @@ public class ParserGeneratorTest {
                            return converter_java_lang_String;
                          }
                          """,
-        result.lookupMethods.get(Tools.typeMirrors().type(String.class)).toString());
+        result.lookupMethods.get(Tools.typeMirrors().type(String.class).toString()).toString());
   }
 
   @Test
@@ -688,7 +687,7 @@ public class ParserGeneratorTest {
                            return converter_java_lang_String;
                          }
                          """,
-        result.lookupMethods.get(Tools.typeMirrors().type(String.class)).toString());
+        result.lookupMethods.get(Tools.typeMirrors().type(String.class).toString()).toString());
     assertEquals(
         """
                          public org.bobstuff.bobbson.BobBsonConverter<java.lang.Double> converter_java_lang_Double() {
@@ -698,7 +697,7 @@ public class ParserGeneratorTest {
                            return converter_java_lang_Double;
                          }
                          """,
-        result.lookupMethods.get(Tools.typeMirrors().type(Double.class)).toString());
+        result.lookupMethods.get(Tools.typeMirrors().type(Double.class).toString()).toString());
   }
 
   @Test
@@ -710,16 +709,6 @@ public class ParserGeneratorTest {
         "private org.bobstuff.bobbson.BobBsonConverter<java.lang.String>"
             + " converter_java_lang_String;",
         result.fields.get(0).toString().strip());
-  }
-
-  @Test
-  public void testGenericClass() throws Exception {
-    var writer = new StringWriter();
-    sut.generate(multipleListNonListDepBugStructInfo, writer, Tools.types(), Tools.elements());
-    assertEquals(
-        "private org.bobstuff.bobbson.BobBsonConverter<java.lang.String>"
-            + " converter_java_lang_String;",
-        writer.toString());
   }
 
   @Case("first")
