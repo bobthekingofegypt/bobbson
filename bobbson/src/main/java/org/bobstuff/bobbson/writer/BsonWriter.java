@@ -518,7 +518,7 @@ public class BsonWriter {
     buffer.writeByte((byte) BsonType.STRING.getValue());
     buffer.writeBytes(key);
     buffer.writeByte((byte) 0);
-    buffer.writeInteger(value.length);
+    buffer.writeInteger(value.length + 1);
     buffer.writeBytes(value);
     buffer.writeByte((byte) 0);
     setNextState();
@@ -527,7 +527,7 @@ public class BsonWriter {
   public void writeString(byte[] value) {
     buffer.writeByte((byte) BsonType.STRING.getValue());
     writeNameValue();
-    buffer.skipTail(value.length);
+    buffer.skipTail(value.length + 1);
     buffer.writeBytes(value);
     buffer.writeByte((byte) 0);
     setNextState();
@@ -537,7 +537,7 @@ public class BsonWriter {
     buffer.writeByte((byte) BsonType.STRING.getValue());
     buffer.writeString(field);
     buffer.writeByte((byte) 0);
-    buffer.skipTail(value.length);
+    buffer.skipTail(value.length + 1);
     buffer.writeBytes(value);
     buffer.writeByte((byte) 0);
     setNextState();
@@ -600,8 +600,7 @@ public class BsonWriter {
     buffer.writeBytes(value);
     setNextState();
   }
-
-  public void writeDouble(String field, Double value) {
+  public void writeDouble(String field, double value) {
     buffer.writeByte((byte) BsonType.DOUBLE.getValue());
     buffer.writeString(field);
     buffer.writeByte((byte) 0);
@@ -609,7 +608,7 @@ public class BsonWriter {
     setNextState();
   }
 
-  public void writeDouble(byte[] field, Double value) {
+  public void writeDouble(byte[] field, double value) {
     buffer.writeByte((byte) BsonType.DOUBLE.getValue());
     buffer.writeBytes(field);
     buffer.writeByte((byte) 0);
@@ -617,14 +616,14 @@ public class BsonWriter {
     setNextState();
   }
 
-  public void writeDouble(Double value) {
+  public void writeDouble(double value) {
     buffer.writeByte((byte) BsonType.DOUBLE.getValue());
     writeNameValue();
     buffer.writeDouble(value);
     setNextState();
   }
 
-  public void writeBoolean(String name, Boolean value) {
+  public void writeBoolean(String name, boolean value) {
     buffer.writeByte((byte) BsonType.BOOLEAN.getValue());
     buffer.writeString(name);
     buffer.writeByte((byte) 0);
@@ -636,7 +635,7 @@ public class BsonWriter {
     setNextState();
   }
 
-  public void writeBoolean(byte[] name, Boolean value) {
+  public void writeBoolean(byte[] name, boolean value) {
     buffer.writeByte((byte) BsonType.BOOLEAN.getValue());
     buffer.writeBytes(name);
     buffer.writeByte((byte) 0);
@@ -648,7 +647,7 @@ public class BsonWriter {
     setNextState();
   }
 
-  public void writeBoolean(Boolean value) {
+  public void writeBoolean(boolean value) {
     buffer.writeByte((byte) BsonType.BOOLEAN.getValue());
     writeNameValue();
     if (value) {
@@ -659,7 +658,7 @@ public class BsonWriter {
     setNextState();
   }
 
-  public void writeInteger(String field, Integer value) {
+  public void writeInteger(String field, int value) {
     buffer.writeByte((byte) BsonType.INT32.getValue());
     buffer.writeString(field);
     buffer.writeByte((byte) 0);
@@ -667,7 +666,7 @@ public class BsonWriter {
     setNextState();
   }
 
-  public void writeInteger(byte[] field, Integer value) {
+  public void writeInteger(byte[] field, int value) {
     buffer.writeByte((byte) BsonType.INT32.getValue());
     buffer.writeBytes(field);
     buffer.writeByte((byte) 0);
@@ -675,14 +674,14 @@ public class BsonWriter {
     setNextState();
   }
 
-  public void writeInteger(Integer value) {
+  public void writeInteger(int value) {
     buffer.writeByte((byte) BsonType.INT32.getValue());
     writeNameValue();
     buffer.writeInteger(value);
     setNextState();
   }
 
-  public void writeLong(String field, Long value) {
+  public void writeLong(String field, long value) {
     buffer.writeByte((byte) BsonType.INT64.getValue());
     buffer.writeString(field);
     buffer.writeByte((byte) 0);
@@ -690,7 +689,7 @@ public class BsonWriter {
     setNextState();
   }
 
-  public void writeLong(byte[] field, Long value) {
+  public void writeLong(byte[] field, long value) {
     buffer.writeByte((byte) BsonType.INT64.getValue());
     buffer.writeBytes(field);
     buffer.writeByte((byte) 0);
@@ -698,7 +697,7 @@ public class BsonWriter {
     setNextState();
   }
 
-  public void writeLong(Long value) {
+  public void writeLong(long value) {
     buffer.writeByte((byte) BsonType.INT64.getValue());
     writeNameValue();
     buffer.writeLong(value);

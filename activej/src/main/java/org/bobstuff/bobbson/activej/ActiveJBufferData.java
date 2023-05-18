@@ -46,7 +46,7 @@ public class ActiveJBufferData implements BobBsonBuffer {
 
   @Override
   public byte[] toByteArray() {
-    var array = this.getArray();
+    var array = buffer.getArray();
     if (array == null) {
       throw new RuntimeException("Cant access backing array of BobBsonBuffer");
     }

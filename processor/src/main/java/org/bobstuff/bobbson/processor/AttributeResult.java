@@ -181,6 +181,10 @@ public class AttributeResult {
     return converterType;
   }
 
+  public boolean isPrimitive() {
+    return type.getKind().isPrimitive();
+  }
+
   public String getAliasName() {
     if (annotation == null) {
       return name;

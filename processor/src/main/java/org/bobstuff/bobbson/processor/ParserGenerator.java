@@ -11,10 +11,12 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.type.PrimitiveType;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import org.bobstuff.bobbson.*;
+import org.bobstuff.bobbson.converters.PrimitiveConverters;
 import org.bobstuff.bobbson.writer.BsonWriter;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -123,8 +125,9 @@ public class ParserGenerator {
   protected CodeBlock generateWriterCollectionCode(AttributeResult attribute) {
     return CodeBlock.builder()
         .addStatement("writer.writeStartArray($NBytes)", attribute.getName())
-        .beginControlFlow("for (var e : obj.$N())", attribute.readMethod.getSimpleName())
-        .addStatement("$N().write(writer, e)", attribute.getConverterFieldName())
+        .addStatement("var col = obj.$N()", attribute.readMethod.getSimpleName())
+        .beginControlFlow("for (var i = 0; i < col.size(); i += 1)", attribute.readMethod.getSimpleName())
+        .addStatement("$N().write(writer, col.get(i))", attribute.getConverterFieldName())
         .endControlFlow()
         .addStatement("writer.writeEndArray()")
         .build();
@@ -170,6 +173,18 @@ public class ParserGenerator {
 
       if ((attribute.isList() || attribute.isSet()) && attribute.getConverterType() == null) {
         block.add(generateWriterCollectionCode(attribute));
+      } else if (attribute.isPrimitive()) {
+        if (attribute.getDeclaredType().getKind() == TypeKind.INT) {
+          block.addStatement("writer.writeInteger($NBytes, obj.$N())", attributeName, attribute.readMethod.getSimpleName());
+        } else if (attribute.getDeclaredType().getKind() == TypeKind.DOUBLE) {
+          block.addStatement("writer.writeDouble($NBytes, obj.$N())", attributeName, attribute.readMethod.getSimpleName());
+        } else if (attribute.getDeclaredType().getKind() == TypeKind.LONG) {
+          block.addStatement("writer.writeLong($NBytes, obj.$N())", attributeName, attribute.readMethod.getSimpleName());
+        } else if (attribute.getDeclaredType().getKind() == TypeKind.BOOLEAN) {
+          block.addStatement("writer.writeBoolean($NBytes, obj.$N())", attributeName, attribute.readMethod.getSimpleName());
+        } else {
+          throw new RuntimeException("Attempting to write unknown primitive type " + attribute);
+        }
       } else if (attribute.isMap() && attribute.getConverterType() == null) {
         block.add(generateWriterMapCode(attribute));
       } else {
@@ -264,6 +279,18 @@ public class ParserGenerator {
         block.add(generateParserCollectionCode(HashSet.class, attribute));
       } else if (attribute.isMap() && attribute.getConverterType() == null) {
         block.add(generateParserMapCode(attribute));
+      } else if (attribute.isPrimitive()) {
+        if (attribute.getDeclaredType().getKind() == TypeKind.INT) {
+          block.addStatement("result.$N($T.parseInteger(reader))", attribute.writeMethod.getSimpleName(), PrimitiveConverters.class);
+        } else if (attribute.getDeclaredType().getKind() == TypeKind.DOUBLE) {
+          block.addStatement("result.$N($T.parseDouble(reader))", attribute.writeMethod.getSimpleName(), PrimitiveConverters.class);
+        } else if (attribute.getDeclaredType().getKind() == TypeKind.LONG) {
+          block.addStatement("result.$N($T.parseLong(reader))", attribute.writeMethod.getSimpleName(), PrimitiveConverters.class);
+        } else if (attribute.getDeclaredType().getKind() == TypeKind.BOOLEAN) {
+          block.addStatement("result.$N($T.parseBoolean(reader))", attribute.writeMethod.getSimpleName(), PrimitiveConverters.class);
+        } else {
+          throw new RuntimeException("Attempting to read unknown primitive type " + attribute);
+        }
       } else {
         if (attribute.getConverterType() != null) {
           block.addStatement(
