@@ -10,7 +10,7 @@ public class BobBsonConverterTest {
   public void readThrowsIllegalState() {
     var sut = new BobBsonConverter<String>() {};
     var buffer = ByteBuffer.allocate(10);
-    var bsonReader = new BsonReader(buffer);
+    var bsonReader = new BsonReaderStack(buffer);
 
     Assertions.assertThrows(
         IllegalStateException.class,

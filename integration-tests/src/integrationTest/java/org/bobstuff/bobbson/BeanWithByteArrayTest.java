@@ -27,7 +27,7 @@ public class BeanWithByteArrayTest {
     byte[] bytes = os.toByteArray();
 
     BobBson bobBson = new BobBson();
-    BsonReader reader = new BsonReader(new ByteBufferBobBsonBuffer(bytes));
+    BsonReader reader = new BsonReaderStack(new ByteBufferBobBsonBuffer(bytes));
     var result = bobBson.deserialise(BeanWithByteArray.class, reader);
     Assertions.assertArrayEquals(id, result.getKey());
   }

@@ -5,7 +5,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.nio.charset.StandardCharsets;
-import org.bobstuff.bobbson.BsonReader;
+
+import org.bobstuff.bobbson.BsonReaderStack;
 import org.bobstuff.bobbson.BsonType;
 import org.bobstuff.bobbson.writer.BsonWriter;
 import org.junit.jupiter.api.Test;
@@ -14,7 +15,7 @@ import org.mockito.Mockito;
 public class BooleanBsonConverterTest {
   @Test
   public void testReadHandlesNull() {
-    var reader = Mockito.mock(BsonReader.class);
+    var reader = Mockito.mock(BsonReaderStack.class);
     when(reader.getCurrentBsonType()).thenReturn(BsonType.NULL);
 
     var sut = new BooleanBsonConverter();
@@ -26,7 +27,7 @@ public class BooleanBsonConverterTest {
 
   @Test
   public void testReadHandlesNonBoolean() {
-    var reader = Mockito.mock(BsonReader.class);
+    var reader = Mockito.mock(BsonReaderStack.class);
     when(reader.getCurrentBsonType()).thenReturn(BsonType.INT32);
 
     var sut = new BooleanBsonConverter();
@@ -35,7 +36,7 @@ public class BooleanBsonConverterTest {
 
   @Test
   public void testReadHandlesBooleanTrue() {
-    var reader = Mockito.mock(BsonReader.class);
+    var reader = Mockito.mock(BsonReaderStack.class);
     when(reader.getCurrentBsonType()).thenReturn(BsonType.BOOLEAN);
     when(reader.readBoolean()).thenReturn(true);
 
@@ -45,7 +46,7 @@ public class BooleanBsonConverterTest {
 
   @Test
   public void testReadHandlesBooleanFalse() {
-    var reader = Mockito.mock(BsonReader.class);
+    var reader = Mockito.mock(BsonReaderStack.class);
     when(reader.getCurrentBsonType()).thenReturn(BsonType.BOOLEAN);
     when(reader.readBoolean()).thenReturn(false);
 

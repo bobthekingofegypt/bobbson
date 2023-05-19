@@ -27,7 +27,7 @@ public class BsonWriterInt {
 
     Files.write(Paths.get("/tmp/data.bin"), bytes);
 
-    BsonReader reader = new BsonReader(new ByteBufferBobBsonBuffer(bytes));
+    BsonReader reader = new BsonReaderStack(new ByteBufferBobBsonBuffer(bytes));
     reader.readStartDocument();
     Assertions.assertEquals(BsonType.STRING, reader.readBsonType());
     Assertions.assertEquals("name", reader.currentFieldName());
@@ -56,7 +56,7 @@ public class BsonWriterInt {
 
     Files.write(Paths.get("/tmp/data.bin"), bytes);
 
-    BsonReader reader = new BsonReader(new ByteBufferBobBsonBuffer(bytes));
+    BsonReader reader = new BsonReaderStack(new ByteBufferBobBsonBuffer(bytes));
     reader.readStartDocument();
     Assertions.assertEquals(BsonType.STRING, reader.readBsonType());
     Assertions.assertEquals("name", reader.currentFieldName());
@@ -91,7 +91,7 @@ public class BsonWriterInt {
 
     Files.write(Paths.get("/tmp/data.bin"), bytes);
 
-    BsonReader reader = new BsonReader(new ByteBufferBobBsonBuffer(bytes));
+    BsonReader reader = new BsonReaderStack(new ByteBufferBobBsonBuffer(bytes));
     reader.readStartDocument();
     Assertions.assertEquals(BsonType.STRING, reader.readBsonType());
     Assertions.assertEquals("name", reader.currentFieldName());

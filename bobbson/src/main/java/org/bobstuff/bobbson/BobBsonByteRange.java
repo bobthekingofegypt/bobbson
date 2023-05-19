@@ -14,6 +14,10 @@ public class BobBsonByteRange implements BobBsonBuffer.ByteRangeComparitor {
     this.data = data;
   }
 
+  public void setData(byte[] data) {
+    this.data = data;
+  }
+
   public void set(int start, int size, int weakHash) {
     this.start = start;
     this.size = size;
@@ -35,6 +39,17 @@ public class BobBsonByteRange implements BobBsonBuffer.ByteRangeComparitor {
   public boolean equalsArray(byte[] array, int otherWeakHash) {
     if (weakHash != otherWeakHash) {
       return false;
+    }
+    if (array.length < 10) {
+      if (array.length != size - 1) {
+        return false;
+      }
+      for (int i = 0; i < array.length; i++) {
+        if (array[i] != data[start + i]) {
+          return false;
+        }
+      }
+      return true;
     }
     return Arrays.equals(data, start, start + size - 1, array, 0, array.length);
   }

@@ -21,7 +21,7 @@ public class UnicodeChars {
     BsonWriter writer = new BsonWriter(buffer);
     bobBson.serialise(beanWithString, BeanWithString.class, writer);
 
-    BsonReader reader = new BsonReader(buffer);
+    BsonReader reader = new BsonReaderStack(buffer);
     var result = bobBson.deserialise(BeanWithString.class, reader);
     System.out.println(result);
     System.out.println(beanWithString);

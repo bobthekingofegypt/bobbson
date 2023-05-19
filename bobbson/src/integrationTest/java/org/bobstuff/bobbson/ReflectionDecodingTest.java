@@ -22,7 +22,7 @@ public class ReflectionDecodingTest {
     var bobBson = new BobBson();
     bobBson.registerFactory(new ObjectConverterFactory());
 
-    var reader = new BsonReader(new BobBufferBobBsonBuffer(buffer, 0, buffer.length));
+    var reader = new BsonReaderStack(new BobBufferBobBsonBuffer(buffer, 0, buffer.length));
     var result = bobBson.deserialise(AliasTest.class, reader);
     assertEquals("a value", result.getNames());
   }
@@ -39,7 +39,7 @@ public class ReflectionDecodingTest {
     var bobBson = new BobBson();
     bobBson.registerFactory(new ObjectConverterFactory());
 
-    var reader = new BsonReader(new BobBufferBobBsonBuffer(buffer, 0, buffer.length));
+    var reader = new BsonReaderStack(new BobBufferBobBsonBuffer(buffer, 0, buffer.length));
     var result = bobBson.deserialise(CustomConverterTest.class, reader);
     assertEquals("custom: a value", result.getNames());
   }

@@ -16,7 +16,7 @@ public class VerificationTest {
   public void verification() throws Exception {
     var bson = "10000000016400120000000000F87F00";
     BsonReader reader =
-        new BsonReader(
+        new BsonReaderStack(
             ByteBuffer.wrap(BaseEncoding.base16().decode(bson.toUpperCase()))
                 .order(ByteOrder.LITTLE_ENDIAN));
     BobBson bobBson = new BobBson();

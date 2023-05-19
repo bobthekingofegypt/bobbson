@@ -32,7 +32,7 @@ public class DelegateObjectTest {
 
     buffer.release();
 
-    var reader = new BsonReader(new BobBufferBobBsonBuffer(data, 0, data.length));
+    var reader = new BsonReaderStack(new BobBufferBobBsonBuffer(data, 0, data.length));
     var result = bobBson.deserialise(DelegateObject.class, reader);
 
     assertEquals(sut, result);

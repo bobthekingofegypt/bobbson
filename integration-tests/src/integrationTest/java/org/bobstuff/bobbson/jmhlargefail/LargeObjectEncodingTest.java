@@ -29,7 +29,7 @@ public class LargeObjectEncodingTest {
 
     buffer.release();
 
-    var reader = new BsonReader(new BobBufferBobBsonBuffer(data, 0, data.length));
+    var reader = new BsonReaderStack(new BobBufferBobBsonBuffer(data, 0, data.length));
     var result = bobBson.deserialise(LargeObject.class, reader);
 
     assertEquals(obj, result);
@@ -59,7 +59,7 @@ public class LargeObjectEncodingTest {
     BobBson bobBson2 = new BobBson();
     //        var reader = new BsonReader(new BobBufferBobBsonBuffer(data, 0, data.length));
     //        var result = bobBson2.deserialise(LargeObject.class, reader);
-    var reader = new BsonReader(new BobBufferBobBsonBuffer(data, 0, data.length));
+    var reader = new BsonReaderStack(new BobBufferBobBsonBuffer(data, 0, data.length));
     var result = bobBson.deserialise(LargeObject.class, reader);
 
     assertEquals(obj, result);

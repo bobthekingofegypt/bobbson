@@ -80,7 +80,7 @@ public class BobBsonTest {
   public void testDeserialise() throws Exception {
     var converter = Mockito.mock(BobBsonConverter.class);
     var factory = Mockito.mock(BobBsonConverterFactory.class);
-    var reader = Mockito.mock(BsonReader.class);
+    var reader = Mockito.mock(BsonReaderStack.class);
     Mockito.when(factory.tryCreate(Mockito.eq(URL.class), Mockito.any(BobBson.class)))
         .thenReturn(converter);
 
@@ -96,7 +96,7 @@ public class BobBsonTest {
 
   @Test
   public void testDeserialiseNull() throws Exception {
-    var reader = Mockito.mock(BsonReader.class);
+    var reader = Mockito.mock(BsonReaderStack.class);
 
     var sut = new BobBson();
 

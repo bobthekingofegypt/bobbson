@@ -33,7 +33,7 @@ public class BsonDocumentConverterWriteTest {
     os.close();
     byte[] bytes = os.toByteArray();
 
-    BsonReader reader = new BsonReader(ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN));
+    BsonReader reader = new BsonReaderStack(ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN));
 
     reader.readStartDocument();
     reader.readBsonType();

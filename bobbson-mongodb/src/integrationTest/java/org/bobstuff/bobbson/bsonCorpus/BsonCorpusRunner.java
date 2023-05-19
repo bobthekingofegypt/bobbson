@@ -31,7 +31,7 @@ public class BsonCorpusRunner {
     ByteBuffer readBuffer =
         ByteBuffer.wrap(BaseEncoding.base16().decode(decodeErrorCase.getBson().toUpperCase()))
             .order(ByteOrder.LITTLE_ENDIAN);
-    BsonReader reader = new BsonReader(readBuffer);
+    BsonReader reader = new BsonReaderStack(readBuffer);
     BobBson bobBson = new BobBson();
     BsonValueConverters.register(bobBson);
 
@@ -65,7 +65,7 @@ public class BsonCorpusRunner {
     ByteBuffer readBuffer =
         ByteBuffer.wrap(BaseEncoding.base16().decode(canonicalBson.toUpperCase()))
             .order(ByteOrder.LITTLE_ENDIAN);
-    BsonReader reader = new BsonReader(readBuffer);
+    BsonReader reader = new BsonReaderStack(readBuffer);
     BobBson bobBson = new BobBson();
     BsonValueConverters.register(bobBson);
 

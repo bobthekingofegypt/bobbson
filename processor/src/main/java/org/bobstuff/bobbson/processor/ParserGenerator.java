@@ -213,7 +213,7 @@ public class ParserGenerator {
 
   protected CodeBlock generateParserCollectionCode(Class<?> clazz, AttributeResult attribute) {
     return CodeBlock.builder()
-        .addStatement("var list = new $T<$N>()", clazz, attribute.getParam())
+        .addStatement("var list = new $T<$N>(6)", clazz, attribute.getParam())
         .addStatement("reader.readStartArray()")
         .addStatement("var type_i = $T.NOT_SET", BsonType.class)
         .beginControlFlow(
@@ -244,9 +244,67 @@ public class ParserGenerator {
         .build();
   }
 
+  protected CodeBlock generateParserFastPath(StructInfo structInfo) {
+    CodeBlock.Builder block = CodeBlock.builder();
+    block.addStatement("type = reader.readBsonType()");
+    block.addStatement("var range = reader.getFieldName()");
+
+    var first = true;
+    for (var entry : structInfo.attributes.entrySet()) {
+      var attribute = entry.getValue();
+      var attributeName = entry.getKey();
+      String fieldName = attribute.getConverterFieldName();
+
+      if (fieldName == null) {
+        throw new RuntimeException("broken fieldName is null");
+      }
+
+      int hash = HashUtils.generateHash(attribute.getAliasName());
+
+      block.beginControlFlow("if (!range.equalsArray($NBytes, $L))", attributeName, hash);
+      block.addStatement("readSlow(reader, result, type)");
+      block.addStatement("return result");
+      block.endControlFlow();
+
+
+
+      if (attribute.isList() && attribute.getConverterType() == null) {
+        block.add(generateParserCollectionCode(ArrayList.class, attribute));
+      } else if (attribute.isSet() && attribute.getConverterType() == null) {
+        block.add(generateParserCollectionCode(HashSet.class, attribute));
+      } else if (attribute.isMap() && attribute.getConverterType() == null) {
+        block.add(generateParserMapCode(attribute));
+      } else if (attribute.isPrimitive()) {
+        if (attribute.getDeclaredType().getKind() == TypeKind.INT) {
+          block.addStatement("result.$N($T.parseInteger(reader))", attribute.writeMethod.getSimpleName(), PrimitiveConverters.class);
+        } else if (attribute.getDeclaredType().getKind() == TypeKind.DOUBLE) {
+          block.addStatement("result.$N($T.parseDouble(reader))", attribute.writeMethod.getSimpleName(), PrimitiveConverters.class);
+        } else if (attribute.getDeclaredType().getKind() == TypeKind.LONG) {
+          block.addStatement("result.$N($T.parseLong(reader))", attribute.writeMethod.getSimpleName(), PrimitiveConverters.class);
+        } else if (attribute.getDeclaredType().getKind() == TypeKind.BOOLEAN) {
+          block.addStatement("result.$N($T.parseBoolean(reader))", attribute.writeMethod.getSimpleName(), PrimitiveConverters.class);
+        } else {
+          throw new RuntimeException("Attempting to read unknown primitive type " + attribute);
+        }
+      } else {
+        if (attribute.getConverterType() != null) {
+          block.addStatement(
+                  "result.$N($N.read(reader))",
+                  attribute.writeMethod.getSimpleName(),
+                  attribute.getConverterName());
+        } else {
+          block.addStatement(
+                  "result.$N($N().read(reader))", attribute.writeMethod.getSimpleName(), fieldName);
+        }
+      }
+
+      block.addStatement("type = reader.readBsonType()");
+    }
+    return block.build();
+  }
+
   protected CodeBlock generateParserCode(StructInfo structInfo) {
     CodeBlock.Builder block = CodeBlock.builder();
-    block.addStatement("var range = reader.getFieldName()");
 
     var first = true;
     for (var entry : structInfo.attributes.entrySet()) {
@@ -262,16 +320,14 @@ public class ParserGenerator {
 
       if (first) {
         block.beginControlFlow(
-            "if (!$NCheck && range.equalsArray($NBytes, $L))", attributeName, attributeName, hash);
+            "if (range.equalsArray($NBytes, $L))", attributeName, hash);
         first = false;
       } else {
         block.nextControlFlow(
-            "else if (!$NCheck && range.equalsArray($NBytes, $L))",
-            attributeName,
+            "else if (range.equalsArray($NBytes, $L))",
             attributeName,
             hash);
       }
-      block.addStatement("$NCheck = readAllValues ? false : true", attributeName);
 
       if (attribute.isList() && attribute.getConverterType() == null) {
         block.add(generateParserCollectionCode(ArrayList.class, attribute));
@@ -308,11 +364,11 @@ public class ParserGenerator {
     // block.nextControlFlow("else").addStatement("System.out.println(range.name())").addStatement("reader.skipValue()");
     block.endControlFlow();
 
-    block.beginControlFlow(
-        "if (!readAllValues && $L)", structInfo.getAttributeReadAllBooleanLogic());
-    block.addStatement("reader.skipContext()");
-    block.addStatement("break");
-    block.endControlFlow();
+//    block.beginControlFlow(
+//        "if (!readAllValues && $L)", structInfo.getAttributeReadAllBooleanLogic());
+//    block.addStatement("reader.skipContext()");
+//    block.addStatement("break");
+//    block.endControlFlow();
     return block.build();
   }
 
@@ -327,6 +383,33 @@ public class ParserGenerator {
               .build());
     }
     return fieldSpecs;
+  }
+
+  protected MethodSpec generateReadSlowMethod(StructInfo structInfo, Types types) {
+    var type = TypeName.get(structInfo.element.asType());
+    ClassName model = ClassName.get(structInfo.element);
+
+    return MethodSpec.methodBuilder("readSlow")
+        //        .addAnnotation(Nullable.class)
+        .addModifiers(Modifier.PRIVATE)
+        .addParameter(BsonReader.class, "reader")
+         .addParameter(type, "result")
+                     .addParameter(BsonType.class, "type")
+        .returns(type)
+    .addStatement("var range = reader.getFieldName()")
+//        .addCode(generateParserPreamble(structInfo, types))
+//        .beginControlFlow(
+//            "while ((type = reader.readBsonType()) != $T" + END_OF_DOCUMENT_POST + ")",
+//            BsonType.class)
+        .addCode(generateParserCode(structInfo))
+
+        .beginControlFlow(
+            "while ((type = reader.readBsonType()) != $T" + END_OF_DOCUMENT_POST + ")",
+            BsonType.class)
+         .addCode(generateParserCode(structInfo))
+        .endControlFlow()
+        .addStatement("return result")
+        .build();
   }
 
   protected MethodSpec generateReadMethod(StructInfo structInfo, Types types) {
@@ -348,12 +431,13 @@ public class ParserGenerator {
         .addStatement("reader.readStartDocument()")
         .endControlFlow()
         .addStatement("var type = $T.NOT_SET", BsonType.class)
-        .addCode(generateParserPreamble(structInfo, types))
-        .beginControlFlow(
-            "while ((type = reader.readBsonType()) != $T" + END_OF_DOCUMENT_POST + ")",
-            BsonType.class)
-        .addCode(generateParserCode(structInfo))
-        .endControlFlow()
+        .addCode(generateParserFastPath(structInfo))
+//        .addCode(generateParserPreamble(structInfo, types))
+//        .beginControlFlow(
+//            "while ((type = reader.readBsonType()) != $T" + END_OF_DOCUMENT_POST + ")",
+//            BsonType.class)
+//        .addCode(generateParserCode(structInfo))
+//        .endControlFlow()
         .beginControlFlow("if (readEnvolope)")
         .addStatement("reader.readEndDocument()")
         .endControlFlow()
@@ -447,6 +531,7 @@ public class ParserGenerator {
                     .addParameter(BobBson.class, "bobBson")
                     .addStatement("this.bobBson = bobBson")
                     .build())
+                .addMethod(generateReadSlowMethod(structInfo, types))
             .addMethod(readMethod)
             .addMethod(writeMethod)
             .addMethod(writeMethodWithKey)

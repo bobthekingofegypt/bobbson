@@ -5,7 +5,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.nio.charset.StandardCharsets;
-import org.bobstuff.bobbson.BsonReader;
+
+import org.bobstuff.bobbson.BsonReaderStack;
 import org.bobstuff.bobbson.BsonType;
 import org.bobstuff.bobbson.writer.BsonWriter;
 import org.junit.jupiter.api.Test;
@@ -14,7 +15,7 @@ import org.mockito.Mockito;
 public class DoubleBsonConvererTest {
   @Test
   public void testReadHandlesNull() {
-    var reader = Mockito.mock(BsonReader.class);
+    var reader = Mockito.mock(BsonReaderStack.class);
     when(reader.getCurrentBsonType()).thenReturn(BsonType.NULL);
 
     var sut = new DoubleBsonConverter();
@@ -26,7 +27,7 @@ public class DoubleBsonConvererTest {
 
   @Test
   public void testReadHandlesDouble() {
-    var reader = Mockito.mock(BsonReader.class);
+    var reader = Mockito.mock(BsonReaderStack.class);
     when(reader.getCurrentBsonType()).thenReturn(BsonType.DOUBLE);
     when(reader.readDouble()).thenReturn(2.4);
 
@@ -36,7 +37,7 @@ public class DoubleBsonConvererTest {
 
   @Test
   public void testReadHandlesInt32() {
-    var reader = Mockito.mock(BsonReader.class);
+    var reader = Mockito.mock(BsonReaderStack.class);
     when(reader.getCurrentBsonType()).thenReturn(BsonType.INT32);
     when(reader.readInt32()).thenReturn(2);
 
@@ -46,7 +47,7 @@ public class DoubleBsonConvererTest {
 
   @Test
   public void testReadHandlesInt64() {
-    var reader = Mockito.mock(BsonReader.class);
+    var reader = Mockito.mock(BsonReaderStack.class);
     when(reader.getCurrentBsonType()).thenReturn(BsonType.INT64);
     when(reader.readInt64()).thenReturn(25L);
 
@@ -56,7 +57,7 @@ public class DoubleBsonConvererTest {
 
   @Test
   public void testReadThrowsOnIncompatibleType() {
-    var reader = Mockito.mock(BsonReader.class);
+    var reader = Mockito.mock(BsonReaderStack.class);
     when(reader.getCurrentBsonType()).thenReturn(BsonType.STRING);
 
     var sut = new DoubleBsonConverter();

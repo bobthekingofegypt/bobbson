@@ -84,7 +84,7 @@ public class ObjectConverterFactoryTest {
     bsonWriter.writeInteger("age", 23);
     bsonWriter.writeEndDocument();
 
-    var reader = new BsonReader(buffer);
+    var reader = new BsonReaderStack(buffer);
 
     var result = (BasicTypes) converter.read(reader);
     assertEquals("bob", result.getName());
@@ -106,7 +106,7 @@ public class ObjectConverterFactoryTest {
     var bsonWriter = new BsonWriter(buffer);
     converter.write(bsonWriter, testModel);
 
-    var reader = new BsonReader(buffer);
+    var reader = new BsonReaderStack(buffer);
     reader.readStartDocument();
     assertEquals(BsonType.STRING, reader.readBsonType());
     assertEquals("other", reader.getFieldName().name());

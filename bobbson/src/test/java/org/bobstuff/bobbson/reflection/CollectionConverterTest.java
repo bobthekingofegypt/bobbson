@@ -7,7 +7,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.bobstuff.bobbson.BsonReader;
+
+import org.bobstuff.bobbson.BsonReaderStack;
 import org.bobstuff.bobbson.buffer.BobBufferBobBsonBuffer;
 import org.bobstuff.bobbson.converters.IntegerBsonConverter;
 import org.bobstuff.bobbson.writer.BsonWriter;
@@ -30,7 +31,7 @@ public class CollectionConverterTest {
     bsonWriter.writeEndArray();
     bsonWriter.writeEndDocument();
 
-    var reader = new BsonReader(buffer);
+    var reader = new BsonReaderStack(buffer);
     reader.readStartDocument();
     reader.readBsonType();
 
@@ -55,7 +56,7 @@ public class CollectionConverterTest {
     bsonWriter.writeEndArray();
     bsonWriter.writeEndDocument();
 
-    var reader = new BsonReader(buffer);
+    var reader = new BsonReaderStack(buffer);
     reader.readStartDocument();
     reader.readBsonType();
 

@@ -68,7 +68,7 @@ public class Main {
 
     BobBson bobBson = new BobBson();
     Person person =
-        bobBson.deserialise(Person.class, new BsonReader(new ByteBufferBobBsonBuffer(buffer)));
+        bobBson.deserialise(Person.class, new BsonReaderStack(new ByteBufferBobBsonBuffer(buffer)));
     System.out.println(person);
 
     BasicObject bo = new BasicObject();
@@ -108,7 +108,7 @@ public class Main {
 
     BasicObject bo2 =
         bobBson.deserialise(
-            BasicObject.class, new BsonReader(new ByteBufferBobBsonBuffer(bas.toByteArray())));
+            BasicObject.class, new BsonReaderStack(new ByteBufferBobBsonBuffer(bas.toByteArray())));
     System.out.println(bo2);
 
     testPersonSerializeThenDeserialise();
@@ -157,7 +157,7 @@ public class Main {
 
     Person p2 =
         bobBson.deserialise(
-            Person.class, new BsonReader(new ByteBufferBobBsonBuffer(bas.toByteArray())));
+            Person.class, new BsonReaderStack(new ByteBufferBobBsonBuffer(bas.toByteArray())));
     System.out.println(p);
     System.out.println(p2);
 

@@ -21,7 +21,7 @@ public class EnumValueTest {
 
     var bytes = buffer.toByteArray();
 
-    BsonReader reader = new BsonReader(new ByteBufferBobBsonBuffer(bytes));
+    BsonReader reader = new BsonReaderStack(new ByteBufferBobBsonBuffer(bytes));
     var result = bobBson.deserialise(EnumValue.class, reader);
     Assertions.assertEquals(beanWithEnum, result);
   }

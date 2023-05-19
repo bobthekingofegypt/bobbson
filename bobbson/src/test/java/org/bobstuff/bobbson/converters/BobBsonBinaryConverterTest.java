@@ -5,7 +5,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.bobstuff.bobbson.BobBsonBinary;
-import org.bobstuff.bobbson.BsonReader;
+import org.bobstuff.bobbson.BsonReaderStack;
 import org.bobstuff.bobbson.BsonType;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -13,7 +13,7 @@ import org.mockito.Mockito;
 public class BobBsonBinaryConverterTest {
   @Test
   public void testReadHandlesNull() {
-    var reader = Mockito.mock(BsonReader.class);
+    var reader = Mockito.mock(BsonReaderStack.class);
     when(reader.getCurrentBsonType()).thenReturn(BsonType.NULL);
 
     var sut = new BobBsonBinaryBsonConverter();
@@ -25,7 +25,7 @@ public class BobBsonBinaryConverterTest {
 
   @Test
   public void testReadHandlesBobBsonBinary() {
-    var reader = Mockito.mock(BsonReader.class);
+    var reader = Mockito.mock(BsonReaderStack.class);
     when(reader.getCurrentBsonType()).thenReturn(BsonType.BINARY);
     var result = new BobBsonBinary(new byte[4]);
     when(reader.readBinary()).thenReturn(result);
@@ -38,7 +38,7 @@ public class BobBsonBinaryConverterTest {
 
   @Test
   public void testReadHandlesWrongType() {
-    var reader = Mockito.mock(BsonReader.class);
+    var reader = Mockito.mock(BsonReaderStack.class);
     when(reader.getCurrentBsonType()).thenReturn(BsonType.STRING);
 
     var sut = new BobBsonBinaryBsonConverter();

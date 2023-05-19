@@ -18,7 +18,7 @@ public class BsonReaderTest {
     bsonWriter.writeInteger("int", 4);
     bsonWriter.writeEndDocument();
 
-    var sut = new BsonReader(buffer);
+    var sut = new BsonReaderStack(buffer);
     sut.readStartDocument();
 
     assertEquals(2, sut.getContextStack().getStack().size());
@@ -39,7 +39,7 @@ public class BsonReaderTest {
     bsonWriter.writeEndDocument();
     bsonWriter.writeEndDocument();
 
-    var sut = new BsonReader(buffer);
+    var sut = new BsonReaderStack(buffer);
     sut.readStartDocument();
     assertEquals(BsonType.DOCUMENT, sut.readBsonType());
     assertEquals("doc", sut.currentFieldName());
@@ -60,7 +60,7 @@ public class BsonReaderTest {
     bsonWriter.writeStartDocument();
     bsonWriter.writeEndDocument();
 
-    var sut = new BsonReader(buffer);
+    var sut = new BsonReaderStack(buffer);
     sut.readStartDocument();
     sut.readEndDocument();
 
@@ -81,7 +81,7 @@ public class BsonReaderTest {
     bsonWriter.writeEndDocument();
     bsonWriter.writeEndDocument();
 
-    var sut = new BsonReader(buffer);
+    var sut = new BsonReaderStack(buffer);
     sut.readStartDocument();
     assertEquals(BsonType.DOCUMENT, sut.readBsonType());
     assertEquals("doc", sut.currentFieldName());
@@ -109,7 +109,7 @@ public class BsonReaderTest {
     bsonWriter.writeInteger(9);
     bsonWriter.writeEndArray();
 
-    var sut = new BsonReader(buffer);
+    var sut = new BsonReaderStack(buffer);
     sut.readStartDocument();
     assertEquals(BsonType.ARRAY, sut.readBsonType());
     assertEquals("bob", sut.currentFieldName());
@@ -134,7 +134,7 @@ public class BsonReaderTest {
     bsonWriter.writeEndArray();
     bsonWriter.writeEndDocument();
 
-    var sut = new BsonReader(buffer);
+    var sut = new BsonReaderStack(buffer);
     sut.readStartDocument();
     assertEquals(BsonType.ARRAY, sut.readBsonType());
     assertEquals("bob", sut.currentFieldName());
@@ -160,7 +160,7 @@ public class BsonReaderTest {
     bsonWriter.writeInteger("bob", 3);
     bsonWriter.writeEndDocument();
 
-    var sut = new BsonReader(buffer);
+    var sut = new BsonReaderStack(buffer);
     sut.readStartDocument();
     var context = sut.getContextStack().context;
     assertEquals(10, context.getRemaining());
@@ -176,7 +176,7 @@ public class BsonReaderTest {
     bsonWriter.writeStartDocument();
     bsonWriter.writeEndDocument();
 
-    var sut = new BsonReader(buffer);
+    var sut = new BsonReaderStack(buffer);
     sut.readStartDocument();
     var context = sut.getContextStack().context;
     assertEquals(1, context.getRemaining());
@@ -194,7 +194,7 @@ public class BsonReaderTest {
     bsonWriter.writeEndArray();
     bsonWriter.writeEndDocument();
 
-    var sut = new BsonReader(buffer);
+    var sut = new BsonReaderStack(buffer);
     sut.readStartDocument();
     sut.readBsonType();
     sut.readStartArray();
@@ -214,7 +214,7 @@ public class BsonReaderTest {
     bsonWriter.writeEndArray();
     bsonWriter.writeEndDocument();
 
-    var sut = new BsonReader(buffer);
+    var sut = new BsonReaderStack(buffer);
     sut.readStartDocument();
     sut.readBsonType();
 
@@ -234,7 +234,7 @@ public class BsonReaderTest {
     bsonWriter.writeEndArray();
     bsonWriter.writeEndDocument();
 
-    var sut = new BsonReader(buffer);
+    var sut = new BsonReaderStack(buffer);
     sut.readStartDocument();
     sut.readBsonType();
     assertEquals(13, sut.getContextStack().getRemaining());
@@ -260,7 +260,7 @@ public class BsonReaderTest {
     bsonWriter.writeBoolean("bool2", false);
     bsonWriter.writeEndDocument();
 
-    var sut = new BsonReader(buffer);
+    var sut = new BsonReaderStack(buffer);
     sut.readStartDocument();
     assertEquals(BsonType.BOOLEAN, sut.readBsonType());
     assertEquals("bool1", sut.currentFieldName());
@@ -282,7 +282,7 @@ public class BsonReaderTest {
     bsonWriter.writeRegex("regex1", "/test", "g");
     bsonWriter.writeEndDocument();
 
-    var sut = new BsonReader(buffer);
+    var sut = new BsonReaderStack(buffer);
     sut.readStartDocument();
     assertEquals(BsonType.REGULAR_EXPRESSION, sut.readBsonType());
     assertEquals("regex1", sut.currentFieldName());
@@ -303,7 +303,7 @@ public class BsonReaderTest {
     bsonWriter.writeDbPointer("dbpointer", "namespace", bytes);
     bsonWriter.writeEndDocument();
 
-    var sut = new BsonReader(buffer);
+    var sut = new BsonReaderStack(buffer);
     sut.readStartDocument();
     assertEquals(BsonType.DB_POINTER, sut.readBsonType());
     assertEquals("dbpointer", sut.currentFieldName());
@@ -324,7 +324,7 @@ public class BsonReaderTest {
     bsonWriter.writeCodeWithScope("cws", "var i=0", bytes);
     bsonWriter.writeEndDocument();
 
-    var sut = new BsonReader(buffer);
+    var sut = new BsonReaderStack(buffer);
     sut.readStartDocument();
     assertEquals(BsonType.JAVASCRIPT_WITH_SCOPE, sut.readBsonType());
     assertEquals("cws", sut.currentFieldName());
@@ -345,7 +345,7 @@ public class BsonReaderTest {
     bsonWriter.writeBinary("binary", (byte) 1, bytes);
     bsonWriter.writeEndDocument();
 
-    var sut = new BsonReader(buffer);
+    var sut = new BsonReaderStack(buffer);
     sut.readStartDocument();
     assertEquals(BsonType.BINARY, sut.readBsonType());
     assertEquals("binary", sut.currentFieldName());
@@ -366,7 +366,7 @@ public class BsonReaderTest {
     bsonWriter.writeBinary("binary", (byte) 2, bytes);
     bsonWriter.writeEndDocument();
 
-    var sut = new BsonReader(buffer);
+    var sut = new BsonReaderStack(buffer);
     sut.readStartDocument();
     assertEquals(BsonType.BINARY, sut.readBsonType());
     assertEquals("binary", sut.currentFieldName());
@@ -387,7 +387,7 @@ public class BsonReaderTest {
     bsonWriter.writeObjectId("oid", bytes);
     bsonWriter.writeEndDocument();
 
-    var sut = new BsonReader(buffer);
+    var sut = new BsonReaderStack(buffer);
     sut.readStartDocument();
     assertEquals(BsonType.OBJECT_ID, sut.readBsonType());
     assertEquals("oid", sut.currentFieldName());
@@ -407,7 +407,7 @@ public class BsonReaderTest {
     bsonWriter.writeDecimal128("value", decimal);
     bsonWriter.writeEndDocument();
 
-    var sut = new BsonReader(buffer);
+    var sut = new BsonReaderStack(buffer);
     sut.readStartDocument();
     assertEquals(BsonType.DECIMAL128, sut.readBsonType());
     assertEquals("value", sut.currentFieldName());
@@ -426,7 +426,7 @@ public class BsonReaderTest {
     bsonWriter.writeString("value", "bob rocks");
     bsonWriter.writeEndDocument();
 
-    var sut = new BsonReader(buffer);
+    var sut = new BsonReaderStack(buffer);
     sut.readStartDocument();
     assertEquals(BsonType.STRING, sut.readBsonType());
     assertEquals("value", sut.currentFieldName());
@@ -445,7 +445,7 @@ public class BsonReaderTest {
     bsonWriter.writeInteger("value", 23);
     bsonWriter.writeEndDocument();
 
-    var sut = new BsonReader(buffer);
+    var sut = new BsonReaderStack(buffer);
     sut.readStartDocument();
     assertEquals(BsonType.INT32, sut.readBsonType());
     assertEquals("value", sut.currentFieldName());
@@ -464,7 +464,7 @@ public class BsonReaderTest {
     bsonWriter.writeLong("value", 64L);
     bsonWriter.writeEndDocument();
 
-    var sut = new BsonReader(buffer);
+    var sut = new BsonReaderStack(buffer);
     sut.readStartDocument();
     assertEquals(BsonType.INT64, sut.readBsonType());
     assertEquals("value", sut.currentFieldName());
@@ -484,7 +484,7 @@ public class BsonReaderTest {
     bsonWriter.writeDateTime("value", datetime);
     bsonWriter.writeEndDocument();
 
-    var sut = new BsonReader(buffer);
+    var sut = new BsonReaderStack(buffer);
     sut.readStartDocument();
     assertEquals(BsonType.DATE_TIME, sut.readBsonType());
     assertEquals("value", sut.currentFieldName());
@@ -503,7 +503,7 @@ public class BsonReaderTest {
     bsonWriter.writeNull("value");
     bsonWriter.writeEndDocument();
 
-    var sut = new BsonReader(buffer);
+    var sut = new BsonReaderStack(buffer);
     sut.readStartDocument();
     assertEquals(BsonType.NULL, sut.readBsonType());
     assertEquals("value", sut.currentFieldName());
@@ -521,7 +521,7 @@ public class BsonReaderTest {
     bsonWriter.writeUndefined("value");
     bsonWriter.writeEndDocument();
 
-    var sut = new BsonReader(buffer);
+    var sut = new BsonReaderStack(buffer);
     sut.readStartDocument();
     assertEquals(BsonType.UNDEFINED, sut.readBsonType());
     assertEquals("value", sut.currentFieldName());
@@ -539,7 +539,7 @@ public class BsonReaderTest {
     bsonWriter.writeDouble("value", 23.23);
     bsonWriter.writeEndDocument();
 
-    var sut = new BsonReader(buffer);
+    var sut = new BsonReaderStack(buffer);
     sut.readStartDocument();
     assertEquals(BsonType.DOUBLE, sut.readBsonType());
     assertEquals("value", sut.currentFieldName());
@@ -558,7 +558,7 @@ public class BsonReaderTest {
     bsonWriter.writeNull("value");
     bsonWriter.writeEndDocument();
 
-    var sut = new BsonReader(buffer);
+    var sut = new BsonReaderStack(buffer);
     sut.readStartDocument();
     sut.readBsonType();
 
@@ -577,7 +577,7 @@ public class BsonReaderTest {
     bsonWriter.writeBoolean("value", true);
     bsonWriter.writeEndDocument();
 
-    var sut = new BsonReader(buffer);
+    var sut = new BsonReaderStack(buffer);
     sut.readStartDocument();
     sut.readBsonType();
 
@@ -596,7 +596,7 @@ public class BsonReaderTest {
     bsonWriter.writeObjectId("value", new ObjectId().toByteArray());
     bsonWriter.writeEndDocument();
 
-    var sut = new BsonReader(buffer);
+    var sut = new BsonReaderStack(buffer);
     sut.readStartDocument();
     sut.readBsonType();
 
@@ -615,7 +615,7 @@ public class BsonReaderTest {
     bsonWriter.writeBinary("value", (byte) 1, new byte[12]);
     bsonWriter.writeEndDocument();
 
-    var sut = new BsonReader(buffer);
+    var sut = new BsonReaderStack(buffer);
     sut.readStartDocument();
     sut.readBsonType();
 
@@ -634,7 +634,7 @@ public class BsonReaderTest {
     bsonWriter.writeBinary("value", (byte) 2, new byte[12]);
     bsonWriter.writeEndDocument();
 
-    var sut = new BsonReader(buffer);
+    var sut = new BsonReaderStack(buffer);
     sut.readStartDocument();
     sut.readBsonType();
 
@@ -656,7 +656,7 @@ public class BsonReaderTest {
     bsonWriter.writeEndArray();
     bsonWriter.writeEndDocument();
 
-    var sut = new BsonReader(buffer);
+    var sut = new BsonReaderStack(buffer);
     sut.readStartDocument();
     sut.readBsonType();
 
@@ -679,7 +679,7 @@ public class BsonReaderTest {
             .addType(BsonType.INT32)
             .addReadUntil(5)
             .build();
-    BsonReader reader = new BsonReader(buffer);
+    BsonReader reader = new BsonReaderStack(buffer);
     reader.readStartDocument();
     reader.readBsonType();
 
@@ -697,7 +697,7 @@ public class BsonReaderTest {
             .addType(BsonType.INT64)
             .addReadUntil(5)
             .build();
-    BsonReader reader = new BsonReader(buffer);
+    BsonReader reader = new BsonReaderStack(buffer);
     reader.readStartDocument();
     reader.readBsonType();
 
@@ -717,7 +717,7 @@ public class BsonReaderTest {
             .addIntValue(10)
             .addType(BsonType.END_OF_DOCUMENT)
             .build();
-    BsonReader reader = new BsonReader(buffer);
+    BsonReader reader = new BsonReaderStack(buffer);
     reader.readStartDocument();
     reader.readBsonType();
 
@@ -736,7 +736,7 @@ public class BsonReaderTest {
             .addReadUntil(5)
             .addType(BsonType.END_OF_DOCUMENT)
             .build();
-    BsonReader reader = new BsonReader(buffer);
+    BsonReader reader = new BsonReaderStack(buffer);
     reader.readStartDocument();
     reader.readBsonType();
     reader.skipContext();
@@ -762,7 +762,7 @@ public class BsonReaderTest {
             .addIntValue(14)
             .addType(BsonType.END_OF_DOCUMENT)
             .build();
-    BsonReader reader = new BsonReader(buffer);
+    BsonReader reader = new BsonReaderStack(buffer);
     reader.readStartDocument();
     assertEquals(BsonType.DOCUMENT, reader.readBsonType());
     reader.readStartDocument();
@@ -792,7 +792,7 @@ public class BsonReaderTest {
             .addType(BsonType.END_OF_DOCUMENT)
             .addType(BsonType.END_OF_DOCUMENT)
             .build();
-    BsonReader reader = new BsonReader(buffer);
+    BsonReader reader = new BsonReaderStack(buffer);
     reader.readStartDocument();
     assertEquals(BsonType.DOCUMENT, reader.readBsonType());
     reader.readStartDocument();
@@ -826,7 +826,7 @@ public class BsonReaderTest {
             .addIntValue(14)
             .addType(BsonType.END_OF_DOCUMENT)
             .build();
-    BsonReader reader = new BsonReader(buffer);
+    BsonReader reader = new BsonReaderStack(buffer);
     reader.readStartDocument();
     assertEquals(BsonType.ARRAY, reader.readBsonType());
     reader.readStartArray();
@@ -875,7 +875,7 @@ public class BsonReaderTest {
             .addIntValue(14)
             .addType(BsonType.END_OF_DOCUMENT)
             .build();
-    BsonReader reader = new BsonReader(buffer);
+    BsonReader reader = new BsonReaderStack(buffer);
     reader.readStartDocument();
     assertEquals(BsonType.ARRAY, reader.readBsonType());
     reader.readStartArray();
@@ -925,7 +925,7 @@ public class BsonReaderTest {
             //                             .addType(BsonType.END_OF_DOCUMENT)
             .build();
 
-    BsonReader reader = new BsonReader(buffer);
+    BsonReader reader = new BsonReaderStack(buffer);
     reader.readStartDocument();
     assertEquals(BsonType.ARRAY, reader.readBsonType());
     reader.readStartArray();
