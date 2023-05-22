@@ -10,7 +10,7 @@ import org.bobstuff.bobbson.buffer.BobBufferBobBsonBuffer;
 import org.bobstuff.bobbson.reflection.CollectionConverterFactory;
 import org.bobstuff.bobbson.reflection.MapConverterFactory;
 import org.bobstuff.bobbson.reflection.ObjectConverterFactory;
-import org.bobstuff.bobbson.writer.BsonWriter;
+import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.junit.jupiter.api.Test;
 
 public class ReflectionEncodingTest {
@@ -28,7 +28,7 @@ public class ReflectionEncodingTest {
         new NoopBufferDataPool((size) -> new BobBufferBobBsonBuffer(new byte[size], 0, 0));
     DynamicBobBsonBuffer buffer = new DynamicBobBsonBuffer(pool);
 
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bobBson.serialise(simple, Simple.class, bsonWriter);
 
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -54,7 +54,7 @@ public class ReflectionEncodingTest {
         new NoopBufferDataPool((size) -> new BobBufferBobBsonBuffer(new byte[size], 0, 0));
     DynamicBobBsonBuffer buffer = new DynamicBobBsonBuffer(pool);
 
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bobBson.serialise(simple, AliasTest.class, bsonWriter);
 
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -79,7 +79,7 @@ public class ReflectionEncodingTest {
         new NoopBufferDataPool((size) -> new BobBufferBobBsonBuffer(new byte[size], 0, 0));
     DynamicBobBsonBuffer buffer = new DynamicBobBsonBuffer(pool);
 
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bobBson.serialise(simple, CustomConverterTest.class, bsonWriter);
 
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -115,7 +115,7 @@ public class ReflectionEncodingTest {
         new NoopBufferDataPool((size) -> new BobBufferBobBsonBuffer(new byte[size], 0, 0));
     DynamicBobBsonBuffer buffer = new DynamicBobBsonBuffer(pool);
 
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bobBson.serialise(simple, SimpleCollections.class, bsonWriter);
 
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -151,7 +151,7 @@ public class ReflectionEncodingTest {
         new NoopBufferDataPool((size) -> new BobBufferBobBsonBuffer(new byte[size], 0, 0));
     DynamicBobBsonBuffer buffer = new DynamicBobBsonBuffer(pool);
 
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bobBson.serialise(simple, RecursiveMaps.class, bsonWriter);
 
     ByteArrayOutputStream bos = new ByteArrayOutputStream();

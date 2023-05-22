@@ -6,7 +6,7 @@ import org.bobstuff.bobbson.BsonReaderStack;
 import org.bobstuff.bobbson.buffer.BobBufferBobBsonBuffer;
 import org.bobstuff.bobbson.converters.BsonValueConverters;
 import org.bobstuff.bobbson.utils.MDBBsonWriter;
-import org.bobstuff.bobbson.writer.BsonWriter;
+import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.bson.BsonDocument;
 import org.bson.Document;
 import org.junit.jupiter.api.Assertions;
@@ -37,7 +37,7 @@ public class DocumentConverterTest {
     document.put("name", "bob");
 
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bobBson.serialise(document, Document.class, bsonWriter);
 
     ByteArrayOutputStream bos = new ByteArrayOutputStream();

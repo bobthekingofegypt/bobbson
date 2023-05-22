@@ -8,7 +8,7 @@ import java.nio.charset.StandardCharsets;
 
 import org.bobstuff.bobbson.BsonReaderStack;
 import org.bobstuff.bobbson.BsonType;
-import org.bobstuff.bobbson.writer.BsonWriter;
+import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -46,7 +46,7 @@ public class StringBsonConverterTest {
 
   @Test
   public void testWriteString() {
-    var writer = Mockito.mock(BsonWriter.class);
+    var writer = Mockito.mock(StackBsonWriter.class);
 
     var sut = new StringBsonConverter();
     sut.write(writer, "bob", "bob");
@@ -56,7 +56,7 @@ public class StringBsonConverterTest {
 
   @Test
   public void testWriteStringNoKey() {
-    var writer = Mockito.mock(BsonWriter.class);
+    var writer = Mockito.mock(StackBsonWriter.class);
 
     var sut = new StringBsonConverter();
     sut.write(writer, "bob");
@@ -66,7 +66,7 @@ public class StringBsonConverterTest {
 
   @Test
   public void testWriteStringNullKey() {
-    var writer = Mockito.mock(BsonWriter.class);
+    var writer = Mockito.mock(StackBsonWriter.class);
 
     var sut = new StringBsonConverter();
     sut.write(writer, (byte[]) null, "bob");
@@ -76,7 +76,7 @@ public class StringBsonConverterTest {
 
   @Test
   public void testWriteStringByteKey() {
-    var writer = Mockito.mock(BsonWriter.class);
+    var writer = Mockito.mock(StackBsonWriter.class);
 
     var sut = new StringBsonConverter();
     sut.write(writer, "bob".getBytes(StandardCharsets.UTF_8), "bob");

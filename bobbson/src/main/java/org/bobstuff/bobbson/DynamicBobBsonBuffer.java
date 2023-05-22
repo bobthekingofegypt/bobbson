@@ -634,6 +634,10 @@ public class DynamicBobBsonBuffer implements BobBsonBuffer {
 
   @Override
   public byte[] toByteArray() {
+    if (buffers.size() == 1) {
+      return buffers.get(0).toByteArray();
+    }
+
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     try {
       pipe(bos);

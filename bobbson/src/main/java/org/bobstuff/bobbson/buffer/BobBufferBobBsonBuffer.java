@@ -7,6 +7,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class BobBufferBobBsonBuffer implements BobBsonBuffer {
   private BobBuffer buffer;
+  private byte[] data;
   private int start;
   public BobBsonByteRange byteRange;
 
@@ -21,15 +22,22 @@ public class BobBufferBobBsonBuffer implements BobBsonBuffer {
   public BobBufferBobBsonBuffer(byte[] data, int start, int tail) {
     buffer = new BobBuffer(data, start, tail);
     this.byteRange = new BobBsonByteRange(buffer.getArray());
+    this.data = data;
   }
 
   public BobBufferBobBsonBuffer(BobBuffer buffer) {
     this.buffer = buffer;
     this.byteRange = new BobBsonByteRange(buffer.getArray());
+    this.data = buffer.getArray();
   }
 
   public BobBuffer getBobBuffer() {
     return buffer;
+  }
+
+  public void process(byte[] data, int head, int tail) {
+    buffer = new BobBuffer(data, head, tail);
+    this.byteRange.setData(data);
   }
 
   @Override
@@ -83,7 +91,7 @@ public class BobBufferBobBsonBuffer implements BobBsonBuffer {
   //
   @Override
   public int readUntil(byte value) {
-    byte[] bufferArray = buffer.getArray();
+    byte[] bufferArray = data;
     boolean checkNext = true;
     int i = buffer.getHead();
     int start = i;

@@ -1,7 +1,8 @@
 package org.bobstuff.bobbson;
 
 import java.net.URL;
-import org.bobstuff.bobbson.writer.BsonWriter;
+
+import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -107,7 +108,7 @@ public class BobBsonTest {
   public void testSerialise() throws Exception {
     var converter = Mockito.mock(BobBsonConverter.class);
     var factory = Mockito.mock(BobBsonConverterFactory.class);
-    var writer = Mockito.mock(BsonWriter.class);
+    var writer = Mockito.mock(StackBsonWriter.class);
     Mockito.when(factory.tryCreate(Mockito.eq(URL.class), Mockito.any(BobBson.class)))
         .thenReturn(converter);
 

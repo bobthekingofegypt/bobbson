@@ -8,7 +8,7 @@ import org.bobstuff.bobbson.annotations.BsonWriterOptions;
 import org.bobstuff.bobbson.buffer.BobBufferBobBsonBuffer;
 import org.bobstuff.bobbson.converters.IntegerBsonConverter;
 import org.bobstuff.bobbson.converters.StringBsonConverter;
-import org.bobstuff.bobbson.writer.BsonWriter;
+import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -78,7 +78,7 @@ public class ObjectConverterFactoryTest {
     var converter = sut.tryCreate(BasicTypes.class, bobBson);
 
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bsonWriter.writeStartDocument();
     bsonWriter.writeString("name", "bob");
     bsonWriter.writeInteger("age", 23);
@@ -103,7 +103,7 @@ public class ObjectConverterFactoryTest {
     var testModel = new DontWriteNulls();
     testModel.setOther("othervalue");
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     converter.write(bsonWriter, testModel);
 
     var reader = new BsonReaderStack(buffer);

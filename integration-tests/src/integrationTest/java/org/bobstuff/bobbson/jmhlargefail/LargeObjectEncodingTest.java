@@ -7,6 +7,7 @@ import org.bobstuff.bobbson.*;
 import org.bobstuff.bobbson.buffer.BobBufferBobBsonBuffer;
 import org.bobstuff.bobbson.reflection.CollectionConverterFactory;
 import org.bobstuff.bobbson.reflection.ObjectConverterFactory;
+import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.junit.jupiter.api.Test;
 
 public class LargeObjectEncodingTest {
@@ -20,7 +21,7 @@ public class LargeObjectEncodingTest {
     var obj = Generator.newLargeObject();
 
     org.bobstuff.bobbson.writer.BsonWriter bsonWriter =
-        new org.bobstuff.bobbson.writer.BsonWriter(buffer);
+        new StackBsonWriter(buffer);
     bobBson.serialise(obj, LargeObject.class, bsonWriter);
 
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -47,7 +48,7 @@ public class LargeObjectEncodingTest {
     var obj = Generator.newLargeObject();
 
     org.bobstuff.bobbson.writer.BsonWriter bsonWriter =
-        new org.bobstuff.bobbson.writer.BsonWriter(buffer);
+        new StackBsonWriter(buffer);
     bobBson.serialise(obj, LargeObject.class, bsonWriter);
 
     ByteArrayOutputStream bos = new ByteArrayOutputStream();

@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream;
 import org.bobstuff.bobbson.*;
 import org.bobstuff.bobbson.buffer.BobBufferBobBsonBuffer;
 import org.bobstuff.bobbson.reflection.ObjectConverterFactory;
+import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.junit.jupiter.api.Test;
 
 public class DelegateObjectTest {
@@ -23,7 +24,7 @@ public class DelegateObjectTest {
     bobBson.registerFactory(new ObjectConverterFactory());
 
     org.bobstuff.bobbson.writer.BsonWriter bsonWriter =
-        new org.bobstuff.bobbson.writer.BsonWriter(buffer);
+        new StackBsonWriter(buffer);
     bobBson.serialise(sut, DelegateObject.class, bsonWriter);
 
     ByteArrayOutputStream bos = new ByteArrayOutputStream();

@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import org.bobstuff.bobbson.converters.BsonValueConverters;
 import org.bobstuff.bobbson.writer.BsonWriter;
+import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.bson.BsonDocument;
 import org.bson.BsonString;
 import org.junit.jupiter.api.Assertions;
@@ -20,7 +21,7 @@ public class BsonDocumentConverterWriteTest {
         new NoopBufferDataPool((size) -> new ByteBufferBobBsonBuffer(new byte[10]));
     DynamicBobBsonBuffer buffer = new DynamicBobBsonBuffer(pool);
 
-    BsonWriter writer = new BsonWriter(buffer);
+    BsonWriter writer = new StackBsonWriter(buffer);
 
     BsonDocument document = new BsonDocument();
     document.append("name", new BsonString("bob"));

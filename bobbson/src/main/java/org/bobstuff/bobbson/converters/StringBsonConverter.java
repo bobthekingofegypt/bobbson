@@ -37,4 +37,15 @@ public class StringBsonConverter implements BobBsonConverter<String> {
   public void write(@NonNull BsonWriter bsonWriter, @NonNull String value) {
     bsonWriter.writeString(value);
   }
+
+  public static @Nullable String readString(@NonNull BsonReader bsonReader) {
+    if (bsonReader.getCurrentBsonType() == BsonType.STRING) {
+      return bsonReader.readString();
+    } else if (bsonReader.getCurrentBsonType() == BsonType.NULL) {
+      bsonReader.readNull();
+      return null;
+    }
+    throw new RuntimeException(
+            "trying to read a string from something that isn't a string or a null");
+  }
 }

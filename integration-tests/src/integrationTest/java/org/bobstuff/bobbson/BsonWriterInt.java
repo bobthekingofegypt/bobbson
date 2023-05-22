@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import org.bobstuff.bobbson.writer.BsonWriter;
+import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -14,7 +15,7 @@ public class BsonWriterInt {
         new NoopBufferDataPool((size) -> new ByteBufferBobBsonBuffer(new byte[10]));
     DynamicBobBsonBuffer buffer = new DynamicBobBsonBuffer(pool);
 
-    BsonWriter writer = new BsonWriter(buffer);
+    BsonWriter writer = new StackBsonWriter(buffer);
     writer.writeStartDocument();
     writer.writeString("name", "bob");
     writer.writeEndDocument();
@@ -41,7 +42,7 @@ public class BsonWriterInt {
         new NoopBufferDataPool((size) -> new ByteBufferBobBsonBuffer(new byte[size]));
     ByteBufferBobBsonBuffer buffer = new ByteBufferBobBsonBuffer(new byte[2048]);
 
-    BsonWriter writer = new BsonWriter(buffer);
+    BsonWriter writer = new StackBsonWriter(buffer);
     writer.writeStartDocument();
     writer.writeString("name", "bob");
     writer.writeString("job", "programmer");
@@ -76,7 +77,7 @@ public class BsonWriterInt {
         new NoopBufferDataPool((size) -> new ByteBufferBobBsonBuffer(new byte[size]));
     ByteBufferBobBsonBuffer buffer = new ByteBufferBobBsonBuffer(new byte[2048]);
 
-    BsonWriter writer = new BsonWriter(buffer);
+    BsonWriter writer = new StackBsonWriter(buffer);
     writer.writeStartDocument();
     writer.writeString("name", "bob");
     writer.writeString("job", "programmer");

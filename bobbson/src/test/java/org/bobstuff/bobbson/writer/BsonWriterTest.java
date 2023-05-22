@@ -17,7 +17,7 @@ public class BsonWriterTest {
   public void setUp() {
     buffer = new byte[1000];
     bsonBuffer = new ByteBufferBobBsonBuffer(buffer);
-    writer = new BsonWriter(bsonBuffer);
+    writer = new StackBsonWriter(bsonBuffer);
     writer.writeStartDocument();
   }
 

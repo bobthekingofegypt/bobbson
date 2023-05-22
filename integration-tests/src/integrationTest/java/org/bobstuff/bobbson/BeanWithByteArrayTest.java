@@ -2,6 +2,7 @@ package org.bobstuff.bobbson;
 
 import java.io.ByteArrayOutputStream;
 import org.bobstuff.bobbson.writer.BsonWriter;
+import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -15,7 +16,7 @@ public class BeanWithByteArrayTest {
 
     var id = new ObjectId().toByteArray();
 
-    BsonWriter writer = new BsonWriter(buffer);
+    BsonWriter writer = new StackBsonWriter(buffer);
     writer.writeStartDocument();
     writer.writeObjectId("key", id);
     writer.writeEndDocument();

@@ -17,6 +17,7 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import org.bobstuff.bobbson.*;
 import org.bobstuff.bobbson.converters.PrimitiveConverters;
+import org.bobstuff.bobbson.converters.StringBsonConverter;
 import org.bobstuff.bobbson.writer.BsonWriter;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -213,7 +214,7 @@ public class ParserGenerator {
 
   protected CodeBlock generateParserCollectionCode(Class<?> clazz, AttributeResult attribute) {
     return CodeBlock.builder()
-        .addStatement("var list = new $T<$N>(6)", clazz, attribute.getParam())
+        .addStatement("var list = new $T<$N>(4)", clazz, attribute.getParam())
         .addStatement("reader.readStartArray()")
         .addStatement("var type_i = $T.NOT_SET", BsonType.class)
         .beginControlFlow(
@@ -347,6 +348,10 @@ public class ParserGenerator {
         } else {
           throw new RuntimeException("Attempting to read unknown primitive type " + attribute);
         }
+      } else if (ClassName.get(attribute.getType()).toString().equals("java.lang.String")) {
+        block.addStatement(
+                "result.$N($T.readString(reader))", attribute.writeMethod.getSimpleName(),
+                StringBsonConverter.class);
       } else {
         if (attribute.getConverterType() != null) {
           block.addStatement(

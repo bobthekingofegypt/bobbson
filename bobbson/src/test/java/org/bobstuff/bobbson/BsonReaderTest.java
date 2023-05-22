@@ -3,7 +3,7 @@ package org.bobstuff.bobbson;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.bobstuff.bobbson.buffer.BobBufferBobBsonBuffer;
-import org.bobstuff.bobbson.writer.BsonWriter;
+import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
@@ -13,7 +13,7 @@ public class BsonReaderTest {
   @Test
   public void testReadStartDocument() {
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bsonWriter.writeStartDocument();
     bsonWriter.writeInteger("int", 4);
     bsonWriter.writeEndDocument();
@@ -32,7 +32,7 @@ public class BsonReaderTest {
   @Test
   public void testReadStartDocumentEmbeddedDoc() {
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bsonWriter.writeStartDocument();
     bsonWriter.writeStartDocument("doc");
     bsonWriter.writeInteger("int", 4);
@@ -56,7 +56,7 @@ public class BsonReaderTest {
   @Test
   public void testReadEndDocument() {
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bsonWriter.writeStartDocument();
     bsonWriter.writeEndDocument();
 
@@ -74,7 +74,7 @@ public class BsonReaderTest {
   @Test
   public void testReadEndDocumentEmbeddedDoc() {
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bsonWriter.writeStartDocument();
     bsonWriter.writeStartDocument("doc");
     bsonWriter.writeInteger("int", 4);
@@ -102,7 +102,7 @@ public class BsonReaderTest {
   @Test
   public void testReadStartArray() {
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bsonWriter.writeStartDocument();
     bsonWriter.writeStartArray("bob");
     bsonWriter.writeInteger(3);
@@ -126,7 +126,7 @@ public class BsonReaderTest {
   @Test
   public void testReadEndArray() {
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bsonWriter.writeStartDocument();
     bsonWriter.writeStartArray("bob");
     bsonWriter.writeInteger(3);
@@ -155,7 +155,7 @@ public class BsonReaderTest {
   @Test
   public void testReadBsonType() {
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bsonWriter.writeStartDocument();
     bsonWriter.writeInteger("bob", 3);
     bsonWriter.writeEndDocument();
@@ -172,7 +172,7 @@ public class BsonReaderTest {
   @Test
   public void testReadBsonTypeEOD() {
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bsonWriter.writeStartDocument();
     bsonWriter.writeEndDocument();
 
@@ -188,7 +188,7 @@ public class BsonReaderTest {
   @Test
   public void testReadBsonTypeEndOfArray() {
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bsonWriter.writeStartDocument();
     bsonWriter.writeStartArray("data");
     bsonWriter.writeEndArray();
@@ -208,7 +208,7 @@ public class BsonReaderTest {
   @Test
   public void testFieldNameRead() {
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bsonWriter.writeStartDocument();
     bsonWriter.writeStartArray("data");
     bsonWriter.writeEndArray();
@@ -227,7 +227,7 @@ public class BsonReaderTest {
   @Test
   public void testGetCurrentBsonType() {
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bsonWriter.writeStartDocument();
     bsonWriter.writeStartArray("data");
     bsonWriter.writeInteger(6);
@@ -254,7 +254,7 @@ public class BsonReaderTest {
   @Test
   public void testReadBoolean() {
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bsonWriter.writeStartDocument();
     bsonWriter.writeBoolean("bool1", true);
     bsonWriter.writeBoolean("bool2", false);
@@ -277,7 +277,7 @@ public class BsonReaderTest {
   @Test
   public void testReadRegex() {
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bsonWriter.writeStartDocument();
     bsonWriter.writeRegex("regex1", "/test", "g");
     bsonWriter.writeEndDocument();
@@ -297,7 +297,7 @@ public class BsonReaderTest {
   @Test
   public void testReadDbPointer() {
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bsonWriter.writeStartDocument();
     var bytes = new ObjectId().toByteArray();
     bsonWriter.writeDbPointer("dbpointer", "namespace", bytes);
@@ -318,7 +318,7 @@ public class BsonReaderTest {
   @Test
   public void testReadCodeWithScope() {
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bsonWriter.writeStartDocument();
     var bytes = new ObjectId().toByteArray();
     bsonWriter.writeCodeWithScope("cws", "var i=0", bytes);
@@ -339,7 +339,7 @@ public class BsonReaderTest {
   @Test
   public void testReadBinary() {
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bsonWriter.writeStartDocument();
     var bytes = new ObjectId().toByteArray();
     bsonWriter.writeBinary("binary", (byte) 1, bytes);
@@ -360,7 +360,7 @@ public class BsonReaderTest {
   @Test
   public void testReadBinarySpecialCaseOldBinary() {
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bsonWriter.writeStartDocument();
     var bytes = new ObjectId().toByteArray();
     bsonWriter.writeBinary("binary", (byte) 2, bytes);
@@ -381,7 +381,7 @@ public class BsonReaderTest {
   @Test
   public void testReadObjectId() {
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bsonWriter.writeStartDocument();
     var bytes = new ObjectId().toByteArray();
     bsonWriter.writeObjectId("oid", bytes);
@@ -401,7 +401,7 @@ public class BsonReaderTest {
   @Test
   public void testReadDecimal128() {
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bsonWriter.writeStartDocument();
     var decimal = new Decimal128(123);
     bsonWriter.writeDecimal128("value", decimal);
@@ -421,7 +421,7 @@ public class BsonReaderTest {
   @Test
   public void testReadString() {
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bsonWriter.writeStartDocument();
     bsonWriter.writeString("value", "bob rocks");
     bsonWriter.writeEndDocument();
@@ -440,7 +440,7 @@ public class BsonReaderTest {
   @Test
   public void testReadInt32() {
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bsonWriter.writeStartDocument();
     bsonWriter.writeInteger("value", 23);
     bsonWriter.writeEndDocument();
@@ -459,7 +459,7 @@ public class BsonReaderTest {
   @Test
   public void testReadInt64() {
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bsonWriter.writeStartDocument();
     bsonWriter.writeLong("value", 64L);
     bsonWriter.writeEndDocument();
@@ -478,7 +478,7 @@ public class BsonReaderTest {
   @Test
   public void testReadDateTime() {
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bsonWriter.writeStartDocument();
     var datetime = System.currentTimeMillis();
     bsonWriter.writeDateTime("value", datetime);
@@ -498,7 +498,7 @@ public class BsonReaderTest {
   @Test
   public void testReadNull() {
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bsonWriter.writeStartDocument();
     bsonWriter.writeNull("value");
     bsonWriter.writeEndDocument();
@@ -516,7 +516,7 @@ public class BsonReaderTest {
   @Test
   public void testReadUndefined() {
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bsonWriter.writeStartDocument();
     bsonWriter.writeUndefined("value");
     bsonWriter.writeEndDocument();
@@ -534,7 +534,7 @@ public class BsonReaderTest {
   @Test
   public void testReadDouble() {
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bsonWriter.writeStartDocument();
     bsonWriter.writeDouble("value", 23.23);
     bsonWriter.writeEndDocument();
@@ -553,7 +553,7 @@ public class BsonReaderTest {
   @Test
   public void testSkipNull() {
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bsonWriter.writeStartDocument();
     bsonWriter.writeNull("value");
     bsonWriter.writeEndDocument();
@@ -572,7 +572,7 @@ public class BsonReaderTest {
   @Test
   public void testSkipBoolean() {
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bsonWriter.writeStartDocument();
     bsonWriter.writeBoolean("value", true);
     bsonWriter.writeEndDocument();
@@ -591,7 +591,7 @@ public class BsonReaderTest {
   @Test
   public void testSkipObjectId() {
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bsonWriter.writeStartDocument();
     bsonWriter.writeObjectId("value", new ObjectId().toByteArray());
     bsonWriter.writeEndDocument();
@@ -610,7 +610,7 @@ public class BsonReaderTest {
   @Test
   public void testSkipBinary() {
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bsonWriter.writeStartDocument();
     bsonWriter.writeBinary("value", (byte) 1, new byte[12]);
     bsonWriter.writeEndDocument();
@@ -629,7 +629,7 @@ public class BsonReaderTest {
   @Test
   public void testSkipBinaryOldType() {
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bsonWriter.writeStartDocument();
     bsonWriter.writeBinary("value", (byte) 2, new byte[12]);
     bsonWriter.writeEndDocument();
@@ -648,7 +648,7 @@ public class BsonReaderTest {
   @Test
   public void testSkipArray() {
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bsonWriter.writeStartDocument();
     bsonWriter.writeStartArray("bob");
     bsonWriter.writeInteger(3);

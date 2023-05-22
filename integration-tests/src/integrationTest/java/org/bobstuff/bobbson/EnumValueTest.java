@@ -1,6 +1,7 @@
 package org.bobstuff.bobbson;
 
 import org.bobstuff.bobbson.writer.BsonWriter;
+import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
@@ -16,7 +17,7 @@ public class EnumValueTest {
     var beanWithEnum = new EnumValue();
     beanWithEnum.setValue(EnumValue.AnEnum.VALUE_ONE);
 
-    BsonWriter writer = new BsonWriter(buffer);
+    BsonWriter writer = new StackBsonWriter(buffer);
     bobBson.serialise(beanWithEnum, EnumValue.class, writer);
 
     var bytes = buffer.toByteArray();

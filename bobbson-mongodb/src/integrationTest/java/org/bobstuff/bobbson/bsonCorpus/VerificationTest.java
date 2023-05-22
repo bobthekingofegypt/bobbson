@@ -7,6 +7,7 @@ import java.nio.ByteOrder;
 import org.bobstuff.bobbson.*;
 import org.bobstuff.bobbson.converters.BsonValueConverters;
 import org.bobstuff.bobbson.writer.BsonWriter;
+import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.bson.BsonDocument;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -28,7 +29,7 @@ public class VerificationTest {
     BufferDataPool pool =
         new NoopBufferDataPool((size) -> new ByteBufferBobBsonBuffer(new byte[size]));
     DynamicBobBsonBuffer buffer = new DynamicBobBsonBuffer(pool);
-    BsonWriter writer = new BsonWriter(buffer);
+    BsonWriter writer = new StackBsonWriter(buffer);
 
     bobBson.serialise(document, BsonDocument.class, writer);
 

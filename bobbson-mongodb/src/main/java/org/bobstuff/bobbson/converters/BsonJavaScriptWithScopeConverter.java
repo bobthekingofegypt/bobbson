@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import org.bobstuff.bobbson.*;
 import org.bobstuff.bobbson.writer.BsonWriter;
+import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.bson.BsonDocument;
 import org.bson.BsonJavaScriptWithScope;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -46,7 +47,7 @@ public class BsonJavaScriptWithScopeConverter implements BobBsonConverter<BsonJa
     BufferDataPool pool =
         new NoopBufferDataPool((size) -> new ByteBufferBobBsonBuffer(new byte[size]));
     DynamicBobBsonBuffer buffer = new DynamicBobBsonBuffer(pool);
-    BsonWriter writer = new BsonWriter(buffer);
+    BsonWriter writer = new StackBsonWriter(buffer);
 
     byte[] scopeBytes;
 
@@ -77,7 +78,7 @@ public class BsonJavaScriptWithScopeConverter implements BobBsonConverter<BsonJa
     BufferDataPool pool =
         new NoopBufferDataPool((size) -> new ByteBufferBobBsonBuffer(new byte[size]));
     DynamicBobBsonBuffer buffer = new DynamicBobBsonBuffer(pool);
-    BsonWriter writer = new BsonWriter(buffer);
+    BsonWriter writer = new StackBsonWriter(buffer);
 
     byte[] scopeBytes;
 

@@ -11,7 +11,7 @@ import java.util.Set;
 import org.bobstuff.bobbson.BsonReaderStack;
 import org.bobstuff.bobbson.buffer.BobBufferBobBsonBuffer;
 import org.bobstuff.bobbson.converters.IntegerBsonConverter;
-import org.bobstuff.bobbson.writer.BsonWriter;
+import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.junit.jupiter.api.Test;
 
 public class CollectionConverterTest {
@@ -23,7 +23,7 @@ public class CollectionConverterTest {
             List.class, ArrayList::new, new IntegerBsonConverter());
 
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bsonWriter.writeStartDocument();
     bsonWriter.writeStartArray("bob");
     bsonWriter.writeInteger(3);
@@ -48,7 +48,7 @@ public class CollectionConverterTest {
             Set.class, HashSet::new, new IntegerBsonConverter());
 
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
-    var bsonWriter = new BsonWriter(buffer);
+    var bsonWriter = new StackBsonWriter(buffer);
     bsonWriter.writeStartDocument();
     bsonWriter.writeStartArray("bob");
     bsonWriter.writeInteger(3);

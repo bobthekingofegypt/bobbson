@@ -6,7 +6,7 @@ import org.bobstuff.bobbson.annotations.BsonAttribute;
 import org.bobstuff.bobbson.annotations.BsonConverter;
 import org.bobstuff.bobbson.buffer.BobBufferBobBsonBuffer;
 import org.bobstuff.bobbson.reflection.ObjectConverterFactory;
-import org.bobstuff.bobbson.writer.BsonWriter;
+import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.junit.jupiter.api.Test;
 
 public class ReflectionDecodingTest {
@@ -14,7 +14,7 @@ public class ReflectionDecodingTest {
   public void testAlias() throws Exception {
     var buffer = new byte[1000];
     var bsonBuffer = new ByteBufferBobBsonBuffer(buffer);
-    var writer = new BsonWriter(bsonBuffer);
+    var writer = new StackBsonWriter(bsonBuffer);
     writer.writeStartDocument();
     writer.writeString("notnames", "a value");
     writer.writeEndDocument();
@@ -31,7 +31,7 @@ public class ReflectionDecodingTest {
   public void testCustomConverterDecode() throws Exception {
     var buffer = new byte[1000];
     var bsonBuffer = new ByteBufferBobBsonBuffer(buffer);
-    var writer = new BsonWriter(bsonBuffer);
+    var writer = new StackBsonWriter(bsonBuffer);
     writer.writeStartDocument();
     writer.writeString("names", "a value");
     writer.writeEndDocument();
