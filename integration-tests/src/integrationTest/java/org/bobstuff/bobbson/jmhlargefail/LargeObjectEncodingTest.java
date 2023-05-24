@@ -5,6 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.ByteArrayOutputStream;
 import org.bobstuff.bobbson.*;
 import org.bobstuff.bobbson.buffer.BobBufferBobBsonBuffer;
+import org.bobstuff.bobbson.buffer.DynamicBobBsonBuffer;
+import org.bobstuff.bobbson.buffer.pool.BobBsonBufferPool;
+import org.bobstuff.bobbson.buffer.pool.NoopBobBsonBufferPool;
 import org.bobstuff.bobbson.reflection.CollectionConverterFactory;
 import org.bobstuff.bobbson.reflection.ObjectConverterFactory;
 import org.bobstuff.bobbson.writer.StackBsonWriter;
@@ -13,8 +16,8 @@ import org.junit.jupiter.api.Test;
 public class LargeObjectEncodingTest {
   @Test
   public void testEncodingSucceeds() throws Exception {
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new BobBufferBobBsonBuffer(new byte[size], 0, 0));
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new BobBufferBobBsonBuffer(new byte[size], 0, 0));
     DynamicBobBsonBuffer buffer = new DynamicBobBsonBuffer(pool);
     BobBson bobBson = new BobBson();
 
@@ -37,8 +40,8 @@ public class LargeObjectEncodingTest {
 
   @Test
   public void testRelfectionEncodingSucceeds() throws Exception {
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new BobBufferBobBsonBuffer(new byte[size], 0, 0));
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new BobBufferBobBsonBuffer(new byte[size], 0, 0));
     DynamicBobBsonBuffer buffer = new DynamicBobBsonBuffer(pool);
     BobBson bobBson = new BobBson(new BobBsonConfig(false));
     bobBson.registerFactory(new CollectionConverterFactory());

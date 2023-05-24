@@ -7,6 +7,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import org.bobstuff.bobbson.buffer.ByteBufferBobBsonBuffer;
+import org.bobstuff.bobbson.buffer.DynamicBobBsonBuffer;
+import org.bobstuff.bobbson.buffer.pool.BobBsonBufferPool;
+import org.bobstuff.bobbson.buffer.pool.NoopBobBsonBufferPool;
 import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.bson.BsonBinaryWriter;
 import org.bson.io.BasicOutputBuffer;
@@ -93,8 +97,8 @@ public class Main {
     qualification.setType("Computer Science");
     bo.setQualification(qualification);
 
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new ByteBufferBobBsonBuffer(new byte[size]));
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new ByteBufferBobBsonBuffer(new byte[size]));
     DynamicBobBsonBuffer dynamicBuffer = new DynamicBobBsonBuffer(pool);
 
     org.bobstuff.bobbson.writer.BsonWriter bsonWriter = new StackBsonWriter(dynamicBuffer);
@@ -116,8 +120,8 @@ public class Main {
 
   private static void testPersonSerializeThenDeserialise() throws Exception {
     BobBson bobBson = new BobBson();
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new ByteBufferBobBsonBuffer(new byte[size]));
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new ByteBufferBobBsonBuffer(new byte[size]));
     DynamicBobBsonBuffer dynamicBuffer = new DynamicBobBsonBuffer(pool);
 
     Person p = new Person();

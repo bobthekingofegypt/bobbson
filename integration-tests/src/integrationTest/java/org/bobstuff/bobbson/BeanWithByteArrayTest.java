@@ -1,6 +1,10 @@
 package org.bobstuff.bobbson;
 
 import java.io.ByteArrayOutputStream;
+import org.bobstuff.bobbson.buffer.ByteBufferBobBsonBuffer;
+import org.bobstuff.bobbson.buffer.DynamicBobBsonBuffer;
+import org.bobstuff.bobbson.buffer.pool.BobBsonBufferPool;
+import org.bobstuff.bobbson.buffer.pool.NoopBobBsonBufferPool;
 import org.bobstuff.bobbson.writer.BsonWriter;
 import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.bson.types.ObjectId;
@@ -10,8 +14,8 @@ import org.junit.jupiter.api.Test;
 public class BeanWithByteArrayTest {
   @Test
   public void testReadWriteKeyAsByteArray() throws Exception {
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new ByteBufferBobBsonBuffer(new byte[100]));
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new ByteBufferBobBsonBuffer(new byte[100]));
     DynamicBobBsonBuffer buffer = new DynamicBobBsonBuffer(pool);
 
     var id = new ObjectId().toByteArray();

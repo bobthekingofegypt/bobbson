@@ -5,8 +5,8 @@ import java.nio.charset.StandardCharsets;
 public class BobBuffer {
   private int head;
   private int tail;
-  private int limit;
-  private byte[] data;
+  private final int limit;
+  private final byte[] data;
 
   public BobBuffer(byte[] data, int head, int tail) {
     if (tail > data.length) {

@@ -132,7 +132,7 @@ public class ActiveJBufferDataTest extends BobBsonBufferTest {
     var sut = new ActiveJBufferData(data);
 
     sut.readUntil((byte) 0);
-    Assertions.assertEquals("this is a string", sut.getByteRangeComparitor().name());
+    Assertions.assertEquals("this is a string", sut.getByteRangeComparator().value());
     Assertions.assertEquals((byte) 49, sut.getByte());
   }
 

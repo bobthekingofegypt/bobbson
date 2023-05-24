@@ -6,6 +6,7 @@ import java.util.Map;
 import org.bobstuff.bobbson.*;
 import org.bobstuff.bobbson.BsonReader;
 import org.bobstuff.bobbson.BsonType;
+import org.bobstuff.bobbson.buffer.BobBsonBuffer;
 import org.bobstuff.bobbson.writer.BsonWriter;
 import org.bson.*;
 import org.bson.types.Binary;
@@ -63,13 +64,13 @@ public class BasicBSONObjectConverter implements BobBsonConverter<BasicBSONObjec
 
     bsonReader.readStartDocument();
     BsonType type;
-    BobBsonBuffer.ByteRangeComparitor rangeComparitor = bsonReader.getFieldName();
+    BobBsonBuffer.ByteRangeComparator rangeComparitor = bsonReader.getFieldName();
     while ((type = bsonReader.readBsonType()) != BsonType.END_OF_DOCUMENT) {
 
       // TODO why did I write this caching solution and is it worth keeping
       String fieldName = cache.get(rangeComparitor.getWeakHash());
       if (fieldName == null) {
-        fieldName = rangeComparitor.name();
+        fieldName = rangeComparitor.value();
         cache.put(rangeComparitor.getWeakHash(), fieldName);
       }
 

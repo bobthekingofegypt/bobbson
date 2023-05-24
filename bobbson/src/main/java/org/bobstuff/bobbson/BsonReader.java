@@ -1,5 +1,7 @@
 package org.bobstuff.bobbson;
 
+import org.bobstuff.bobbson.buffer.BobBsonBuffer;
+
 public interface BsonReader {
   ContextStack getContextStack();
 
@@ -17,7 +19,7 @@ public interface BsonReader {
 
   void readStringRaw();
 
-  BobBsonBuffer.ByteRangeComparitor getFieldName();
+  BobBsonBuffer.ByteRangeComparator getFieldName();
 
   String currentFieldName();
 

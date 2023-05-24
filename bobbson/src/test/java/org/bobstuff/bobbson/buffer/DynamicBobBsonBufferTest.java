@@ -4,10 +4,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.google.common.base.Strings;
-import org.bobstuff.bobbson.BobBsonBuffer;
-import org.bobstuff.bobbson.BufferDataPool;
-import org.bobstuff.bobbson.DynamicBobBsonBuffer;
-import org.bobstuff.bobbson.NoopBufferDataPool;
+import org.bobstuff.bobbson.buffer.pool.BobBsonBufferPool;
+import org.bobstuff.bobbson.buffer.pool.NoopBobBsonBufferPool;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,18 +16,18 @@ public class DynamicBobBsonBufferTest {
   public static final int TEST_STRING_1_LENGTH = TEST_STRING_1.getBytes(UTF_8).length;
   public static final int TEST_STRING_2_LENGTH = TEST_STRING_2.getBytes(UTF_8).length;
   DynamicBobBsonBuffer writeSut;
-  BufferDataPool exceptionPool =
-      new NoopBufferDataPool(
+  BobBsonBufferPool exceptionPool =
+      new NoopBobBsonBufferPool(
           (size) -> {
             throw new RuntimeException("shouldn't be called");
           });
-  BufferDataPool smallBufferPool =
-      new NoopBufferDataPool((size) -> new BobBufferBobBsonBuffer(new byte[50], 0, 0));
+  BobBsonBufferPool smallBufferPool =
+      new NoopBobBsonBufferPool((size) -> new BobBufferBobBsonBuffer(new byte[50], 0, 0));
 
   @BeforeEach
   public void setup() {
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new BobBufferBobBsonBuffer(new byte[50], 0, 0));
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new BobBufferBobBsonBuffer(new byte[50], 0, 0));
     writeSut = new DynamicBobBsonBuffer(pool);
     writeSut.writeString(TEST_STRING_1);
     writeSut.writeInteger(30);
@@ -39,8 +37,8 @@ public class DynamicBobBsonBufferTest {
 
   @Test
   public void testReadContentRollsBuffers() {
-    BufferDataPool pool =
-        new NoopBufferDataPool(
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool(
             (size) -> {
               throw new RuntimeException("shouldn't be called");
             });
@@ -54,8 +52,8 @@ public class DynamicBobBsonBufferTest {
 
   @Test
   public void testSkipHeadRollsBuffers() {
-    BufferDataPool pool =
-        new NoopBufferDataPool(
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool(
             (size) -> {
               throw new RuntimeException("shouldn't be called");
             });
@@ -68,8 +66,8 @@ public class DynamicBobBsonBufferTest {
 
   @Test
   public void testSkipTailRollsBuffers() {
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new BobBufferBobBsonBuffer(new byte[10], 0, 0));
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new BobBufferBobBsonBuffer(new byte[10], 0, 0));
     DynamicBobBsonBuffer readSut = new DynamicBobBsonBuffer(pool);
     readSut.skipTail(53);
     assertEquals(53, readSut.getTail());
@@ -83,8 +81,8 @@ public class DynamicBobBsonBufferTest {
 
   @Test
   public void testSkipTailRollsBuffersDontResetToZero() {
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new BobBufferBobBsonBuffer(new byte[10], 0, 0));
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new BobBufferBobBsonBuffer(new byte[10], 0, 0));
     DynamicBobBsonBuffer readSut = new DynamicBobBsonBuffer(pool);
     readSut.skipTail(53);
     assertEquals(53, readSut.getTail());
@@ -98,8 +96,8 @@ public class DynamicBobBsonBufferTest {
 
   @Test
   public void testSkipTailRollsBuffersEndsOnBufferX() {
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new BobBufferBobBsonBuffer(new byte[10], 0, 0));
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new BobBufferBobBsonBuffer(new byte[10], 0, 0));
     DynamicBobBsonBuffer readSut = new DynamicBobBsonBuffer(pool);
     readSut.skipTail(53);
     assertEquals(53, readSut.getTail());
@@ -113,8 +111,8 @@ public class DynamicBobBsonBufferTest {
 
   @Test
   public void testGetReadRemaining() {
-    BufferDataPool pool =
-        new NoopBufferDataPool(
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool(
             (size) -> {
               throw new RuntimeException("shouldn't be called");
             });
@@ -131,8 +129,8 @@ public class DynamicBobBsonBufferTest {
 
   @Test
   public void testGetIntRollsBuffers() {
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new BobBufferBobBsonBuffer(new byte[50], 0, 0));
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new BobBufferBobBsonBuffer(new byte[50], 0, 0));
     writeSut = new DynamicBobBsonBuffer(pool);
     for (var i = 0; i < 1000; i += 1) {
       writeSut.writeInteger(i);
@@ -148,8 +146,8 @@ public class DynamicBobBsonBufferTest {
 
   @Test
   public void testGetByteRollsBuffers() {
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new BobBufferBobBsonBuffer(new byte[10], 0, 0));
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new BobBufferBobBsonBuffer(new byte[10], 0, 0));
     writeSut = new DynamicBobBsonBuffer(pool);
     for (var i = 0; i < 1000; i += 1) {
       writeSut.writeByte((byte) i);
@@ -263,8 +261,8 @@ public class DynamicBobBsonBufferTest {
         new byte[] {
           1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
         };
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new BobBufferBobBsonBuffer(new byte[10], 0, 0));
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new BobBufferBobBsonBuffer(new byte[10], 0, 0));
     writeSut = new DynamicBobBsonBuffer(pool);
     writeSut.writeBytes(data);
 
@@ -280,8 +278,8 @@ public class DynamicBobBsonBufferTest {
           1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
           0
         };
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new BobBufferBobBsonBuffer(new byte[10], 0, 0));
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new BobBufferBobBsonBuffer(new byte[10], 0, 0));
     writeSut = new DynamicBobBsonBuffer(pool);
     writeSut.writeBytes(data);
 
@@ -296,20 +294,20 @@ public class DynamicBobBsonBufferTest {
   public void testGetFieldNameRollsBuffers() {
     var dataString = "this is a very long string that is used to test that name crosses buffers";
     var data = dataString.getBytes(UTF_8);
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new BobBufferBobBsonBuffer(new byte[10], 0, 0));
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new BobBufferBobBsonBuffer(new byte[10], 0, 0));
     writeSut = new DynamicBobBsonBuffer(pool);
     writeSut.writeBytes(data);
     writeSut.writeByte((byte) 0);
 
     DynamicBobBsonBuffer readSut = new DynamicBobBsonBuffer(writeSut.getBuffers(), exceptionPool);
     int count = readSut.readUntil((byte) 0);
-    BobBsonBuffer.ByteRangeComparitor comparitor = readSut.getByteRangeComparitor();
-    Assertions.assertEquals(dataString, comparitor.name());
+    BobBsonBuffer.ByteRangeComparator comparitor = readSut.getByteRangeComparator();
+    Assertions.assertEquals(dataString, comparitor.value());
     assertEquals(dataString.length() + 1, count);
 
     readSut.setHead(4);
-    Assertions.assertEquals(dataString, comparitor.name());
+    Assertions.assertEquals(dataString, comparitor.value());
     Assertions.assertEquals(4, readSut.getHead());
   }
 
@@ -317,14 +315,14 @@ public class DynamicBobBsonBufferTest {
   public void testComparitorEqualsArrayWhenRollsBuffers() {
     var dataString = "this is a very long string that is used to test that name crosses buffers";
     var data = dataString.getBytes(UTF_8);
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new BobBufferBobBsonBuffer(new byte[10], 0, 0));
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new BobBufferBobBsonBuffer(new byte[10], 0, 0));
     writeSut = new DynamicBobBsonBuffer(pool);
     writeSut.writeBytes(data);
     writeSut.writeByte((byte) 0);
 
     DynamicBobBsonBuffer readSut = new DynamicBobBsonBuffer(writeSut.getBuffers(), exceptionPool);
-    BobBsonBuffer.ByteRangeComparitor comparitor = readSut.getByteRangeComparitor();
+    BobBsonBuffer.ByteRangeComparator comparitor = readSut.getByteRangeComparator();
     int count = readSut.readUntil((byte) 0);
     assertTrue(comparitor.equalsArray(data));
     // try starting somewhere in middle of stream
@@ -338,14 +336,14 @@ public class DynamicBobBsonBufferTest {
   public void testComparitorEqualsArrayWeakHashWhenRollsBuffers() {
     var dataString = "this is a very long string that is used to test that name crosses buffers";
     var data = dataString.getBytes(UTF_8);
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new BobBufferBobBsonBuffer(new byte[10], 0, 0));
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new BobBufferBobBsonBuffer(new byte[10], 0, 0));
     writeSut = new DynamicBobBsonBuffer(pool);
     writeSut.writeBytes(data);
     writeSut.writeByte((byte) 0);
 
     DynamicBobBsonBuffer readSut = new DynamicBobBsonBuffer(writeSut.getBuffers(), exceptionPool);
-    BobBsonBuffer.ByteRangeComparitor comparitor = readSut.getByteRangeComparitor();
+    BobBsonBuffer.ByteRangeComparator comparitor = readSut.getByteRangeComparator();
     int count = readSut.readUntil((byte) 0);
     assertTrue(comparitor.equalsArray(data, 23));
     // try starting somewhere in middle of stream
@@ -358,26 +356,26 @@ public class DynamicBobBsonBufferTest {
   public void testSetTail() {
     var dataString = "this is a very long string that is used to test that name crosses buffers";
     var data = dataString.getBytes(UTF_8);
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new BobBufferBobBsonBuffer(new byte[10], 0, 0));
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new BobBufferBobBsonBuffer(new byte[10], 0, 0));
     writeSut = new DynamicBobBsonBuffer(pool);
     writeSut.writeBytes(data);
     writeSut.writeByte((byte) 0);
 
     DynamicBobBsonBuffer readSut = new DynamicBobBsonBuffer(writeSut.getBuffers(), exceptionPool);
-    BobBsonBuffer.ByteRangeComparitor comparitor = readSut.getByteRangeComparitor();
+    BobBsonBuffer.ByteRangeComparator comparitor = readSut.getByteRangeComparator();
     readSut.setTail(data.length - 7);
     readSut.writeBytes("bananas".getBytes(UTF_8));
     writeSut.writeByte((byte) 0);
 
     int count = readSut.readUntil((byte) 0);
-    System.out.println(comparitor.name());
+    System.out.println(comparitor.value());
   }
 
   @Test
   public void testReadAndWrite() {
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new BobBufferBobBsonBuffer(new byte[10], 0, 0));
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new BobBufferBobBsonBuffer(new byte[10], 0, 0));
     writeSut = new DynamicBobBsonBuffer(pool);
     writeSut.writeInteger(14);
     writeSut.writeInteger(25);
@@ -390,24 +388,24 @@ public class DynamicBobBsonBufferTest {
 
     writeSut.writeByte((byte) 0);
 
-    BobBsonBuffer.ByteRangeComparitor comparator = writeSut.getByteRangeComparitor();
+    BobBsonBuffer.ByteRangeComparator comparator = writeSut.getByteRangeComparator();
     writeSut.readUntil((byte) 0);
 
-    assertEquals("hello", comparator.name());
+    assertEquals("hello", comparator.value());
   }
 
   @Test
   public void testReadBeyondTailFails() {
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new BobBufferBobBsonBuffer(new byte[10], 0, 0));
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new BobBufferBobBsonBuffer(new byte[10], 0, 0));
     writeSut = new DynamicBobBsonBuffer(pool);
     Assertions.assertThrows(IllegalStateException.class, () -> writeSut.getInt());
   }
 
   @Test
   public void testReadBeyondTailAfterTailSetFails() {
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new BobBufferBobBsonBuffer(new byte[10], 0, 0));
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new BobBufferBobBsonBuffer(new byte[10], 0, 0));
     writeSut = new DynamicBobBsonBuffer(pool);
     writeSut.writeBytes("this is some text to make the buffer roll over somewhere".getBytes(UTF_8));
     writeSut.setTail(2);
@@ -423,15 +421,15 @@ public class DynamicBobBsonBufferTest {
 
   @Test
   public void testWriteBytesWithinRemainingLimit() {
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new BobBufferBobBsonBuffer(new byte[1000], 0, 0));
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new BobBufferBobBsonBuffer(new byte[1000], 0, 0));
     writeSut = new DynamicBobBsonBuffer(pool);
     String text = "this is some text to make the buffer roll over somewhere";
     writeSut.writeBytes(text.getBytes(UTF_8));
     writeSut.writeByte((byte) 0);
 
     writeSut.readUntil((byte) 0);
-    assertEquals(text, writeSut.getByteRangeComparitor().name());
+    assertEquals(text, writeSut.getByteRangeComparator().value());
   }
 
   @Test
@@ -441,8 +439,8 @@ public class DynamicBobBsonBufferTest {
 
   @Test
   public void testWriteIntegerAtPosition() {
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new BobBufferBobBsonBuffer(new byte[10], 0, 0));
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new BobBufferBobBsonBuffer(new byte[10], 0, 0));
     writeSut = new DynamicBobBsonBuffer(pool);
 
     writeSut.skipTail(4);
@@ -457,8 +455,8 @@ public class DynamicBobBsonBufferTest {
 
   @Test
   public void testWriteIntegerAtRollsBuffer() {
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new BobBufferBobBsonBuffer(new byte[10], 0, 0));
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new BobBufferBobBsonBuffer(new byte[10], 0, 0));
     writeSut = new DynamicBobBsonBuffer(pool);
 
     writeSut.writeDouble(2.3);
@@ -476,8 +474,8 @@ public class DynamicBobBsonBufferTest {
     var text =
         "оЂ мЎ Боↁ іт'ѕ а ъцисЂ оf сѓаzЎ циісоↁэ тэхт ₕ ₘy gₒd ᵢₜ'ₛ ₐ bᵤₙcₕ ₒf cᵣₐzy ᵤₙᵢcₒdₑ ₜₑₓₜ"
             + " öḧ ṁÿ ġöḋ ïẗ'ṡ ä ḅüṅċḧ öḟ ċṛäżÿ üṅïċöḋë ẗëẍẗ \uD808\uDC04 \uD808\uDC2A";
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new BobBufferBobBsonBuffer(new byte[10], 0, 0));
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new BobBufferBobBsonBuffer(new byte[10], 0, 0));
     writeSut = new DynamicBobBsonBuffer(pool);
 
     writeSut.writeInteger(4);
@@ -486,7 +484,7 @@ public class DynamicBobBsonBufferTest {
 
     assertEquals(4, writeSut.getInt());
     int length = writeSut.readUntil((byte) 0);
-    assertEquals(text, writeSut.getByteRangeComparitor().name());
+    assertEquals(text, writeSut.getByteRangeComparator().value());
   }
 
   @Test

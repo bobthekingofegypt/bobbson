@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.bobstuff.bobbson.annotations.BsonAttribute;
 import org.bobstuff.bobbson.annotations.BsonConverter;
 import org.bobstuff.bobbson.buffer.BobBufferBobBsonBuffer;
+import org.bobstuff.bobbson.buffer.ByteBufferBobBsonBuffer;
 import org.bobstuff.bobbson.reflection.ObjectConverterFactory;
 import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.junit.jupiter.api.Test;

@@ -2,7 +2,6 @@ package org.bobstuff.bobbson.buffer;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import org.bobstuff.bobbson.ByteBufferBobBsonBuffer;
 import org.junit.jupiter.api.BeforeEach;
 
 public class ByteBufferBobBsonBufferTest extends BobBsonBufferTest {

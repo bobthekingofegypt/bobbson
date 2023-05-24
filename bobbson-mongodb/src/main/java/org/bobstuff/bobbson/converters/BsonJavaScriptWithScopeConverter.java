@@ -4,6 +4,10 @@ import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import org.bobstuff.bobbson.*;
+import org.bobstuff.bobbson.buffer.ByteBufferBobBsonBuffer;
+import org.bobstuff.bobbson.buffer.DynamicBobBsonBuffer;
+import org.bobstuff.bobbson.buffer.pool.BobBsonBufferPool;
+import org.bobstuff.bobbson.buffer.pool.NoopBobBsonBufferPool;
 import org.bobstuff.bobbson.writer.BsonWriter;
 import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.bson.BsonDocument;
@@ -45,8 +49,8 @@ public class BsonJavaScriptWithScopeConverter implements BobBsonConverter<BsonJa
     var code = value.getCode();
     var scope = value.getScope();
 
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new ByteBufferBobBsonBuffer(new byte[size]));
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new ByteBufferBobBsonBuffer(new byte[size]));
     DynamicBobBsonBuffer buffer = new DynamicBobBsonBuffer(pool);
     BsonWriter writer = new StackBsonWriter(buffer);
 
@@ -76,8 +80,8 @@ public class BsonJavaScriptWithScopeConverter implements BobBsonConverter<BsonJa
     var code = value.getCode();
     var scope = value.getScope();
 
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new ByteBufferBobBsonBuffer(new byte[size]));
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new ByteBufferBobBsonBuffer(new byte[size]));
     DynamicBobBsonBuffer buffer = new DynamicBobBsonBuffer(pool);
     BsonWriter writer = new StackBsonWriter(buffer);
 

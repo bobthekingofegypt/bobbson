@@ -4,6 +4,7 @@ import static org.bobstuff.bobbson.BsonContextType.DOCUMENT;
 import static org.bobstuff.bobbson.BsonContextType.TOP_LEVEL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.bobstuff.bobbson.buffer.BobBsonBuffer;
 import org.junit.jupiter.api.Test;
 
 /**

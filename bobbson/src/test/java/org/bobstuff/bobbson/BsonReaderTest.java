@@ -2,6 +2,7 @@ package org.bobstuff.bobbson;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.bobstuff.bobbson.buffer.BobBsonBuffer;
 import org.bobstuff.bobbson.buffer.BobBufferBobBsonBuffer;
 import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.bson.types.ObjectId;
@@ -218,10 +219,10 @@ public class BsonReaderTest {
     sut.readStartDocument();
     sut.readBsonType();
 
-    BobBsonBuffer.ByteRangeComparitor comparitor = sut.getFieldName();
-    assertEquals("data", comparitor.name());
-    assertEquals("data", comparitor.name());
-    assertEquals("data", comparitor.name());
+    BobBsonBuffer.ByteRangeComparator comparitor = sut.getFieldName();
+    assertEquals("data", comparitor.value());
+    assertEquals("data", comparitor.value());
+    assertEquals("data", comparitor.value());
   }
 
   @Test

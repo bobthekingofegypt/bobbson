@@ -3,6 +3,7 @@ package org.bobstuff.bobbson;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
+import org.bobstuff.bobbson.buffer.ByteBufferBobBsonBuffer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -112,7 +113,7 @@ public class ByteBufferDataTest {
     var sut = new ByteBufferBobBsonBuffer(data);
 
     sut.readUntil((byte) 0);
-    Assertions.assertEquals("this is a string", sut.getByteRangeComparitor().name());
+    Assertions.assertEquals("this is a string", sut.getByteRangeComparator().value());
     Assertions.assertEquals((byte) 49, sut.getByte());
   }
 }

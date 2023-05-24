@@ -1,4 +1,4 @@
-package org.bobstuff.bobbson;
+package org.bobstuff.bobbson.buffer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -7,6 +7,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.bobstuff.bobbson.ByteSizes;
+import org.bobstuff.bobbson.buffer.pool.BobBsonBufferPool;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class DynamicBobBsonBuffer implements BobBsonBuffer {
@@ -14,7 +16,7 @@ public class DynamicBobBsonBuffer implements BobBsonBuffer {
   public static final String BUF_IS_NULL = "buf is null";
   public static final String READ_BEYOND_LIMIT_ERROR_MSG =
       "cannot read beyond current tail " + "position";
-  private BufferDataPool pool;
+  private BobBsonBufferPool pool;
   private int[] limits;
   private List<BobBsonBuffer> buffers;
   private int currentBufferIndex;
@@ -25,11 +27,11 @@ public class DynamicBobBsonBuffer implements BobBsonBuffer {
   private int tail;
   private DynamicByteRangeComparitor byteRangeComparitor;
 
-  public DynamicBobBsonBuffer(BufferDataPool pool) {
+  public DynamicBobBsonBuffer(BobBsonBufferPool pool) {
     this(pool, pool.allocate(DEFAULT_BUFFER_SIZE));
   }
 
-  public DynamicBobBsonBuffer(List<BobBsonBuffer> buffers, BufferDataPool pool) {
+  public DynamicBobBsonBuffer(List<BobBsonBuffer> buffers, BobBsonBufferPool pool) {
     this.pool = pool;
     this.limits = new int[Math.max(buffers.size(), 30)];
     this.buffers = buffers;
@@ -51,7 +53,7 @@ public class DynamicBobBsonBuffer implements BobBsonBuffer {
     this.byteRangeComparitor = new DynamicByteRangeComparitor();
   }
 
-  public DynamicBobBsonBuffer(BufferDataPool pool, BobBsonBuffer startingBuffer) {
+  public DynamicBobBsonBuffer(BobBsonBufferPool pool, BobBsonBuffer startingBuffer) {
     this.pool = pool;
     this.limits = new int[10];
     this.buffers = new ArrayList<>();
@@ -628,7 +630,7 @@ public class DynamicBobBsonBuffer implements BobBsonBuffer {
   }
 
   @Override
-  public ByteRangeComparitor getByteRangeComparitor() {
+  public ByteRangeComparator getByteRangeComparator() {
     return byteRangeComparitor;
   }
 
@@ -661,7 +663,7 @@ public class DynamicBobBsonBuffer implements BobBsonBuffer {
     return buffers.subList(0, currentWriteBufferIndex + 1);
   }
 
-  private class DynamicByteRangeComparitor implements ByteRangeComparitor {
+  private class DynamicByteRangeComparitor implements ByteRangeComparator {
     private int start;
     private int size;
 
@@ -675,7 +677,7 @@ public class DynamicBobBsonBuffer implements BobBsonBuffer {
     }
 
     @Override
-    public String name() {
+    public String value() {
       int head = DynamicBobBsonBuffer.this.getHead();
       DynamicBobBsonBuffer.this.setHead(start);
       var result = DynamicBobBsonBuffer.this.getString(size - 1);

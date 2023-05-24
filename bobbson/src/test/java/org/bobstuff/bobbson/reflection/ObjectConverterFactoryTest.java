@@ -109,10 +109,10 @@ public class ObjectConverterFactoryTest {
     var reader = new BsonReaderStack(buffer);
     reader.readStartDocument();
     assertEquals(BsonType.STRING, reader.readBsonType());
-    assertEquals("other", reader.getFieldName().name());
+    assertEquals("other", reader.getFieldName().value());
     assertEquals("othervalue", reader.readString());
     assertEquals(BsonType.NULL, reader.readBsonType());
-    assertEquals("otherNull", reader.getFieldName().name());
+    assertEquals("otherNull", reader.getFieldName().value());
     reader.readNull();
     reader.readEndDocument();
   }

@@ -3,6 +3,9 @@ package org.bobstuff.bobbson.writer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import org.bobstuff.bobbson.*;
+import org.bobstuff.bobbson.buffer.BobBsonBuffer;
+import org.bobstuff.bobbson.buffer.ByteBufferBobBsonBuffer;
+import org.bobstuff.bobbson.buffer.pool.BobBsonBufferPool;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 @SuppressWarnings("PMD.NullAssignment")
@@ -25,7 +28,7 @@ public class FastBsonWriter implements BsonWriter {
   private int contextStackArrayIndex;
   private BsonContextType contextStackType;
 
-  public FastBsonWriter(BufferDataPool bufferDataPool) {
+  public FastBsonWriter(BobBsonBufferPool bufferDataPool) {
     this(new ByteBufferBobBsonBuffer(new byte[1024]));
   }
 

@@ -1,10 +1,9 @@
 package org.bobstuff.bobbson.buffer;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
-import org.bobstuff.bobbson.BobBsonBuffer;
-import org.bobstuff.bobbson.BufferDataPool;
+import org.bobstuff.bobbson.buffer.pool.BobBsonBufferPool;
 
-public class BobBufferPool implements BufferDataPool {
+public class BobBufferPool implements BobBsonBufferPool {
   private ConcurrentLinkedQueue<BobBsonBuffer>[] slabs;
 
   @SuppressWarnings("unchecked")

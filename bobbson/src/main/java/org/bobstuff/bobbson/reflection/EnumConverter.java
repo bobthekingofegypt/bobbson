@@ -78,6 +78,6 @@ public class EnumConverter<T extends Enum<T>> implements BobBsonConverter<T> {
         return value.value;
       }
     }
-    return Enum.valueOf(instanceClazz, fieldName.name());
+    return Enum.valueOf(instanceClazz, fieldName.value());
   }
 }

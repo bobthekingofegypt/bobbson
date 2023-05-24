@@ -3,6 +3,7 @@ package org.bobstuff.bobbson.reflection;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import org.bobstuff.bobbson.*;
+import org.bobstuff.bobbson.buffer.BobBsonBuffer;
 import org.bobstuff.bobbson.writer.BsonWriter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -72,7 +73,7 @@ public class ReflectionBasedConverter implements BobBsonConverter<Object> {
 
     bsonReader.readStartDocument();
 
-    BobBsonBuffer.ByteRangeComparitor nameComparitor = bsonReader.getFieldName();
+    BobBsonBuffer.ByteRangeComparator nameComparitor = bsonReader.getFieldName();
     while (bsonReader.readBsonType() != BsonType.END_OF_DOCUMENT) {
       if (bsonReader.getCurrentBsonType() == BsonType.NULL) {
         bsonReader.readNull();

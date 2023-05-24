@@ -2,9 +2,10 @@ package org.bobstuff.bobbson;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import org.bobstuff.bobbson.buffer.BobBsonBuffer;
 
 // TODO need direct array version of this class for when array is not available
-public class BobBsonByteRange implements BobBsonBuffer.ByteRangeComparitor {
+public class BobBsonByteRange implements BobBsonBuffer.ByteRangeComparator {
   private int start;
   private int size;
   private int weakHash;
@@ -28,7 +29,7 @@ public class BobBsonByteRange implements BobBsonBuffer.ByteRangeComparitor {
     return weakHash;
   }
 
-  public String name() {
+  public String value() {
     return new String(data, start, size - 1, StandardCharsets.UTF_8);
   }
 

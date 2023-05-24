@@ -21,6 +21,7 @@ import static java.lang.String.format;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import org.bobstuff.bobbson.buffer.BobBsonBuffer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class FastBsonReader implements BsonReader {
@@ -183,13 +184,13 @@ public class FastBsonReader implements BsonReader {
   }
 
   @Override
-  public BobBsonBuffer.ByteRangeComparitor getFieldName() {
-    return buffer.getByteRangeComparitor();
+  public BobBsonBuffer.ByteRangeComparator getFieldName() {
+    return buffer.getByteRangeComparator();
   }
 
   @Override
   public String currentFieldName() {
-    return buffer.getByteRangeComparitor().name();
+    return buffer.getByteRangeComparator().value();
   }
 
   @Override
@@ -216,9 +217,9 @@ public class FastBsonReader implements BsonReader {
   @Override
   public RegexRaw readRegex() {
     int size = buffer.readUntil((byte) 0);
-    String regex = buffer.getByteRangeComparitor().name();
+    String regex = buffer.getByteRangeComparator().value();
     size += buffer.readUntil((byte) 0);
-    String options = buffer.getByteRangeComparitor().name();
+    String options = buffer.getByteRangeComparator().value();
     contextStackRemaining -= size;
     state = getNextState();
     return new RegexRaw(regex, options);

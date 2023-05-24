@@ -1,4 +1,4 @@
-package org.bobstuff.bobbson;
+package org.bobstuff.bobbson.buffer;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import org.bobstuff.bobbson.BobBsonByteRange;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class ByteBufferBobBsonBuffer implements BobBsonBuffer {
@@ -295,7 +296,7 @@ public class ByteBufferBobBsonBuffer implements BobBsonBuffer {
   }
 
   @Override
-  public ByteRangeComparitor getByteRangeComparitor() {
+  public ByteRangeComparator getByteRangeComparator() {
     return byteRange;
   }
 

@@ -3,6 +3,7 @@ package org.bobstuff.bobbson.activej;
 import io.activej.bytebuf.ByteBuf;
 import java.nio.charset.StandardCharsets;
 import org.bobstuff.bobbson.*;
+import org.bobstuff.bobbson.buffer.BobBsonBuffer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class ActiveJBufferData implements BobBsonBuffer {
@@ -48,7 +49,7 @@ public class ActiveJBufferData implements BobBsonBuffer {
   }
 
   @Override
-  public ByteRangeComparitor getByteRangeComparitor() {
+  public ByteRangeComparator getByteRangeComparator() {
     return byteRange;
   }
 

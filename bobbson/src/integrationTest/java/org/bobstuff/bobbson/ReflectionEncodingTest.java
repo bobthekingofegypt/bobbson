@@ -7,6 +7,9 @@ import java.util.*;
 import org.bobstuff.bobbson.annotations.BsonAttribute;
 import org.bobstuff.bobbson.annotations.BsonConverter;
 import org.bobstuff.bobbson.buffer.BobBufferBobBsonBuffer;
+import org.bobstuff.bobbson.buffer.DynamicBobBsonBuffer;
+import org.bobstuff.bobbson.buffer.pool.BobBsonBufferPool;
+import org.bobstuff.bobbson.buffer.pool.NoopBobBsonBufferPool;
 import org.bobstuff.bobbson.reflection.CollectionConverterFactory;
 import org.bobstuff.bobbson.reflection.MapConverterFactory;
 import org.bobstuff.bobbson.reflection.ObjectConverterFactory;
@@ -24,8 +27,8 @@ public class ReflectionEncodingTest {
     simple.setAge(3);
     simple.setName("bob");
 
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new BobBufferBobBsonBuffer(new byte[size], 0, 0));
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new BobBufferBobBsonBuffer(new byte[size], 0, 0));
     DynamicBobBsonBuffer buffer = new DynamicBobBsonBuffer(pool);
 
     var bsonWriter = new StackBsonWriter(buffer);
@@ -50,8 +53,8 @@ public class ReflectionEncodingTest {
     var simple = new AliasTest();
     simple.setNames("bob");
 
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new BobBufferBobBsonBuffer(new byte[size], 0, 0));
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new BobBufferBobBsonBuffer(new byte[size], 0, 0));
     DynamicBobBsonBuffer buffer = new DynamicBobBsonBuffer(pool);
 
     var bsonWriter = new StackBsonWriter(buffer);
@@ -75,8 +78,8 @@ public class ReflectionEncodingTest {
     var simple = new CustomConverterTest();
     simple.setNames("custom: bob");
 
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new BobBufferBobBsonBuffer(new byte[size], 0, 0));
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new BobBufferBobBsonBuffer(new byte[size], 0, 0));
     DynamicBobBsonBuffer buffer = new DynamicBobBsonBuffer(pool);
 
     var bsonWriter = new StackBsonWriter(buffer);
@@ -111,8 +114,8 @@ public class ReflectionEncodingTest {
     simple.setNumbers(numbers);
     simple.setTags(tags);
 
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new BobBufferBobBsonBuffer(new byte[size], 0, 0));
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new BobBufferBobBsonBuffer(new byte[size], 0, 0));
     DynamicBobBsonBuffer buffer = new DynamicBobBsonBuffer(pool);
 
     var bsonWriter = new StackBsonWriter(buffer);
@@ -147,8 +150,8 @@ public class ReflectionEncodingTest {
     holder2.put("holder2", holder);
     simple.setRecursive(holder2);
 
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new BobBufferBobBsonBuffer(new byte[size], 0, 0));
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new BobBufferBobBsonBuffer(new byte[size], 0, 0));
     DynamicBobBsonBuffer buffer = new DynamicBobBsonBuffer(pool);
 
     var bsonWriter = new StackBsonWriter(buffer);

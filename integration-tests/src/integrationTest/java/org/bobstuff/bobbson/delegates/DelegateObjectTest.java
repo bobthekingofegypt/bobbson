@@ -5,6 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.ByteArrayOutputStream;
 import org.bobstuff.bobbson.*;
 import org.bobstuff.bobbson.buffer.BobBufferBobBsonBuffer;
+import org.bobstuff.bobbson.buffer.DynamicBobBsonBuffer;
+import org.bobstuff.bobbson.buffer.pool.BobBsonBufferPool;
+import org.bobstuff.bobbson.buffer.pool.NoopBobBsonBufferPool;
 import org.bobstuff.bobbson.reflection.ObjectConverterFactory;
 import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.junit.jupiter.api.Test;
@@ -17,8 +20,8 @@ public class DelegateObjectTest {
     sut.setAge(1002);
     sut.setOld(true);
 
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new BobBufferBobBsonBuffer(new byte[size], 0, 0));
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new BobBufferBobBsonBuffer(new byte[size], 0, 0));
     DynamicBobBsonBuffer buffer = new DynamicBobBsonBuffer(pool);
     BobBson bobBson = new BobBson(new BobBsonConfig(false));
     bobBson.registerFactory(new ObjectConverterFactory());

@@ -2,6 +2,9 @@ package org.bobstuff.bobbson.writer;
 
 import java.nio.charset.StandardCharsets;
 import org.bobstuff.bobbson.*;
+import org.bobstuff.bobbson.buffer.BobBsonBuffer;
+import org.bobstuff.bobbson.buffer.ByteBufferBobBsonBuffer;
+import org.bobstuff.bobbson.buffer.pool.BobBsonBufferPool;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 @SuppressWarnings("PMD.NullAssignment")
@@ -13,11 +16,11 @@ public class StackBsonWriter implements BsonWriter {
   private BsonState state;
   private byte[] indexNumberCache = new byte[32];
 
-  public StackBsonWriter(BufferDataPool bufferDataPool) {
+  public StackBsonWriter(BobBsonBufferPool bufferDataPool) {
     this(bufferDataPool, new ContextStack());
   }
 
-  public StackBsonWriter(BufferDataPool bufferDataPool, ContextStack contextStack) {
+  public StackBsonWriter(BobBsonBufferPool bufferDataPool, ContextStack contextStack) {
     this(new ByteBufferBobBsonBuffer(new byte[1024]), contextStack);
   }
 

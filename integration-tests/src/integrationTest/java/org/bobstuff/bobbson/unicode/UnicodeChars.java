@@ -1,6 +1,7 @@
 package org.bobstuff.bobbson.unicode;
 
 import org.bobstuff.bobbson.*;
+import org.bobstuff.bobbson.buffer.BobBsonBuffer;
 import org.bobstuff.bobbson.writer.BsonWriter;
 import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.junit.jupiter.api.Assertions;

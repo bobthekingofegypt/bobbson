@@ -1,7 +1,6 @@
 package org.bobstuff.bobbson.buffer;
 
 import java.util.Arrays;
-import org.bobstuff.bobbson.BobBsonBuffer;
 import org.bobstuff.bobbson.BobBsonByteRange;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -48,7 +47,7 @@ public class BobBufferBobBsonBuffer implements BobBsonBuffer {
   }
 
   @Override
-  public BobBsonBuffer.ByteRangeComparitor getByteRangeComparitor() {
+  public ByteRangeComparator getByteRangeComparator() {
     return byteRange;
   }
 

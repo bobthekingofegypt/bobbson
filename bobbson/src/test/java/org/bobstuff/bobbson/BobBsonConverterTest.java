@@ -1,6 +1,10 @@
 package org.bobstuff.bobbson;
 
 import java.nio.ByteBuffer;
+import org.bobstuff.bobbson.buffer.BobBsonBuffer;
+import org.bobstuff.bobbson.buffer.ByteBufferBobBsonBuffer;
+import org.bobstuff.bobbson.buffer.pool.BobBsonBufferPool;
+import org.bobstuff.bobbson.buffer.pool.NoopBobBsonBufferPool;
 import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -23,7 +27,8 @@ public class BobBsonConverterTest {
   public void writeThrowsIllegalState() {
     var sut = new BobBsonConverter<String>() {};
     byte[] bytes = new byte[100];
-    BufferDataPool pool = new NoopBufferDataPool((size) -> new ByteBufferBobBsonBuffer(bytes));
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new ByteBufferBobBsonBuffer(bytes));
     BobBsonBuffer buffer = new ByteBufferBobBsonBuffer(bytes);
     var bsonWriter = new StackBsonWriter(buffer);
 
