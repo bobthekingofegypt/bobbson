@@ -23,8 +23,7 @@ public class DelegateObjectTest {
     BobBson bobBson = new BobBson(new BobBsonConfig(false));
     bobBson.registerFactory(new ObjectConverterFactory());
 
-    org.bobstuff.bobbson.writer.BsonWriter bsonWriter =
-        new StackBsonWriter(buffer);
+    org.bobstuff.bobbson.writer.BsonWriter bsonWriter = new StackBsonWriter(buffer);
     bobBson.serialise(sut, DelegateObject.class, bsonWriter);
 
     ByteArrayOutputStream bos = new ByteArrayOutputStream();

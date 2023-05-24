@@ -46,6 +46,6 @@ public class StringBsonConverter implements BobBsonConverter<String> {
       return null;
     }
     throw new RuntimeException(
-            "trying to read a string from something that isn't a string or a null");
+        "trying to read a string from something that isn't a string or a null");
   }
 }

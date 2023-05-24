@@ -5,7 +5,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.nio.charset.StandardCharsets;
-
 import org.bobstuff.bobbson.BsonReaderStack;
 import org.bobstuff.bobbson.BsonType;
 import org.bobstuff.bobbson.writer.StackBsonWriter;

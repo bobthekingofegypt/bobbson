@@ -138,15 +138,30 @@ public class StackBsonWriter implements BsonWriter {
       var index = contextStack.context.getAndIncrementArrayIndex();
       var size = stringSize(index);
       var c = getChars(index, size, indexNumberCache);
-//      buffer.writeString((contextStack.context.getAndIncrementArrayIndex()));
+      //      buffer.writeString((contextStack.context.getAndIncrementArrayIndex()));
       buffer.writeBytes(indexNumberCache, 0, size);
       buffer.writeByte((byte) 0);
     } else {
       throw new IllegalStateException("write name value is confused");
     }
   }
-  static final byte[] DigitOnes = new byte[]{48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57};
-  static final byte[] DigitTens = new byte[]{48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 51, 51, 51, 51, 51, 51, 51, 51, 51, 51, 52, 52, 52, 52, 52, 52, 52, 52, 52, 52, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 54, 54, 54, 54, 54, 54, 54, 54, 54, 54, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 56, 56, 56, 56, 56, 56, 56, 56, 56, 56, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57};
+
+  static final byte[] DigitOnes =
+      new byte[] {
+        48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50,
+        51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53,
+        54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54, 55, 56,
+        57, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49,
+        50, 51, 52, 53, 54, 55, 56, 57
+      };
+  static final byte[] DigitTens =
+      new byte[] {
+        48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 50, 50, 50,
+        50, 50, 50, 50, 50, 50, 50, 51, 51, 51, 51, 51, 51, 51, 51, 51, 51, 52, 52, 52, 52, 52, 52,
+        52, 52, 52, 52, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 54, 54, 54, 54, 54, 54, 54, 54, 54,
+        54, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 56, 56, 56, 56, 56, 56, 56, 56, 56, 56, 57, 57,
+        57, 57, 57, 57, 57, 57, 57, 57
+      };
 
   static int getChars(int i, int index, byte[] buf) {
     int charPos = index;
@@ -157,7 +172,7 @@ public class StackBsonWriter implements BsonWriter {
 
     int q;
     int r;
-    while(i <= -100) {
+    while (i <= -100) {
       q = i / 100;
       r = q * 100 - i;
       i = q;
@@ -170,10 +185,10 @@ public class StackBsonWriter implements BsonWriter {
     q = i / 10;
     r = q * 10 - i;
     --charPos;
-    buf[charPos] = (byte)(48 + r);
+    buf[charPos] = (byte) (48 + r);
     if (q < 0) {
       --charPos;
-      buf[charPos] = (byte)(48 - q);
+      buf[charPos] = (byte) (48 - q);
     }
 
     if (negative) {
@@ -193,7 +208,7 @@ public class StackBsonWriter implements BsonWriter {
 
     int p = -10;
 
-    for(int i = 1; i < 10; ++i) {
+    for (int i = 1; i < 10; ++i) {
       if (x > p) {
         return i + d;
       }
@@ -723,6 +738,7 @@ public class StackBsonWriter implements BsonWriter {
     buffer.writeBytes(value);
     setNextState();
   }
+
   @Override
   public void writeDouble(String field, double value) {
     buffer.writeByte((byte) BsonType.DOUBLE.getValue());

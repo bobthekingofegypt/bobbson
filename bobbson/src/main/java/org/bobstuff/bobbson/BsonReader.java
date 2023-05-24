@@ -1,61 +1,61 @@
 package org.bobstuff.bobbson;
 
 public interface BsonReader {
-    ContextStack getContextStack();
+  ContextStack getContextStack();
 
-    BsonState getState();
+  BsonState getState();
 
-    void readStartDocument();
+  void readStartDocument();
 
-    void readEndDocument();
+  void readEndDocument();
 
-    void readStartArray();
+  void readStartArray();
 
-    void readEndArray();
+  void readEndArray();
 
-    BsonType readBsonType();
+  BsonType readBsonType();
 
-    void readStringRaw();
+  void readStringRaw();
 
-    BobBsonBuffer.ByteRangeComparitor getFieldName();
+  BobBsonBuffer.ByteRangeComparitor getFieldName();
 
-    String currentFieldName();
+  String currentFieldName();
 
-    BsonType getCurrentBsonType();
+  BsonType getCurrentBsonType();
 
-    BsonContextType getCurrentContextType();
+  BsonContextType getCurrentContextType();
 
-    boolean readBoolean();
+  boolean readBoolean();
 
-    RegexRaw readRegex();
+  RegexRaw readRegex();
 
-    DbPointerRaw readDbPointerRaw();
+  DbPointerRaw readDbPointerRaw();
 
-    CodeWithScopeRaw readCodeWithScope();
+  CodeWithScopeRaw readCodeWithScope();
 
-    BobBsonBinary readBinary();
+  BobBsonBinary readBinary();
 
-    byte[] readObjectId();
+  byte[] readObjectId();
 
-    Decimal128 readDecimal128();
+  Decimal128 readDecimal128();
 
-    String readString();
+  String readString();
 
-    int readInt32();
+  int readInt32();
 
-    long readInt64();
+  long readInt64();
 
-    long readDateTime();
+  long readDateTime();
 
-    void readNull();
+  void readNull();
 
-    void readUndefined();
+  void readUndefined();
 
-    double readDouble();
+  double readDouble();
 
-    void skipValue();
+  void skipValue();
 
-    void skipContext();
+  void skipContext();
 
-    void skipToEnd();
+  void skipToEnd();
 }

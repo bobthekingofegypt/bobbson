@@ -20,8 +20,7 @@ public class LargeObjectEncodingTest {
 
     var obj = Generator.newLargeObject();
 
-    org.bobstuff.bobbson.writer.BsonWriter bsonWriter =
-        new StackBsonWriter(buffer);
+    org.bobstuff.bobbson.writer.BsonWriter bsonWriter = new StackBsonWriter(buffer);
     bobBson.serialise(obj, LargeObject.class, bsonWriter);
 
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -47,8 +46,7 @@ public class LargeObjectEncodingTest {
 
     var obj = Generator.newLargeObject();
 
-    org.bobstuff.bobbson.writer.BsonWriter bsonWriter =
-        new StackBsonWriter(buffer);
+    org.bobstuff.bobbson.writer.BsonWriter bsonWriter = new StackBsonWriter(buffer);
     bobBson.serialise(obj, LargeObject.class, bsonWriter);
 
     ByteArrayOutputStream bos = new ByteArrayOutputStream();

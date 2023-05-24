@@ -1,7 +1,6 @@
 package org.bobstuff.bobbson;
 
 import java.nio.ByteBuffer;
-
 import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

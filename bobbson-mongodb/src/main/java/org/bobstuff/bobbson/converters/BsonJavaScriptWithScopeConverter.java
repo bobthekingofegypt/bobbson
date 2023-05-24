@@ -22,7 +22,8 @@ public class BsonJavaScriptWithScopeConverter implements BobBsonConverter<BsonJa
   public @Nullable BsonJavaScriptWithScope read(BsonReader bsonReader) {
     var codeWithScope = bsonReader.readCodeWithScope();
     BsonReader reader =
-        new BsonReaderStack(ByteBuffer.wrap(codeWithScope.getScope()).order(ByteOrder.LITTLE_ENDIAN));
+        new BsonReaderStack(
+            ByteBuffer.wrap(codeWithScope.getScope()).order(ByteOrder.LITTLE_ENDIAN));
     BsonDocument document;
     try {
       document = bobBson.deserialise(BsonDocument.class, reader);

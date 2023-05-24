@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-
 import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.bson.BsonBinaryWriter;
 import org.bson.io.BasicOutputBuffer;
@@ -98,8 +97,7 @@ public class Main {
         new NoopBufferDataPool((size) -> new ByteBufferBobBsonBuffer(new byte[size]));
     DynamicBobBsonBuffer dynamicBuffer = new DynamicBobBsonBuffer(pool);
 
-    org.bobstuff.bobbson.writer.BsonWriter bsonWriter =
-        new StackBsonWriter(dynamicBuffer);
+    org.bobstuff.bobbson.writer.BsonWriter bsonWriter = new StackBsonWriter(dynamicBuffer);
 
     bobBson.serialise(bo, BasicObject.class, bsonWriter);
 
@@ -147,8 +145,7 @@ public class Main {
     qualifications.put("english", q2);
     p.setQualifications(qualifications);
 
-    org.bobstuff.bobbson.writer.BsonWriter bsonWriter =
-        new StackBsonWriter(dynamicBuffer);
+    org.bobstuff.bobbson.writer.BsonWriter bsonWriter = new StackBsonWriter(dynamicBuffer);
 
     bobBson.serialise(p, Person.class, bsonWriter);
 

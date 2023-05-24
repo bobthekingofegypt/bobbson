@@ -16,14 +16,12 @@
  */
 package org.bobstuff.bobbson;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
+import static java.lang.String.format;
 
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-
-import static java.lang.String.format;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class FastBsonReader implements BsonReader {
   private static final Charset UTF8_CHARSET = StandardCharsets.UTF_8;
@@ -62,12 +60,13 @@ public class FastBsonReader implements BsonReader {
     var value = contextStack[contextStackIndex];
     contextStackRemaining = value >> 4;
     var contextTypeValue = value & 0xf;
-    contextStackType = switch (contextTypeValue) {
-      case 0 -> BsonContextType.TOP_LEVEL;
-      case 1 -> BsonContextType.DOCUMENT;
-      case 2 -> BsonContextType.ARRAY;
-      default -> throw new RuntimeException("Unknown context type");
-    };
+    contextStackType =
+        switch (contextTypeValue) {
+          case 0 -> BsonContextType.TOP_LEVEL;
+          case 1 -> BsonContextType.DOCUMENT;
+          case 2 -> BsonContextType.ARRAY;
+          default -> throw new RuntimeException("Unknown context type");
+        };
   }
 
   public void reset() {
@@ -471,8 +470,7 @@ public class FastBsonReader implements BsonReader {
       case TOP_LEVEL:
         return BsonState.DONE;
       default:
-        throw new RuntimeException(
-            format("Unexpected ContextType %s.", contextStackType));
+        throw new RuntimeException(format("Unexpected ContextType %s.", contextStackType));
     }
   }
 
@@ -486,8 +484,7 @@ public class FastBsonReader implements BsonReader {
         state = BsonState.DONE;
         break;
       default:
-        throw new RuntimeException(
-            format("Unexpected ContextType %s.", contextStackType));
+        throw new RuntimeException(format("Unexpected ContextType %s.", contextStackType));
     }
   }
 }
