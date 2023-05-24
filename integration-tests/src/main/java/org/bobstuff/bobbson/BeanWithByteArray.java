@@ -1,9 +1,9 @@
 package org.bobstuff.bobbson;
 
 import org.bobstuff.bobbson.annotations.BsonConverter;
-import org.bobstuff.bobbson.annotations.CompiledBson;
+import org.bobstuff.bobbson.annotations.GenerateBobBsonConverter;
 
-@CompiledBson
+@GenerateBobBsonConverter
 public class BeanWithByteArray {
   @BsonConverter(target = CustomObjectIdConverter.class)
   private byte[] key;

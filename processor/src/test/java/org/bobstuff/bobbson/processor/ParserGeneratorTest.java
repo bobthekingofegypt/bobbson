@@ -13,7 +13,7 @@ import java.util.*;
 import javax.lang.model.element.Element;
 import org.bobstuff.bobbson.annotations.BsonAttribute;
 import org.bobstuff.bobbson.annotations.BsonConverter;
-import org.bobstuff.bobbson.annotations.CompiledBson;
+import org.bobstuff.bobbson.annotations.GenerateBobBsonConverter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -712,7 +712,7 @@ public class ParserGeneratorTest {
   }
 
   @Case("first")
-  @CompiledBson
+  @GenerateBobBsonConverter
   static class Sample {
     private String name;
 
@@ -726,7 +726,7 @@ public class ParserGeneratorTest {
   }
 
   @Case("converter")
-  @CompiledBson
+  @GenerateBobBsonConverter
   static class SampleConverter {
     @BsonConverter(target = CustomConverter.class)
     private String name;
@@ -741,7 +741,7 @@ public class ParserGeneratorTest {
   }
 
   @Case("multipleFields")
-  @CompiledBson
+  @GenerateBobBsonConverter
   static class SampleMultipleFields {
     private String name;
     private int age;
@@ -773,7 +773,7 @@ public class ParserGeneratorTest {
   }
 
   @Case("multipleFieldsOrdered1")
-  @CompiledBson
+  @GenerateBobBsonConverter
   static class SampleMultipleFieldsOrdered1 {
     @BsonAttribute(value = "name", order = 3)
     private String name;
@@ -810,7 +810,7 @@ public class ParserGeneratorTest {
   }
 
   @Case("multipleFieldsOrdered2")
-  @CompiledBson
+  @GenerateBobBsonConverter
   static class SampleMultipleFieldsOrdered2 {
     @BsonAttribute(value = "name", order = 1)
     private String name;
@@ -847,7 +847,7 @@ public class ParserGeneratorTest {
   }
 
   @Case("multipleListNonListDepBug")
-  @CompiledBson
+  @GenerateBobBsonConverter
   static class SampleMultipleListNonListDepBug {
     @BsonAttribute(value = "name", order = 1)
     private @Nullable String name;
@@ -873,7 +873,7 @@ public class ParserGeneratorTest {
   }
 
   @Case("genericClass")
-  @CompiledBson
+  @GenerateBobBsonConverter
   static class SampleGenericClass<TModelCrazyName> {
     @BsonAttribute(value = "name", order = 1)
     private @Nullable String name;
@@ -899,7 +899,7 @@ public class ParserGeneratorTest {
   }
 
   @Case("collections")
-  @CompiledBson
+  @GenerateBobBsonConverter
   static class SampleCollections {
     private Map<String, String> map;
     private Map<String, Double> mapDouble;

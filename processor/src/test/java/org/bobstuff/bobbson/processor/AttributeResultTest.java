@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.lang.model.element.Element;
-import org.bobstuff.bobbson.annotations.CompiledBson;
+import org.bobstuff.bobbson.annotations.GenerateBobBsonConverter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -60,7 +60,7 @@ public class AttributeResultTest {
   public static class TestEmbedded {}
 
   @Case("multipleFields")
-  @CompiledBson
+  @GenerateBobBsonConverter
   static class SampleMultipleFields {
     private String name;
     private int age;

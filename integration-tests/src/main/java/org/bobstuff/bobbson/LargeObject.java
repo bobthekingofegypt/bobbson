@@ -2,9 +2,9 @@ package org.bobstuff.bobbson;
 
 import java.util.List;
 import java.util.Objects;
-import org.bobstuff.bobbson.annotations.CompiledBson;
+import org.bobstuff.bobbson.annotations.GenerateBobBsonConverter;
 
-@CompiledBson
+@GenerateBobBsonConverter
 public class LargeObject {
   private List<MediumObject> mediumObjects;
   private SmallObject smallObject;

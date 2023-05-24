@@ -14,7 +14,7 @@ import javax.lang.model.util.Types;
 import org.bobstuff.bobbson.annotations.BsonAttribute;
 import org.bobstuff.bobbson.annotations.BsonConverter;
 import org.bobstuff.bobbson.annotations.BsonWriterOptions;
-import org.bobstuff.bobbson.annotations.CompiledBson;
+import org.bobstuff.bobbson.annotations.GenerateBobBsonConverter;
 
 public class Analysis {
   private Types types;
@@ -33,7 +33,7 @@ public class Analysis {
     this.types = types;
     this.elements = elements;
     this.messager = bobMessager;
-    this.compileElement = elements.getTypeElement(CompiledBson.class.getName());
+    this.compileElement = elements.getTypeElement(GenerateBobBsonConverter.class.getName());
     this.compileType = types.getDeclaredType(compileElement);
     this.attributeElement = elements.getTypeElement(BsonAttribute.class.getName());
     this.attributeType = types.getDeclaredType(attributeElement);

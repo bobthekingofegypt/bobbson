@@ -2,9 +2,9 @@ package org.bobstuff.bobbson.delegates;
 
 import java.util.Objects;
 import org.bobstuff.bobbson.annotations.BsonAttribute;
-import org.bobstuff.bobbson.annotations.CompiledBson;
+import org.bobstuff.bobbson.annotations.GenerateBobBsonConverter;
 
-@CompiledBson
+@GenerateBobBsonConverter
 public class DelegateObject {
   private String name;
   private DelegateAge delegateAge = new DelegateAge();

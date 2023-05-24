@@ -11,7 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import org.bobstuff.bobbson.annotations.BsonAttribute;
 import org.bobstuff.bobbson.annotations.BsonConverter;
-import org.bobstuff.bobbson.annotations.CompiledBson;
+import org.bobstuff.bobbson.annotations.GenerateBobBsonConverter;
 import org.bobstuff.bobbson.converters.StringBsonConverter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -190,7 +190,7 @@ public class AnalysisTest {
   }
 
   @Case("first")
-  @CompiledBson
+  @GenerateBobBsonConverter
   static class Sample {
     private String name;
 
@@ -204,7 +204,7 @@ public class AnalysisTest {
   }
 
   @Case("second")
-  @CompiledBson
+  @GenerateBobBsonConverter
   static class SampleList {
     private List<String> names;
 
@@ -218,7 +218,7 @@ public class AnalysisTest {
   }
 
   @Case("alias")
-  @CompiledBson
+  @GenerateBobBsonConverter
   static class SampleAlias {
     @BsonAttribute("notcalledname")
     private String name;
@@ -233,7 +233,7 @@ public class AnalysisTest {
   }
 
   @Case("converter")
-  @CompiledBson
+  @GenerateBobBsonConverter
   static class SampleConverter {
     @BsonConverter(target = StringBsonConverter.class)
     private String name;
@@ -248,7 +248,7 @@ public class AnalysisTest {
   }
 
   @Case("isiscase")
-  @CompiledBson
+  @GenerateBobBsonConverter
   static class IsIsCase {
     private boolean isName;
 

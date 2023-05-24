@@ -2,10 +2,10 @@ package org.bobstuff.bobbson;
 
 import java.util.List;
 import org.bobstuff.bobbson.annotations.BsonAttribute;
-import org.bobstuff.bobbson.annotations.CompiledBson;
+import org.bobstuff.bobbson.annotations.GenerateBobBsonConverter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-@CompiledBson
+@GenerateBobBsonConverter
 public class MultipleConverterBug<TModel> {
   @BsonAttribute("q")
   private @Nullable String filter;

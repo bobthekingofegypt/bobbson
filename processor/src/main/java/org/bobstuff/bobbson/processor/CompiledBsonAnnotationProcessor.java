@@ -12,7 +12,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.JavaFileObject;
-import org.bobstuff.bobbson.annotations.CompiledBson;
+import org.bobstuff.bobbson.annotations.GenerateBobBsonConverter;
 
 @SupportedAnnotationTypes({
   "org.bobstuff.bobbson.annotations.CompiledBson",
@@ -39,7 +39,7 @@ public class CompiledBsonAnnotationProcessor extends AbstractProcessor {
     messager.debug("running the processor for a round");
 
     Set<? extends Element> compiledBsonInstances =
-        roundEnv.getElementsAnnotatedWith(CompiledBson.class);
+        roundEnv.getElementsAnnotatedWith(GenerateBobBsonConverter.class);
     messager.debug("found " + compiledBsonInstances.size() + " items marked as BsonCompiler");
     if (compiledBsonInstances.isEmpty()) {
       return false;

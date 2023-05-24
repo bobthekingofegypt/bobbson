@@ -7,4 +7,4 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.TYPE, ElementType.CONSTRUCTOR, ElementType.METHOD})
 @Retention(RetentionPolicy.CLASS)
-public @interface CompiledBson {}
+public @interface GenerateBobBsonConverter {}
