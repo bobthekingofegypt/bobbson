@@ -140,8 +140,19 @@ public class ActiveJBufferData implements BobBsonBuffer {
   }
 
   @Override
-  public byte @Nullable [] getArray() {
+  public byte[] getArray() {
     return data;
+  }
+
+  /**
+   * If the buffer allows direct access to its backing array. Call this method if you need to check
+   * before trying to access array.
+   *
+   * @return true if raw byte array access is possible
+   */
+  @Override
+  public boolean canAccessArray() {
+    return true;
   }
 
   @Override

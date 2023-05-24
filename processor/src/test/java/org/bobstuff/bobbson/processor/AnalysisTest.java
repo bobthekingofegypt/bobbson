@@ -30,9 +30,10 @@ public class AnalysisTest {
 
     assertEquals("org.bobstuff.bobbson.processor.AnalysisTest$Sample", si.binaryName);
     assertEquals(
-        "org.bobstuff.bobbson.annotations.CompiledBson",
+        "org.bobstuff.bobbson.annotations.GenerateBobBsonConverter",
         si.annotation.getAnnotationType().toString());
-    assertEquals("org.bobstuff.bobbson.annotations.CompiledBson", si.discoveredBy.toString());
+    assertEquals(
+        "org.bobstuff.bobbson.annotations.GenerateBobBsonConverter", si.discoveredBy.toString());
 
     var attributes = si.attributes;
     assertTrue(attributes.containsKey("name"));
@@ -62,9 +63,10 @@ public class AnalysisTest {
 
     assertEquals("org.bobstuff.bobbson.processor.AnalysisTest$SampleList", si.binaryName);
     assertEquals(
-        "org.bobstuff.bobbson.annotations.CompiledBson",
+        "org.bobstuff.bobbson.annotations.GenerateBobBsonConverter",
         si.annotation.getAnnotationType().toString());
-    assertEquals("org.bobstuff.bobbson.annotations.CompiledBson", si.discoveredBy.toString());
+    assertEquals(
+        "org.bobstuff.bobbson.annotations.GenerateBobBsonConverter", si.discoveredBy.toString());
 
     var attributes = si.attributes;
     assertTrue(attributes.containsKey("names"));
@@ -96,9 +98,10 @@ public class AnalysisTest {
 
     assertEquals("org.bobstuff.bobbson.processor.AnalysisTest$SampleAlias", si.binaryName);
     assertEquals(
-        "org.bobstuff.bobbson.annotations.CompiledBson",
+        "org.bobstuff.bobbson.annotations.GenerateBobBsonConverter",
         si.annotation.getAnnotationType().toString());
-    assertEquals("org.bobstuff.bobbson.annotations.CompiledBson", si.discoveredBy.toString());
+    assertEquals(
+        "org.bobstuff.bobbson.annotations.GenerateBobBsonConverter", si.discoveredBy.toString());
 
     var attributes = si.attributes;
     assertTrue(attributes.containsKey("name"));
@@ -130,9 +133,10 @@ public class AnalysisTest {
 
     assertEquals("org.bobstuff.bobbson.processor.AnalysisTest$IsIsCase", si.binaryName);
     assertEquals(
-        "org.bobstuff.bobbson.annotations.CompiledBson",
+        "org.bobstuff.bobbson.annotations.GenerateBobBsonConverter",
         si.annotation.getAnnotationType().toString());
-    assertEquals("org.bobstuff.bobbson.annotations.CompiledBson", si.discoveredBy.toString());
+    assertEquals(
+        "org.bobstuff.bobbson.annotations.GenerateBobBsonConverter", si.discoveredBy.toString());
 
     var attributes = si.attributes;
     assertTrue(attributes.containsKey("isName"));
@@ -161,9 +165,10 @@ public class AnalysisTest {
 
     assertEquals("org.bobstuff.bobbson.processor.AnalysisTest$SampleConverter", si.binaryName);
     assertEquals(
-        "org.bobstuff.bobbson.annotations.CompiledBson",
+        "org.bobstuff.bobbson.annotations.GenerateBobBsonConverter",
         si.annotation.getAnnotationType().toString());
-    assertEquals("org.bobstuff.bobbson.annotations.CompiledBson", si.discoveredBy.toString());
+    assertEquals(
+        "org.bobstuff.bobbson.annotations.GenerateBobBsonConverter", si.discoveredBy.toString());
 
     var attributes = si.attributes;
     assertTrue(attributes.containsKey("name"));

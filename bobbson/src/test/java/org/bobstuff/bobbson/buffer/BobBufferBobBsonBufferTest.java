@@ -16,6 +16,10 @@ public class BobBufferBobBsonBufferTest extends BobBsonBufferTest {
   }
 
   @Test
+  public void testCanAccessArray() {
+    Assertions.assertTrue(writeSut.canAccessArray());
+  }
+  @Test
   public void testGetArray() {
     Assertions.assertNotNull(writeSut.getArray());
   }

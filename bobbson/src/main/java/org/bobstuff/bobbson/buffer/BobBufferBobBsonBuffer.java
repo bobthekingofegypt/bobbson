@@ -7,7 +7,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public class BobBufferBobBsonBuffer implements BobBsonBuffer {
   private BobBuffer buffer;
   private byte[] data;
-  private int start;
   public BobBsonByteRange byteRange;
 
   public BobBufferBobBsonBuffer(byte[] data) {
@@ -135,9 +134,15 @@ public class BobBufferBobBsonBuffer implements BobBsonBuffer {
 
   //
   @Override
-  public byte @Nullable [] getArray() {
+  public byte[] getArray() {
     return buffer.getArray();
   }
+
+  @Override
+  public boolean canAccessArray() {
+    return true;
+  }
+
   //
   @Override
   public int getLimit() {

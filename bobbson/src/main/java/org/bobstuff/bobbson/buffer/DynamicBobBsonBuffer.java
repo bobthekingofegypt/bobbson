@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.List;
 import org.bobstuff.bobbson.ByteSizes;
 import org.bobstuff.bobbson.buffer.pool.BobBsonBufferPool;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class DynamicBobBsonBuffer implements BobBsonBuffer {
   private static final int DEFAULT_BUFFER_SIZE = 1024;
@@ -139,9 +138,19 @@ public class DynamicBobBsonBuffer implements BobBsonBuffer {
   }
 
   @Override
-  @SuppressWarnings("PMD.ReturnEmptyCollectionRatherThanNull")
-  public byte @Nullable [] getArray() {
-    return null;
+  public byte[] getArray() {
+    throw new UnsupportedOperationException("Cannot access raw array of dynamic buffer");
+  }
+
+  /**
+   * If the buffer allows direct access to its backing array. Call this method if you need to check
+   * before trying to access array.
+   *
+   * @return true if raw byte array access is possible
+   */
+  @Override
+  public boolean canAccessArray() {
+    return true;
   }
 
   @Override

@@ -3,6 +3,7 @@ package org.bobstuff.bobbson;
 import java.util.stream.Stream;
 import org.bobstuff.bobbson.activej.ActiveJBufferData;
 import org.bobstuff.bobbson.buffer.*;
+import org.bobstuff.bobbson.buffer.pool.ConcurrentBobBsonBufferPool;
 import org.bobstuff.bobbson.reflection.CollectionConverterFactory;
 import org.bobstuff.bobbson.reflection.EnumConverterFactory;
 import org.bobstuff.bobbson.reflection.ObjectConverterFactory;
@@ -61,7 +62,7 @@ public class BobBsonComboProvider implements ArgumentsProvider {
   public class DynamicBobBsonBufferProvider implements BobBsonBufferProvider {
     @Override
     public BobBsonBuffer provide(int size) {
-      return new DynamicBobBsonBuffer(new BobBufferPool());
+      return new DynamicBobBsonBuffer(new ConcurrentBobBsonBufferPool());
     }
   }
 

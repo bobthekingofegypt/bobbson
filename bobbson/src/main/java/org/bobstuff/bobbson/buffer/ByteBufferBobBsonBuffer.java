@@ -38,11 +38,22 @@ public class ByteBufferBobBsonBuffer implements BobBsonBuffer {
 
   @Override
   @SuppressWarnings("PMD.ReturnEmptyCollectionRatherThanNull")
-  public byte @Nullable [] getArray() {
+  public byte[] getArray() {
     if (buffer.hasArray()) {
       return buffer.array();
     }
-    return null;
+    throw new UnsupportedOperationException("ByteBuffer does not provide access to backing array");
+  }
+
+  /**
+   * If the buffer allows direct access to its backing array. Call this method if you need to check
+   * before trying to access array.
+   *
+   * @return true if raw byte array access is possible
+   */
+  @Override
+  public boolean canAccessArray() {
+    return buffer.hasArray();
   }
 
   @Override

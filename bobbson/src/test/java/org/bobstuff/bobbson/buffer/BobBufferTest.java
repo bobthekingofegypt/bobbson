@@ -156,7 +156,7 @@ public class BobBufferTest {
 
     BobBuffer bobBuffer = new BobBuffer(data, 0, 100);
     byte[] newData = new byte[17];
-    bobBuffer.readBytes(newData);
+    var count = bobBuffer.readBytes(newData);
 
     ByteBuffer comp = ByteBuffer.wrap(newData).order(ByteOrder.LITTLE_ENDIAN);
     Assertions.assertEquals((byte) 48, comp.get());
@@ -165,6 +165,7 @@ public class BobBufferTest {
 
     Assertions.assertEquals(100, bobBuffer.getTail());
     Assertions.assertEquals(17, bobBuffer.getHead());
+    Assertions.assertEquals(17, count);
   }
 
   @Test
