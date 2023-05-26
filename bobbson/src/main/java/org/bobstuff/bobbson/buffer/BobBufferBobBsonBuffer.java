@@ -2,27 +2,49 @@ package org.bobstuff.bobbson.buffer;
 
 import java.util.Arrays;
 import org.bobstuff.bobbson.BobBsonByteRange;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * Implementation of {@code BobBsonBuffer} that uses {@code BobBuffer} as its backing buffer.
+ */
 public class BobBufferBobBsonBuffer implements BobBsonBuffer {
   private BobBuffer buffer;
   private byte[] data;
   public BobBsonByteRange byteRange;
 
+  /**
+   * Construct new buffer using data array, head will be set to 0 and tail to length of data
+   * @param data  backing byte array
+   */
   public BobBufferBobBsonBuffer(byte[] data) {
     this(data, 0, data.length);
   }
 
-  public BobBufferBobBsonBuffer(byte[] data, int start) {
-    this(data, start, data.length);
+  /**
+   * Construct a new buffer using data array, head will be set to given head value.  Tail will be set to length of data array
+   * @param data  backing byte array
+   * @param head  starting value for head
+   */
+  public BobBufferBobBsonBuffer(byte[] data, int head) {
+    this(data, head, data.length);
   }
 
-  public BobBufferBobBsonBuffer(byte[] data, int start, int tail) {
-    buffer = new BobBuffer(data, start, tail);
+  /**
+   * Construct a new buffer using the data array, starting head and tail set to given values
+   * @param data  backing byte array
+   * @param head  starting value for head
+   * @param tail  starting value for tail
+   */
+  public BobBufferBobBsonBuffer(byte[] data, int head, int tail) {
+    buffer = new BobBuffer(data, head, tail);
     this.byteRange = new BobBsonByteRange(buffer.getArray());
     this.data = data;
   }
 
+  /**
+   * Construct a new buffer using an existing {@code BobBuffer}
+   *
+   * @param buffer  {@code BobBuffer} to read from
+   */
   public BobBufferBobBsonBuffer(BobBuffer buffer) {
     this.buffer = buffer;
     this.byteRange = new BobBsonByteRange(buffer.getArray());
@@ -33,8 +55,15 @@ public class BobBufferBobBsonBuffer implements BobBsonBuffer {
     return buffer;
   }
 
+  /**
+   * Set BobBsonBuffer to operate on a new backing array, allows reuse of this instance for new data
+   * @param data  new backing array
+   * @param head  new head position to read from
+   * @param tail  new tail position to write from
+   */
   public void process(byte[] data, int head, int tail) {
     buffer = new BobBuffer(data, head, tail);
+    this.data = data;
     this.byteRange.setData(data);
   }
 
@@ -75,18 +104,6 @@ public class BobBufferBobBsonBuffer implements BobBsonBuffer {
     return Double.longBitsToDouble(buffer.readLongLe());
   }
 
-  //  //  @Override
-  //  //  public int readSizeValue(OutputStream stream) {
-  //  //    var size = getInt();
-  //  //    try {
-  //  //      stream.write(buffer.array(), buffer.head() - 4, size);
-  //  //    } catch (Exception e) {
-  //  //      e.printStackTrace();
-  //  //    }
-  //  //    buffer.head(buffer.head() - 4);
-  //  //    return size;
-  //  //  }
-  //
   @Override
   public int readUntil(byte value) {
     byte[] bufferArray = data;
@@ -132,7 +149,6 @@ public class BobBufferBobBsonBuffer implements BobBsonBuffer {
     return buffer.readRemaining();
   }
 
-  //
   @Override
   public byte[] getArray() {
     return buffer.getArray();
@@ -143,7 +159,6 @@ public class BobBufferBobBsonBuffer implements BobBsonBuffer {
     return true;
   }
 
-  //
   @Override
   public int getLimit() {
     return buffer.getLimit();
@@ -158,7 +173,7 @@ public class BobBufferBobBsonBuffer implements BobBsonBuffer {
   public void writeByte(byte b) {
     buffer.writeByte(b);
   }
-  //
+
   @Override
   public void writeInteger(int i) {
     buffer.writeIntegerLe(i);
@@ -173,50 +188,25 @@ public class BobBufferBobBsonBuffer implements BobBsonBuffer {
   public void writeBytes(byte[] bytes, int offset, int size) {
     buffer.writeBytes(bytes, offset, size);
   }
-  //
+
   @Override
   public void writeInteger(int position, int i) {
     buffer.writeIntegerLe(position, i);
   }
-  //
+
   @Override
   public void writeLong(long value) {
     buffer.writeLongLe(value);
   }
 
   @Override
-  @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
   public void writeString(String value) {
     var buf = buffer.getArray();
     var i = buffer.getTail();
-    int start = i;
 
-    for (int sIndex = 0, sLength = value.length(); sIndex < sLength; sIndex++) {
-      char c = value.charAt(sIndex);
-      if (c < '\u0080') {
-        buf[i++] = (byte) c;
-      } else if (c < '\u0800') {
-        buf[i++] = (byte) (192 | c >>> 6);
-        buf[i++] = (byte) (128 | c & 63);
-      } else if (c < '\ud800' || c > '\udfff') {
-        buf[i++] = (byte) (224 | c >>> 12);
-        buf[i++] = (byte) (128 | c >>> 6 & 63);
-        buf[i++] = (byte) (128 | c & 63);
-      } else {
-        int cp = 0;
-        sIndex += 1;
-        if (sIndex < sLength) cp = Character.toCodePoint(c, value.charAt(sIndex));
-        if ((cp >= 1 << 16) && (cp < 1 << 21)) {
-          buf[i++] = (byte) (240 | cp >>> 18);
-          buf[i++] = (byte) (128 | cp >>> 12 & 63);
-          buf[i++] = (byte) (128 | cp >>> 6 & 63);
-          buf[i++] = (byte) (128 | cp & 63);
-        } else {
-          buf[i++] = (byte) '?';
-        }
-      }
-    }
-    buffer.setTail(i);
+    int finalTail = BufferUtilities.writeStringToByteArray(value, buf, i);
+
+    buffer.setTail(finalTail);
   }
 
   @Override
