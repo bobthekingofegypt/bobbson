@@ -15,7 +15,7 @@ import javax.tools.JavaFileObject;
 import org.bobstuff.bobbson.annotations.GenerateBobBsonConverter;
 
 @SupportedAnnotationTypes({
-  "org.bobstuff.bobbson.annotations.CompiledBson",
+  "org.bobstuff.bobbson.annotations.GenerateBobBsonConverter",
 })
 @SuppressWarnings("initialization")
 public class CompiledBsonAnnotationProcessor extends AbstractProcessor {

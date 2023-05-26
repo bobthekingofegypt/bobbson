@@ -16,5 +16,5 @@ import org.bobstuff.bobbson.BobBsonConverter;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface BsonConverter {
   /** @return implementation of {@code BobBsonConverter} to use for annotated field */
-  Class<? extends BobBsonConverter> target();
+  Class<? extends BobBsonConverter<?>> target();
 }

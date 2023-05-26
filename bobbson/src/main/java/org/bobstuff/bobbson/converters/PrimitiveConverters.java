@@ -15,14 +15,19 @@ public class PrimitiveConverters {
   }
 
   public static long parseLong(BsonReader reader) {
-    if (reader.getCurrentBsonType() == BsonType.NULL) {
+    var type = reader.getCurrentBsonType();
+    if (type == BsonType.NULL) {
       throw new RuntimeException("Attempting to read null into a primitive long type");
     }
-    // TODO support casting of numeric types where safe
-    if (reader.getCurrentBsonType() != BsonType.INT64) {
-      throw new RuntimeException("Attempting to read non int64 type into long field");
+
+    if (type == BsonType.INT64) {
+      return reader.readInt64();
+    } else if (type == BsonType.INT32) {
+      return reader.readInt32();
+    } else if (type == BsonType.DOUBLE) {
+      return (long) reader.readDouble();
     }
-    return reader.readInt64();
+    throw new RuntimeException("Attempting to read non int64 type into long field");
   }
 
   public static double parseDouble(BsonReader reader) {

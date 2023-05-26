@@ -125,6 +125,7 @@ public class ParserGenerator {
 
   protected CodeBlock generateWriterCollectionCode(AttributeResult attribute) {
     return CodeBlock.builder()
+        .beginControlFlow("")
         .addStatement("writer.writeStartArray($NBytes)", attribute.getName())
         .addStatement("var col = obj.$N()", attribute.readMethod.getSimpleName())
         .beginControlFlow(
@@ -132,17 +133,32 @@ public class ParserGenerator {
         .addStatement("$N().write(writer, col.get(i))", attribute.getConverterFieldName())
         .endControlFlow()
         .addStatement("writer.writeEndArray()")
+        .endControlFlow()
+        .build();
+  }
+
+  protected CodeBlock generateWriterCollectionIteratorCode(AttributeResult attribute) {
+    return CodeBlock.builder()
+        .beginControlFlow("")
+        .addStatement("writer.writeStartArray($NBytes)", attribute.getName())
+        .beginControlFlow("for (var e : obj.$N())", attribute.readMethod.getSimpleName())
+        .addStatement("$N().write(writer, e)", attribute.getConverterFieldName())
+        .endControlFlow()
+        .addStatement("writer.writeEndArray()")
+        .endControlFlow()
         .build();
   }
 
   protected CodeBlock generateWriterMapCode(AttributeResult attribute) {
     return CodeBlock.builder()
+        .beginControlFlow("")
         .addStatement("writer.writeStartDocument($NBytes)", attribute.getName())
         .beginControlFlow("for (var e : obj.$N().entrySet())", attribute.readMethod.getSimpleName())
         .addStatement(
             "$N().write(writer, e.getKey(), e.getValue())", attribute.getConverterFieldName())
         .endControlFlow()
         .addStatement("writer.writeEndDocument()")
+        .endControlFlow()
         .build();
   }
 
@@ -173,8 +189,10 @@ public class ParserGenerator {
         block.beginControlFlow("if (obj.$N() != null)", attribute.readMethod.getSimpleName());
       }
 
-      if ((attribute.isList() || attribute.isSet()) && attribute.getConverterType() == null) {
+      if ((attribute.isList()) && attribute.getConverterType() == null) {
         block.add(generateWriterCollectionCode(attribute));
+      } else if ((attribute.isSet()) && attribute.getConverterType() == null) {
+        block.add(generateWriterCollectionIteratorCode(attribute));
       } else if (attribute.isPrimitive()) {
         if (attribute.getDeclaredType().getKind() == TypeKind.INT) {
           block.addStatement(
@@ -227,6 +245,7 @@ public class ParserGenerator {
 
   protected CodeBlock generateParserCollectionCode(Class<?> clazz, AttributeResult attribute) {
     return CodeBlock.builder()
+        .beginControlFlow("")
         .addStatement("var list = new $T<$N>(4)", clazz, attribute.getParam())
         .addStatement("reader.readStartArray()")
         .addStatement("var type_i = $T.NOT_SET", BsonType.class)
@@ -237,11 +256,13 @@ public class ParserGenerator {
         .endControlFlow()
         .addStatement("reader.readEndArray()")
         .addStatement("result.$N(list)", attribute.writeMethod.getSimpleName())
+        .endControlFlow()
         .build();
   }
 
   protected CodeBlock generateParserMapCode(AttributeResult attribute) {
     return CodeBlock.builder()
+        .beginControlFlow("")
         .addStatement(
             "var map = new $T<$T, $N>()", HashMap.class, String.class, attribute.getParam())
         .addStatement("reader.readStartDocument()")
@@ -255,6 +276,7 @@ public class ParserGenerator {
         .endControlFlow()
         .addStatement("reader.readEndDocument()")
         .addStatement("result.$N(map)", attribute.writeMethod.getSimpleName())
+        .endControlFlow()
         .build();
   }
 
