@@ -10,26 +10,51 @@ import java.util.List;
 import org.bobstuff.bobbson.ByteSizes;
 import org.bobstuff.bobbson.buffer.pool.BobBsonBufferPool;
 
+/**
+ * Implementation that attempts to handle all read/write operations, expanding as more space is
+ * required.
+ *
+ * <p>Internally maintains a list of small buffers, as space in one buffer is used up it will ask
+ * the pool implementation to give it another buffer to use. This is slower than an implementation
+ * that just doubles its size and copies the data as space runs out but it allows for easy pooling
+ * and reuse of backing buffers. The cost occurs on all the bounds checking before each byte is
+ * written.
+ *
+ * <p>It is not advised to use this buffer for read operations as it is so much slower than any of
+ * the other implementations that know the size of data to read.
+ */
 public class DynamicBobBsonBuffer implements BobBsonBuffer {
   private static final int DEFAULT_BUFFER_SIZE = 1024;
   public static final String BUF_IS_NULL = "buf is null";
   public static final String READ_BEYOND_LIMIT_ERROR_MSG =
       "cannot read beyond current tail " + "position";
-  private BobBsonBufferPool pool;
+  private final BobBsonBufferPool pool;
   private int[] limits;
-  private List<BobBsonBuffer> buffers;
+  private final List<BobBsonBuffer> buffers;
   private int currentBufferIndex;
   private int currentWriteBufferIndex;
   private BobBsonBuffer buffer;
   private BobBsonBuffer writeBuffer;
   private int head;
   private int tail;
-  private DynamicByteRangeComparitor byteRangeComparitor;
+  private final DynamicByteRangeComparator byteRangeComparator;
 
+  /**
+   * Construct new instance using the given pool to acquire new buffers
+   *
+   * @param pool buffer provider
+   */
   public DynamicBobBsonBuffer(BobBsonBufferPool pool) {
-    this(pool, pool.allocate(DEFAULT_BUFFER_SIZE));
+    this(pool.allocate(DEFAULT_BUFFER_SIZE), pool);
   }
 
+  /**
+   * Construct new instance with the starting list of buffers. Uses the pool to get new buffers when
+   * required.
+   *
+   * @param buffers initial list of buffers
+   * @param pool buffer provider
+   */
   public DynamicBobBsonBuffer(List<BobBsonBuffer> buffers, BobBsonBufferPool pool) {
     this.pool = pool;
     this.limits = new int[Math.max(buffers.size(), 30)];
@@ -49,10 +74,17 @@ public class DynamicBobBsonBuffer implements BobBsonBuffer {
     this.writeBuffer = buffers.get(buffers.size() - 1);
     this.head = 0;
     this.tail = count;
-    this.byteRangeComparitor = new DynamicByteRangeComparitor();
+    this.byteRangeComparator = new DynamicByteRangeComparator();
   }
 
-  public DynamicBobBsonBuffer(BobBsonBufferPool pool, BobBsonBuffer startingBuffer) {
+  /**
+   * Constructs new instance with the single starting buffer, using the pool to get new buffers when
+   * space is required.
+   *
+   * @param startingBuffer single buffer to start reading/writing data from
+   * @param pool buffer provider
+   */
+  public DynamicBobBsonBuffer(BobBsonBuffer startingBuffer, BobBsonBufferPool pool) {
     this.pool = pool;
     this.limits = new int[10];
     this.buffers = new ArrayList<>();
@@ -63,7 +95,7 @@ public class DynamicBobBsonBuffer implements BobBsonBuffer {
     this.buffers.add(this.buffer);
     this.head = 0;
     this.tail = 0;
-    this.byteRangeComparitor = new DynamicByteRangeComparitor();
+    this.byteRangeComparator = new DynamicByteRangeComparator();
   }
 
   public void reset() {
@@ -289,7 +321,7 @@ public class DynamicBobBsonBuffer implements BobBsonBuffer {
     int found = buffer.readUntil(value);
     if (found != -1) {
       head += found;
-      byteRangeComparitor.set(start, found);
+      byteRangeComparator.set(start, found);
       return found;
     }
     int total = buffer.getHead() - bufferStart;
@@ -306,7 +338,7 @@ public class DynamicBobBsonBuffer implements BobBsonBuffer {
       return -1;
     }
 
-    byteRangeComparitor.set(start, total);
+    byteRangeComparator.set(start, total);
     return total;
   }
 
@@ -348,8 +380,6 @@ public class DynamicBobBsonBuffer implements BobBsonBuffer {
     tail = newTail;
     int bufferIndex = 0;
 
-    // TODO shortcut if space exits
-
     if (newTail == 0) {
       currentWriteBufferIndex = bufferIndex;
       writeBuffer = buffers.get(currentWriteBufferIndex);
@@ -366,12 +396,10 @@ public class DynamicBobBsonBuffer implements BobBsonBuffer {
         buffers.get(bufferIndex).setTail(lastJump);
         current += lastJump;
       } else {
-        var limit = this.buffers.get(bufferIndex).getLimit(); // writeBuffer.getLimit();
+        var limit = this.buffers.get(bufferIndex).getLimit();
         var remainingSteps = newTail - current;
-        //        var writeRemaining = writeBuffer.getWriteRemaining();
         lastJump = Math.min(limit, remainingSteps);
         current += lastJump;
-        //        writeBuffer.setTail(lastJump);
         if (lastJump == limit && newTail - current > 0) {
           rollBufferForWriting();
         }
@@ -386,15 +414,6 @@ public class DynamicBobBsonBuffer implements BobBsonBuffer {
       writeBuffer = buffers.get(currentWriteBufferIndex);
     }
     writeBuffer.setTail(lastJump);
-    //    var buffer = buffers.get(bufferIndex);
-    //    buffer.setHead(position);
-    //    currentBufferIndex = bufferIndex;
-    //    this.buffer = buffer;
-    // TODO this is not robust, if size > buffer size
-    //    if (buffer.getWriteRemaining() < size) {
-    //      rollBufferForWriting();
-    //    }
-    //    buffer.skipTail(size);
   }
 
   @Override
@@ -409,11 +428,6 @@ public class DynamicBobBsonBuffer implements BobBsonBuffer {
   @Override
   public int getTail() {
     return tail;
-    //    int position = 0;
-    //    for (var i = 0; i < currentBufferIndex; i += 1) {
-    //      position += limits[i];
-    //    }
-    //    return position + buffer.getTail();
   }
 
   @Override
@@ -424,18 +438,6 @@ public class DynamicBobBsonBuffer implements BobBsonBuffer {
   @Override
   public void setTail(int position) {
     skipTail(position - tail);
-    //    // TODO rethink this
-    //    int bufferIndex = 0;
-    //
-    //    while (position > limits[bufferIndex] && bufferIndex < buffers.size() - 1) {
-    //      position -= limits[bufferIndex];
-    //      bufferIndex += 1;
-    //    }
-    //    var buffer = buffers.get(bufferIndex);
-    //    buffer.setTail(position);
-    //    currentBufferIndex = bufferIndex;
-    //    buffers = buffers.subList(0, currentBufferIndex + 1);
-    //    this.buffer = buffer;
   }
 
   @Override
@@ -556,8 +558,6 @@ public class DynamicBobBsonBuffer implements BobBsonBuffer {
           writeBuffer.setTail(i);
           writeByteRollingBufferIfNecessary((byte) (192 | c >>> 6));
           writeByteRollingBufferIfNecessary((byte) (128 | c & 63));
-          //          writeBuffer.setTail(i);
-          //          rollBufferForWriting();
           buf = writeBuffer.getArray();
           if (buf == null) {
             throw new IllegalStateException(BUF_IS_NULL);
@@ -576,8 +576,6 @@ public class DynamicBobBsonBuffer implements BobBsonBuffer {
           writeByteRollingBufferIfNecessary((byte) (224 | c >>> 12));
           writeByteRollingBufferIfNecessary((byte) (128 | c >>> 6 & 63));
           writeByteRollingBufferIfNecessary((byte) (128 | c & 63));
-          //          writeBuffer.setTail(i);
-          //          rollBufferForWriting();
           buf = writeBuffer.getArray();
           if (buf == null) {
             throw new IllegalStateException(BUF_IS_NULL);
@@ -602,8 +600,6 @@ public class DynamicBobBsonBuffer implements BobBsonBuffer {
             writeByteRollingBufferIfNecessary((byte) (128 | cp >>> 12 & 63));
             writeByteRollingBufferIfNecessary((byte) (128 | cp >>> 6 & 63));
             writeByteRollingBufferIfNecessary((byte) (128 | cp & 63));
-            //            writeBuffer.setTail(i);
-            //            rollBufferForWriting();
             buf = writeBuffer.getArray();
             if (buf == null) {
               throw new IllegalStateException(BUF_IS_NULL);
@@ -640,7 +636,7 @@ public class DynamicBobBsonBuffer implements BobBsonBuffer {
 
   @Override
   public ByteRangeComparator getByteRangeComparator() {
-    return byteRangeComparitor;
+    return byteRangeComparator;
   }
 
   @Override
@@ -672,7 +668,7 @@ public class DynamicBobBsonBuffer implements BobBsonBuffer {
     return buffers.subList(0, currentWriteBufferIndex + 1);
   }
 
-  private class DynamicByteRangeComparitor implements ByteRangeComparator {
+  private class DynamicByteRangeComparator implements ByteRangeComparator {
     private int start;
     private int size;
 

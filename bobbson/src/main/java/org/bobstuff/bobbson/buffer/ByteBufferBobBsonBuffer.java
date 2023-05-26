@@ -7,37 +7,68 @@ import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import org.bobstuff.bobbson.BobBsonByteRange;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * Implementation of {@code BobBsonBuffer} that operates on a {@code ByteBuffer}.
+ *
+ * <p>ByteBuffer must be little endian and not direct.
+ */
 public class ByteBufferBobBsonBuffer implements BobBsonBuffer {
-  private ByteBuffer buffer;
-  private BobBsonByteRange byteRange;
+  private final ByteBuffer buffer;
+  private final BobBsonByteRange byteRange;
   private int head;
   private int tail;
   private int position;
 
+  /**
+   * Construct new ByteBufferBobBsonBuffer using the given buffer instance. Head and tail will be
+   * set to the given values and the position of the ByteBuffer will now be controlled by this class
+   *
+   * @param buffer backing {@code ByteBuffer} instance
+   * @param head position in buffer to start read operations
+   * @param tail position in buffer to start write operations
+   */
   public ByteBufferBobBsonBuffer(ByteBuffer buffer, int head, int tail) {
     this.buffer = buffer;
     this.byteRange = new BobBsonByteRange(buffer.array());
     this.head = head;
     this.tail = tail;
-    this.position = buffer.position();
+    buffer.position(head);
+    this.position = head;
   }
 
+  /**
+   * Construct new {@code ByteBufferBobBsonBuffer} using the given buffer defaulting head and tail
+   * to zero.
+   *
+   * @param buffer backing {@code ByteBuffer} instance
+   */
   public ByteBufferBobBsonBuffer(ByteBuffer buffer) {
     this(buffer, 0, 0);
   }
 
+  /**
+   * Construct new instance using the give raw byte array. Starting head/tail positions are 0.
+   *
+   * @param data raw byte array to read/write from
+   */
   public ByteBufferBobBsonBuffer(byte[] data) {
     this(ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN), 0, 0);
   }
 
+  /**
+   * Construct new instance using the given raw byte array, setting the starting head/tail position
+   * to passed values.
+   *
+   * @param data raw byte array to read/write from
+   * @param head position to start reading from
+   * @param tail position to start writing from
+   */
   public ByteBufferBobBsonBuffer(byte[] data, int head, int tail) {
     this(ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN), head, tail);
   }
 
   @Override
-  @SuppressWarnings("PMD.ReturnEmptyCollectionRatherThanNull")
   public byte[] getArray() {
     if (buffer.hasArray()) {
       return buffer.array();
@@ -268,7 +299,6 @@ public class ByteBufferBobBsonBuffer implements BobBsonBuffer {
   }
 
   @Override
-  @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
   public void writeString(String value) {
     if (position != tail) {
       buffer.position(tail);
@@ -276,32 +306,7 @@ public class ByteBufferBobBsonBuffer implements BobBsonBuffer {
     var buf = buffer.array();
     var i = buffer.position();
 
-    for (int sIndex = 0, sLength = value.length(); sIndex < sLength; sIndex++) {
-      char c = value.charAt(sIndex);
-      if (c < '\u0080') {
-        buf[i++] = (byte) c;
-      } else if (c < '\u0800') {
-        buf[i++] = (byte) (192 | c >>> 6);
-        buf[i++] = (byte) (128 | c & 63);
-      } else if (c < '\ud800' || c > '\udfff') {
-        buf[i++] = (byte) (224 | c >>> 12);
-        buf[i++] = (byte) (128 | c >>> 6 & 63);
-        buf[i++] = (byte) (128 | c & 63);
-      } else {
-        int cp = 0;
-        sIndex += 1;
-        if (sIndex < sLength) cp = Character.toCodePoint(c, value.charAt(sIndex));
-        if ((cp >= 1 << 16) && (cp < 1 << 21)) {
-          buf[i++] = (byte) (240 | cp >>> 18);
-          buf[i++] = (byte) (128 | cp >>> 12 & 63);
-          buf[i++] = (byte) (128 | cp >>> 6 & 63);
-          buf[i++] = (byte) (128 | cp & 63);
-        } else {
-          buf[i++] = (byte) '?';
-        }
-      }
-    }
-    tail = i;
+    tail = BufferUtilities.writeStringToByteArray(value, buf, i);
     position = tail;
     buffer.position(tail);
   }
@@ -316,7 +321,13 @@ public class ByteBufferBobBsonBuffer implements BobBsonBuffer {
     return Arrays.copyOf(buffer.array(), getTail());
   }
 
+  /**
+   * Pipe buffer contents into output stream
+   *
+   * @param out stream write data onto
+   * @throws IOException if write operation fails
+   */
   public void pipe(final OutputStream out) throws IOException {
-    out.write(buffer.array(), 0, buffer.position());
+    out.write(buffer.array(), 0, tail);
   }
 }

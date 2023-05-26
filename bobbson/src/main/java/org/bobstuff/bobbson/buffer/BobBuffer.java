@@ -3,38 +3,35 @@ package org.bobstuff.bobbson.buffer;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Implementation of a raw buffer, like ByteBuf, that supports little endian operations
- * to read values from a byte array.
- * <p>Used internally to power {@link BobBufferBobBsonBuffer}
- * but can be used as a building block to create custom {@link BobBsonBuffer} implementations.
+ * Implementation of a raw buffer, like ByteBuf, that supports little endian operations to read
+ * values from a byte array.
+ *
+ * <p>Used internally to power {@link BobBufferBobBsonBuffer} but can be used as a building block to
+ * create custom {@link BobBsonBuffer} implementations.
  *
  * <p>Buffer has a concept of head and tail so can support both read and write operations, read
- * operations will begin at head and can read upto tail position and writes will add data from
- * tails position until limit is reached
+ * operations will begin at head and can read upto tail position and writes will add data from tails
+ * position until limit is reached
  */
 public class BobBuffer {
-  /**
-   * the current head of the buffer, location where reads will happen
-   */
+  /** the current head of the buffer, location where reads will happen */
   private int head;
-  /**
-   * the current tail of the buffer, location where writes will happen
-   */
+  /** the current tail of the buffer, location where writes will happen */
   private int tail;
   /**
-   * the maximum value that tail can write upto, does not have to equal the size of {@code data} array
+   * the maximum value that tail can write upto, does not have to equal the size of {@code data}
+   * array
    */
   private final int limit;
-  /**
-   * the backing byte array for this buffer
-   */
+  /** the backing byte array for this buffer */
   private final byte[] data;
 
   /**
    * Initialize BobBuffer with the given head and tail positions
-   * @param data  the backing byte array
-   * @param head  the starting position for head
-   * @param tail  the starting position for tail
+   *
+   * @param data the backing byte array
+   * @param head the starting position for head
+   * @param tail the starting position for tail
    */
   public BobBuffer(byte[] data, int head, int tail) {
     if (tail > data.length) {
@@ -47,31 +44,29 @@ public class BobBuffer {
     this.limit = data.length;
   }
 
-  /**
-   * @return the backing array for the buffer
-   */
+  /** @return the backing array for the buffer */
   public byte[] getArray() {
     return data;
   }
 
   /**
    * Gets the current limit for the buffer
+   *
    * @return current limit
    */
   public int getLimit() {
     return limit;
   }
 
-  /**
-   * @return current head position of buffer
-   */
+  /** @return current head position of buffer */
   public int getHead() {
     return head;
   }
 
   /**
    * Update the head position of the buffer
-   * @param head  new position for head
+   *
+   * @param head new position for head
    */
   public void setHead(int head) {
     if (head > tail) {
@@ -82,7 +77,8 @@ public class BobBuffer {
 
   /**
    * Adjusts the head position by the given amount, use negative number to move backwards
-   * @param amount  number of bytes to move by
+   *
+   * @param amount number of bytes to move by
    */
   public void skipHead(int amount) {
     if (head + amount > tail) {
@@ -93,6 +89,7 @@ public class BobBuffer {
 
   /**
    * Gets the tail position for the buffer
+   *
    * @return the current tail position
    */
   public int getTail() {
@@ -101,7 +98,8 @@ public class BobBuffer {
 
   /**
    * Updates the current tail position of the buffer
-   * @param tail  new tail position value
+   *
+   * @param tail new tail position value
    */
   public void setTail(int tail) {
     if (tail > limit) {
@@ -112,7 +110,8 @@ public class BobBuffer {
 
   /**
    * Adjusts the tail position by the given amount, use negative number to move backwards
-   * @param amount  number of byes to adjust by
+   *
+   * @param amount number of byes to adjust by
    */
   public void skipTail(int amount) {
     if (tail + amount > limit) {
@@ -121,23 +120,20 @@ public class BobBuffer {
     this.tail += amount;
   }
 
-  /**
-   * @return the number of bytes of space left to write to
-   */
+  /** @return the number of bytes of space left to write to */
   public int writeRemaining() {
     return limit - tail;
   }
 
-  /**
-   * @return the number of bytes left to read
-   */
+  /** @return the number of bytes left to read */
   public int readRemaining() {
     return tail - head;
   }
 
   /**
    * Writes a little endian encoded 32bit integer
-   * @param value  the value to write
+   *
+   * @param value the value to write
    */
   public void writeIntegerLe(int value) {
     if (tail + 4 > limit) {
@@ -151,9 +147,11 @@ public class BobBuffer {
   }
 
   /**
-   * Writes a little endian encoded 32bit integer at the given position, ignores the current head position
-   * @param position  position in the buffer to start writing the valu
-   * @param value  the integer value to write
+   * Writes a little endian encoded 32bit integer at the given position, ignores the current head
+   * position
+   *
+   * @param position position in the buffer to start writing the valu
+   * @param value the integer value to write
    */
   public void writeIntegerLe(int position, int value) {
     int oldTail = tail;
@@ -164,7 +162,8 @@ public class BobBuffer {
 
   /**
    * Writes a little endian 64bit long to the buffer
-   * @param value  the value to write
+   *
+   * @param value the value to write
    */
   public void writeLongLe(long value) {
     if (tail + 8 > limit) {
@@ -183,7 +182,8 @@ public class BobBuffer {
 
   /**
    * Write a single byte value to the buffer
-   * @param value  the byte to write
+   *
+   * @param value the byte to write
    */
   public void writeByte(byte value) {
     if (tail + 1 > limit) {
@@ -196,7 +196,8 @@ public class BobBuffer {
 
   /**
    * Writes the given byte array to the buffer
-   * @param value  the bytes to be written
+   *
+   * @param value the bytes to be written
    */
   public void writeBytes(byte[] value) {
     writeBytes(value, 0, value.length);
@@ -204,9 +205,10 @@ public class BobBuffer {
 
   /**
    * Writes the requested subset of the given byte array to the buffer
-   * @param value  the byte array containing data to be copied
-   * @param offset  starting point in the given array
-   * @param length  number of bytes from array to be written
+   *
+   * @param value the byte array containing data to be copied
+   * @param offset starting point in the given array
+   * @param length number of bytes from array to be written
    */
   public void writeBytes(byte[] value, int offset, int length) {
     if ((length + offset) > value.length) {
@@ -221,6 +223,7 @@ public class BobBuffer {
 
   /**
    * Reads a little endian encoded 32bit integer from the buffer
+   *
    * @return value read from buffer
    */
   public int readIntegerLe() {
@@ -236,6 +239,7 @@ public class BobBuffer {
 
   /**
    * Reads a little endian encoded 64bit long from the buffer
+   *
    * @return value read from buffer
    */
   public long readLongLe() {
@@ -255,6 +259,7 @@ public class BobBuffer {
 
   /**
    * Reads a single byte from the buffer
+   *
    * @return value read from buffer
    */
   public byte readByte() {
@@ -266,8 +271,10 @@ public class BobBuffer {
   }
 
   /**
-   * Reads enough bytes to fill the given sync array or as much data as is left in the buffer if the sync is greater than read remaining
-   * @param sink  buffer to read bytes into
+   * Reads enough bytes to fill the given sync array or as much data as is left in the buffer if the
+   * sync is greater than read remaining
+   *
+   * @param sink buffer to read bytes into
    * @return number of bytes written to sink
    */
   public int readBytes(byte[] sink) {
@@ -281,7 +288,8 @@ public class BobBuffer {
 
   /**
    * Read a utf encoded string of the given length from the buffer
-   * @param size  number of bytes making up the string
+   *
+   * @param size number of bytes making up the string
    * @return the decoded string
    */
   public String readUtf8String(int size) {

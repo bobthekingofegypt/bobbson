@@ -3,9 +3,7 @@ package org.bobstuff.bobbson.buffer;
 import java.util.Arrays;
 import org.bobstuff.bobbson.BobBsonByteRange;
 
-/**
- * Implementation of {@code BobBsonBuffer} that uses {@code BobBuffer} as its backing buffer.
- */
+/** Implementation of {@code BobBsonBuffer} that uses {@code BobBuffer} as its backing buffer. */
 public class BobBufferBobBsonBuffer implements BobBsonBuffer {
   private BobBuffer buffer;
   private byte[] data;
@@ -13,16 +11,19 @@ public class BobBufferBobBsonBuffer implements BobBsonBuffer {
 
   /**
    * Construct new buffer using data array, head will be set to 0 and tail to length of data
-   * @param data  backing byte array
+   *
+   * @param data backing byte array
    */
   public BobBufferBobBsonBuffer(byte[] data) {
     this(data, 0, data.length);
   }
 
   /**
-   * Construct a new buffer using data array, head will be set to given head value.  Tail will be set to length of data array
-   * @param data  backing byte array
-   * @param head  starting value for head
+   * Construct a new buffer using data array, head will be set to given head value. Tail will be set
+   * to length of data array
+   *
+   * @param data backing byte array
+   * @param head starting value for head
    */
   public BobBufferBobBsonBuffer(byte[] data, int head) {
     this(data, head, data.length);
@@ -30,9 +31,10 @@ public class BobBufferBobBsonBuffer implements BobBsonBuffer {
 
   /**
    * Construct a new buffer using the data array, starting head and tail set to given values
-   * @param data  backing byte array
-   * @param head  starting value for head
-   * @param tail  starting value for tail
+   *
+   * @param data backing byte array
+   * @param head starting value for head
+   * @param tail starting value for tail
    */
   public BobBufferBobBsonBuffer(byte[] data, int head, int tail) {
     buffer = new BobBuffer(data, head, tail);
@@ -43,7 +45,7 @@ public class BobBufferBobBsonBuffer implements BobBsonBuffer {
   /**
    * Construct a new buffer using an existing {@code BobBuffer}
    *
-   * @param buffer  {@code BobBuffer} to read from
+   * @param buffer {@code BobBuffer} to read from
    */
   public BobBufferBobBsonBuffer(BobBuffer buffer) {
     this.buffer = buffer;
@@ -57,9 +59,10 @@ public class BobBufferBobBsonBuffer implements BobBsonBuffer {
 
   /**
    * Set BobBsonBuffer to operate on a new backing array, allows reuse of this instance for new data
-   * @param data  new backing array
-   * @param head  new head position to read from
-   * @param tail  new tail position to write from
+   *
+   * @param data new backing array
+   * @param head new head position to read from
+   * @param tail new tail position to write from
    */
   public void process(byte[] data, int head, int tail) {
     buffer = new BobBuffer(data, head, tail);

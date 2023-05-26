@@ -4,7 +4,11 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.google.common.base.Strings;
+import java.io.ByteArrayOutputStream;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import org.bobstuff.bobbson.buffer.pool.BobBsonBufferPool;
+import org.bobstuff.bobbson.buffer.pool.ConcurrentBobBsonBufferPool;
 import org.bobstuff.bobbson.buffer.pool.NoopBobBsonBufferPool;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -489,6 +493,90 @@ public class DynamicBobBsonBufferTest {
 
   @Test
   public void testGetArray() {
-    Assertions.assertNull(writeSut.getArray());
+    Assertions.assertThrows(UnsupportedOperationException.class, () -> writeSut.getArray());
+  }
+
+  @Test
+  public void testReset() {
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new BobBufferBobBsonBuffer(new byte[10], 0, 0));
+    writeSut = new DynamicBobBsonBuffer(pool);
+
+    writeSut.skipTail(4);
+    writeSut.writeDouble(2.3);
+    writeSut.writeDouble(5.3);
+    writeSut.writeInteger(0, 34);
+
+    writeSut.reset();
+
+    Assertions.assertEquals(0, writeSut.getHead());
+    Assertions.assertEquals(0, writeSut.getTail());
+    Assertions.assertThrows(RuntimeException.class, () -> writeSut.getInt());
+  }
+
+  @Test
+  public void testCanAccessArray() {
+    Assertions.assertTrue(writeSut.canAccessArray());
+  }
+
+  @Test
+  public void testRelease() {
+    var pool = new ConcurrentBobBsonBufferPool();
+    writeSut = new DynamicBobBsonBuffer(pool);
+
+    writeSut.skipTail(4);
+    writeSut.writeDouble(2.3);
+    writeSut.writeDouble(5.3);
+    writeSut.writeInteger(0, 34);
+
+    Assertions.assertEquals(0, pool.getPoolSize(1024));
+
+    writeSut.release();
+
+    Assertions.assertEquals(1, pool.getPoolSize(1024));
+  }
+
+  @Test
+  public void testToByteArray() {
+    var pool = new NoopBobBsonBufferPool((size) -> new BobBufferBobBsonBuffer(new byte[10], 0, 0));
+    writeSut = new DynamicBobBsonBuffer(pool);
+
+    writeSut.skipTail(4);
+    writeSut.writeDouble(2.3);
+    writeSut.writeDouble(5.3);
+    writeSut.writeInteger(0, 34);
+
+    var result = writeSut.toByteArray();
+
+    var buf = ByteBuffer.wrap(result).order(ByteOrder.LITTLE_ENDIAN);
+
+    Assertions.assertEquals(34, buf.getInt());
+    Assertions.assertEquals(2.3, buf.getDouble());
+    Assertions.assertEquals(5.3, buf.getDouble());
+  }
+
+  @Test
+  public void testPipe() throws Exception {
+    byte[] data = new byte[4];
+    ByteBuffer comp = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN);
+    comp.putInt(48);
+    var pool = new NoopBobBsonBufferPool((size) -> new BobBufferBobBsonBuffer(new byte[10], 0, 0));
+    writeSut = new DynamicBobBsonBuffer(pool);
+
+    writeSut.skipTail(4);
+    writeSut.writeDouble(2.3);
+    writeSut.writeDouble(5.3);
+    writeSut.writeInteger(0, 34);
+
+    var outputStream = new ByteArrayOutputStream(100);
+    writeSut.pipe(outputStream);
+
+    var result = outputStream.toByteArray();
+
+    var buf = ByteBuffer.wrap(result).order(ByteOrder.LITTLE_ENDIAN);
+
+    Assertions.assertEquals(34, buf.getInt());
+    Assertions.assertEquals(2.3, buf.getDouble());
+    Assertions.assertEquals(5.3, buf.getDouble());
   }
 }
