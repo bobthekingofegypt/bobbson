@@ -7,45 +7,32 @@ import org.bobstuff.bobbson.writer.BsonWriter;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import static java.lang.String.format;
+
 public class StringBsonConverter implements BobBsonConverter<String> {
   @Override
-  public @Nullable String read(@NonNull BsonReader bsonReader) {
-    if (bsonReader.getCurrentBsonType() == BsonType.STRING) {
+  public @Nullable String readValue(BsonReader bsonReader, BsonType type) {
+    if (type == BsonType.STRING) {
       return bsonReader.readString();
-    } else if (bsonReader.getCurrentBsonType() == BsonType.NULL) {
-      bsonReader.readNull();
-      return null;
     }
-    throw new RuntimeException(
-        "trying to read a string from something that isn't a string or a null");
+
+    throw new RuntimeException(format("Attempting to read %s bson type as a string", type));
   }
 
   @Override
-  public void write(@NonNull BsonWriter bsonWriter, byte @Nullable [] key, @NonNull String value) {
-    if (value == null && key == null) {
-      bsonWriter.writeNull();
-    } else if (value == null && key != null) {
-      bsonWriter.writeNull(key);
-    } else if (key == null) {
-      bsonWriter.writeString(value);
-    } else {
-      bsonWriter.writeString(key, value);
-    }
-  }
-
-  @Override
-  public void write(@NonNull BsonWriter bsonWriter, @NonNull String value) {
+  public void writeValue(BsonWriter bsonWriter, String value) {
     bsonWriter.writeString(value);
   }
 
   public static @Nullable String readString(@NonNull BsonReader bsonReader) {
-    if (bsonReader.getCurrentBsonType() == BsonType.STRING) {
+    var type = bsonReader.getCurrentBsonType();
+    if (type == BsonType.STRING) {
       return bsonReader.readString();
-    } else if (bsonReader.getCurrentBsonType() == BsonType.NULL) {
+    } else if (type == BsonType.NULL) {
       bsonReader.readNull();
       return null;
     }
-    throw new RuntimeException(
-        "trying to read a string from something that isn't a string or a null");
+
+    throw new RuntimeException(format("Attempting to read %s bson type as a string", type));
   }
 }

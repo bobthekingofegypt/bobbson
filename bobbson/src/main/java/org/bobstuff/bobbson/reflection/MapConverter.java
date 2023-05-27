@@ -6,6 +6,7 @@ import org.bobstuff.bobbson.BobBsonConverter;
 import org.bobstuff.bobbson.BsonReader;
 import org.bobstuff.bobbson.BsonType;
 import org.bobstuff.bobbson.writer.BsonWriter;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class MapConverter<V, T extends Map<String, V>> implements BobBsonConverter<Map<String, V>> {
@@ -21,12 +22,8 @@ public class MapConverter<V, T extends Map<String, V>> implements BobBsonConvert
   }
 
   @Override
-  public void write(BsonWriter bsonWriter, byte @Nullable [] key, Map<String, V> values) {
-    if (key != null) {
-      bsonWriter.writeStartDocument(key);
-    } else {
-      bsonWriter.writeStartDocument();
-    }
+  public void writeValue(BsonWriter bsonWriter, Map<String, V> values) {
+    bsonWriter.writeStartDocument();
 
     for (Map.Entry<String, V> value : values.entrySet()) {
       if (value == null) {
@@ -46,7 +43,7 @@ public class MapConverter<V, T extends Map<String, V>> implements BobBsonConvert
   }
 
   @Override
-  public @Nullable T read(BsonReader bsonReader) {
+  public @Nullable T readValue(BsonReader bsonReader, BsonType type) {
     bsonReader.readStartDocument();
 
     T map = null;

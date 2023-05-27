@@ -5,6 +5,7 @@ import java.util.List;
 import org.bobstuff.bobbson.*;
 import org.bobstuff.bobbson.buffer.BobBsonBuffer;
 import org.bobstuff.bobbson.writer.BsonWriter;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class ReflectionBasedConverter implements BobBsonConverter<Object> {
@@ -21,22 +22,8 @@ public class ReflectionBasedConverter implements BobBsonConverter<Object> {
 
   @Override
   @SuppressWarnings("unchecked")
-  public void write(BsonWriter bsonWriter, byte @Nullable [] key, Object instance) {
-    if (instance == null) {
-      if (key == null) {
-        bsonWriter.writeNull();
-      } else {
-        bsonWriter.writeNull(key);
-      }
-      return;
-    }
-
-    if (key == null) {
-      bsonWriter.writeStartDocument();
-    } else {
-      bsonWriter.writeStartDocument(key);
-    }
-
+  public void writeValue(BsonWriter bsonWriter, Object instance) {
+    bsonWriter.writeStartDocument();
     for (var field : fields) {
       var converter = field.getConverter();
       if (converter == null) {
@@ -54,13 +41,8 @@ public class ReflectionBasedConverter implements BobBsonConverter<Object> {
   }
 
   @Override
-  public void write(BsonWriter bsonWriter, Object instance) {
-    this.write(bsonWriter, (byte[]) null, instance);
-  }
-
-  @Override
   @SuppressWarnings("unchecked")
-  public Object read(BsonReader bsonReader) {
+  public Object readValue(BsonReader bsonReader, BsonType type) {
     Object instance = null;
     try {
       instance = instanceClazz.getConstructor().newInstance();

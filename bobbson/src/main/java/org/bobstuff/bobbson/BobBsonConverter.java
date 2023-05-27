@@ -8,35 +8,48 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public interface BobBsonConverter<T> {
 
   default @Nullable T read(BsonReader bsonReader) {
-    return this.read(bsonReader, true);
+    BsonType type = bsonReader.getCurrentBsonType();
+
+    if (type != null) {
+      return readValue(bsonReader, type);
+    }
+
+    bsonReader.readNull();
+    return null;
   }
 
-  default @Nullable T read(BsonReader bsonReader, boolean readEnvelope) {
-    throw new IllegalStateException("override read to create custom reader");
+  @Nullable T readValue(BsonReader bsonReader, BsonType type);
+
+  default void write(BsonWriter bsonWriter, @Nullable T value) {
+    if (value != null) {
+      writeValue(bsonWriter, value);
+      return;
+    }
+
+    bsonWriter.writeNull();
   }
 
-  default void write(BsonWriter bsonWriter, @NonNull T value) {
-    write(bsonWriter, (byte[]) null, value, true);
+  void writeValue(BsonWriter bsonWriter, T value);
+
+  default void write(BsonWriter bsonWriter, byte[] key, @Nullable T value) {
+    bsonWriter.writeName(key);
+
+    if (value != null) {
+      writeValue(bsonWriter, value);
+      return;
+    }
+
+    bsonWriter.writeNull();
   }
 
-  default void write(BsonWriter bsonWriter, @NonNull T value, boolean writeEnvelope) {
-    write(bsonWriter, (byte[]) null, value, writeEnvelope);
-  }
+  default void write(BsonWriter bsonWriter, String key, @Nullable T value) {
+    bsonWriter.writeName(key);
 
-  default void write(
-      BsonWriter bsonWriter, byte @Nullable [] key, @NonNull T value, boolean writeEnvolope) {
-    throw new IllegalStateException("override write to create custom writer");
-  }
+    if (value != null) {
+      writeValue(bsonWriter, value);
+      return;
+    }
 
-  default void write(BsonWriter bsonWriter, byte @Nullable [] key, @NonNull T value) {
-    write(bsonWriter, key, value, true);
-  }
-
-  default void write(BsonWriter bsonWriter, String key, @NonNull T value) {
-    write(bsonWriter, key.getBytes(StandardCharsets.UTF_8), value);
-  }
-
-  default void write(BsonWriter bsonWriter, String key, @NonNull T value, boolean writeEnvelope) {
-    write(bsonWriter, key.getBytes(StandardCharsets.UTF_8), value, writeEnvelope);
+    bsonWriter.writeNull();
   }
 }

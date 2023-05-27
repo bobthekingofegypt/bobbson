@@ -7,37 +7,25 @@ import org.bobstuff.bobbson.writer.BsonWriter;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import static java.lang.String.format;
+
 public class IntegerBsonConverter implements BobBsonConverter<Integer> {
   @Override
-  public @Nullable Integer read(@NonNull BsonReader bsonReader) {
-    // TODO handle casting down to type that cant hold value
-    BsonType type = bsonReader.getCurrentBsonType();
-    if (type == BsonType.NULL) {
-      bsonReader.readNull();
-      return null;
+  public @Nullable Integer readValue(BsonReader bsonReader, BsonType type) {
+    // TODO handle casting down to type that cant hold value safer
+    if (type == BsonType.INT32) {
+      bsonReader.readInt32();
     } else if (type == BsonType.INT64) {
       return (int) bsonReader.readInt64();
     } else if (type == BsonType.DOUBLE) {
       return (int) bsonReader.readDouble();
     }
 
-    if (type != BsonType.INT32) {
-      throw new RuntimeException("Oh noes should be int32");
-    }
-    return bsonReader.readInt32();
+    throw new RuntimeException(format("Attempting to read %s bson type as a integer", type));
   }
 
   @Override
-  public void write(@NonNull BsonWriter bsonWriter, byte @Nullable [] key, Integer value) {
-    if (key == null) {
-      bsonWriter.writeInteger(value);
-    } else {
-      bsonWriter.writeInteger(key, value);
-    }
-  }
-
-  @Override
-  public void write(@NonNull BsonWriter bsonWriter, @NonNull Integer value) {
+  public void writeValue(BsonWriter bsonWriter, Integer value) {
     bsonWriter.writeInteger(value);
   }
 }

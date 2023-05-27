@@ -1,6 +1,7 @@
 package org.bobstuff.bobbson;
 
 import org.bobstuff.bobbson.writer.BsonWriter;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class CustomConverter implements BobBsonConverter<String> {
@@ -10,7 +11,7 @@ public class CustomConverter implements BobBsonConverter<String> {
   }
 
   @Override
-  public void write(BsonWriter writer, byte[] key, String value) {
+  public void write(BsonWriter writer, byte[] key, @NonNull String value) {
     writer.writeString(key, value.substring("custom: ".length()));
   }
 }

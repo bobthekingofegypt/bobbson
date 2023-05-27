@@ -1,6 +1,7 @@
 package org.bobstuff.bobbson;
 
 import org.bobstuff.bobbson.writer.BsonWriter;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class CustomListToStringConverter implements BobBsonConverter<String> {
@@ -17,7 +18,7 @@ public class CustomListToStringConverter implements BobBsonConverter<String> {
   }
 
   @Override
-  public void write(BsonWriter bsonWriter, byte[] key, String value) {
+  public void write(BsonWriter bsonWriter, byte[] key, @NonNull String value) {
     var data = value.substring("custom: ".length());
     bsonWriter.writeStartArray(key);
     for (var i = 0; i < data.length(); i += 1) {

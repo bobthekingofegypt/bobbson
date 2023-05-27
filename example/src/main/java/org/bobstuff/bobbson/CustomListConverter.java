@@ -3,6 +3,7 @@ package org.bobstuff.bobbson;
 import java.util.ArrayList;
 import java.util.List;
 import org.bobstuff.bobbson.writer.BsonWriter;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class CustomListConverter implements BobBsonConverter<List<String>> {
@@ -19,7 +20,7 @@ public class CustomListConverter implements BobBsonConverter<List<String>> {
   }
 
   @Override
-  public void write(BsonWriter bsonWriter, byte[] key, List<String> value) {
+  public void write(BsonWriter bsonWriter, byte[] key, @NonNull List<String> value) {
     bsonWriter.writeStartArray(key);
     var index = 0;
     for (var entry : value) {

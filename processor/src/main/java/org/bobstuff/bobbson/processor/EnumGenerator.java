@@ -100,7 +100,6 @@ public class EnumGenerator {
         .addParameter(BsonWriter.class, "writer")
         .addParameter(ParameterSpec.builder(arrayTypeName, "key").build())
         .addParameter(TypeName.get(structInfo.element.asType()), "obj")
-        .addParameter(boolean.class, "writeEnvolope")
         .beginControlFlow("if (obj == null)")
         .beginControlFlow("if (key == null)")
         .addStatement("throw new $T(\"key and object cannot be null\")", RuntimeException.class)
@@ -127,7 +126,7 @@ public class EnumGenerator {
     }
     block
         .nextControlFlow("else")
-        .addStatement("return $T.valueOf(fieldName.name())", structInfo.element.asType())
+        .addStatement("return $T.valueOf(fieldName.value())", structInfo.element.asType())
         .endControlFlow();
     return block.build();
   }
@@ -137,7 +136,6 @@ public class EnumGenerator {
     return MethodSpec.methodBuilder("read")
         .addModifiers(Modifier.PUBLIC)
         .addParameter(BsonReader.class, "reader")
-        .addParameter(boolean.class, "readEnvolope")
         .returns(type)
         .beginControlFlow("if (reader.getCurrentBsonType() == $T.NULL)", BsonType.class)
         .addStatement("reader.readNull()")

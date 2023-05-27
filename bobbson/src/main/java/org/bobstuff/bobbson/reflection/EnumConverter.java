@@ -6,6 +6,7 @@ import org.bobstuff.bobbson.BobBsonConverter;
 import org.bobstuff.bobbson.BsonReader;
 import org.bobstuff.bobbson.BsonType;
 import org.bobstuff.bobbson.writer.BsonWriter;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class EnumConverter<T extends Enum<T>> implements BobBsonConverter<T> {
@@ -41,35 +42,13 @@ public class EnumConverter<T extends Enum<T>> implements BobBsonConverter<T> {
 
   @Override
   @SuppressWarnings("unchecked")
-  public void write(BsonWriter bsonWriter, byte @Nullable [] key, T instance) {
-    if (instance == null) {
-      if (key == null) {
-        bsonWriter.writeNull();
-      } else {
-        bsonWriter.writeNull(key);
-      }
-      return;
-    }
-
-    if (key == null) {
-      bsonWriter.writeString(instance.name());
-    } else {
-      bsonWriter.writeString(key, instance.name());
-    }
-  }
-
-  @Override
-  public void write(BsonWriter bsonWriter, T instance) {
-    this.write(bsonWriter, (byte[]) null, instance);
+  public void writeValue(BsonWriter bsonWriter, T instance) {
+    bsonWriter.writeString(instance.name());
   }
 
   @Override
   @SuppressWarnings("unchecked")
-  public @Nullable T read(BsonReader bsonReader) {
-    if (bsonReader.getCurrentBsonType() == BsonType.NULL) {
-      return null;
-    }
-
+  public @Nullable T readValue(BsonReader bsonReader, BsonType type) {
     var fieldName = bsonReader.getFieldName();
     bsonReader.readStringRaw();
 

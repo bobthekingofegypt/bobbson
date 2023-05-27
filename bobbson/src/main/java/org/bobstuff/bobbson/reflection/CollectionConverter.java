@@ -6,6 +6,7 @@ import org.bobstuff.bobbson.BobBsonConverter;
 import org.bobstuff.bobbson.BsonReader;
 import org.bobstuff.bobbson.BsonType;
 import org.bobstuff.bobbson.writer.BsonWriter;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class CollectionConverter<E, T extends Collection<E>> implements BobBsonConverter<T> {
@@ -21,12 +22,8 @@ public class CollectionConverter<E, T extends Collection<E>> implements BobBsonC
   }
 
   @Override
-  public void write(BsonWriter bsonWriter, byte @Nullable [] key, T values) {
-    if (key != null) {
-      bsonWriter.writeStartArray(key);
-    } else {
-      bsonWriter.writeStartArray();
-    }
+  public void writeValue(BsonWriter bsonWriter, T values) {
+    bsonWriter.writeStartArray();
 
     for (var value : values) {
       if (value == null) {
@@ -40,7 +37,7 @@ public class CollectionConverter<E, T extends Collection<E>> implements BobBsonC
   }
 
   @Override
-  public @Nullable T read(BsonReader bsonReader) {
+  public @Nullable T readValue(BsonReader bsonReader, BsonType type) {
     bsonReader.readStartArray();
 
     T collection = null;

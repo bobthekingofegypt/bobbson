@@ -6,21 +6,12 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class CustomObjectIdConverter implements BobBsonConverter<byte[]> {
   @Override
-  public @Nullable byte[] read(BsonReader bsonReader) {
+  public byte @Nullable [] readValue(BsonReader bsonReader, BsonType type) {
     return bsonReader.readObjectId();
   }
 
   @Override
-  public void write(@NonNull BsonWriter bsonWriter, byte @Nullable [] key, byte @NonNull [] value) {
-    if (key == null) {
-      bsonWriter.writeObjectId(value);
-    } else {
-      bsonWriter.writeObjectId(key, value);
-    }
-  }
-
-  @Override
-  public void write(@NonNull BsonWriter bsonWriter, byte @NonNull [] value) {
+  public void writeValue(BsonWriter bsonWriter, byte[] value) {
     bsonWriter.writeObjectId(value);
   }
 }
