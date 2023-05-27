@@ -8,14 +8,15 @@ import org.bobstuff.bobbson.BobBsonConverter;
 import org.bobstuff.bobbson.BobBsonConverterFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class CollectionConverterFactory implements BobBsonConverterFactory<CollectionConverter> {
+public class CollectionConverterFactory<@Nullable E, T extends Collection<@Nullable E>>
+    implements BobBsonConverterFactory<CollectionConverter<E, T>> {
+  private static final int SINGLE_ARG_LENGTH = 1;
+
   @Override
-  @Nullable
-  @SuppressWarnings({"PMD.AvoidLiteralsInIfCondition", "unchecked"})
-  public CollectionConverter tryCreate(Type manifest, BobBson bobBson) {
+  public @Nullable CollectionConverter<E, T> tryCreate(Type manifest, BobBson bobBson) {
     if (manifest instanceof ParameterizedType) {
-      final ParameterizedType pt = (ParameterizedType) manifest;
-      if (pt.getActualTypeArguments().length == 1) {
+      var pt = (ParameterizedType) manifest;
+      if (pt.getActualTypeArguments().length == SINGLE_ARG_LENGTH) {
         return analyzeDecoding(
             manifest, pt.getActualTypeArguments()[0], (Class<?>) pt.getRawType(), bobBson);
       }
@@ -23,19 +24,20 @@ public class CollectionConverterFactory implements BobBsonConverterFactory<Colle
     return null;
   }
 
-  @Nullable
   @SuppressWarnings("unchecked")
-  private CollectionConverter analyzeDecoding(
+  private @Nullable CollectionConverter<E, T> analyzeDecoding(
       final Type manifest, final Type element, final Class<?> collection, final BobBson bobBson) {
     if (!Collection.class.isAssignableFrom(collection)) return null;
-    final InstanceFactory newInstance;
+    final InstanceFactory<?> newInstance;
     if (!collection.isInterface()) {
-      try {
-        collection.newInstance();
-      } catch (Exception ex) {
-        return null;
-      }
-      newInstance = collection::newInstance;
+      newInstance =
+          () -> {
+            try {
+              return collection.getConstructor().newInstance();
+            } catch (Exception ex) {
+              return null;
+            }
+          };
     } else if (Set.class.isAssignableFrom(collection)) {
       newInstance = () -> new LinkedHashSet<>(4);
     } else if (List.class.isAssignableFrom(collection) || Collection.class == collection) {
