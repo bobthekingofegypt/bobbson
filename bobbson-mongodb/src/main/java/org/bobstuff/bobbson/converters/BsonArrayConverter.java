@@ -20,7 +20,7 @@ public class BsonArrayConverter implements BobBsonConverter<BsonArray> {
 
   @Override
   @SuppressWarnings("PMD.AssignmentInOperand")
-  public @Nullable BsonArray read(BsonReader bsonReader) {
+  public @Nullable BsonArray readValue(BsonReader bsonReader, BsonType outerType) {
     List<BsonValue> values = new ArrayList<>();
 
     bsonReader.readStartArray();
@@ -49,30 +49,7 @@ public class BsonArrayConverter implements BobBsonConverter<BsonArray> {
   }
 
   @Override
-  public void write(
-      @NonNull BsonWriter bsonWriter, byte @Nullable [] key, @NonNull BsonArray value) {
-    if (key == null) {
-      bsonWriter.writeStartArray();
-    } else {
-      bsonWriter.writeStartArray(key);
-    }
-    int i = 0;
-    for (var entry : value) {
-      bsonWriter.writeName(String.valueOf(i));
-      var clazz = entry.getClass();
-      var converter = (BobBsonConverter) bobBson.tryFindConverter(clazz);
-      if (converter == null) {
-        throw new IllegalStateException(
-            String.format("No converter registered for %s", clazz.getSimpleName()));
-      }
-      converter.write(bsonWriter, entry);
-      i += 1;
-    }
-    bsonWriter.writeEndArray();
-  }
-
-  @Override
-  public void write(@NonNull BsonWriter bsonWriter, @NonNull BsonArray value) {
+  public void writeValue(@NonNull BsonWriter bsonWriter, BsonArray value) {
     bsonWriter.writeStartArray();
     int i = 0;
     for (var entry : value) {

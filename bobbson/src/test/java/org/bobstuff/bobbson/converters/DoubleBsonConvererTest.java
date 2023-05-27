@@ -70,7 +70,8 @@ public class DoubleBsonConvererTest {
     var sut = new DoubleBsonConverter();
     sut.write(writer, "bob", 2.3);
 
-    verify(writer).writeDouble("bob".getBytes(StandardCharsets.UTF_8), 2.3);
+    verify(writer).writeName("bob");
+    verify(writer).writeDouble(2.3);
   }
 
   @Test
@@ -100,6 +101,7 @@ public class DoubleBsonConvererTest {
     var sut = new DoubleBsonConverter();
     sut.write(writer, "bob".getBytes(StandardCharsets.UTF_8), 2.3);
 
-    verify(writer).writeDouble("bob".getBytes(StandardCharsets.UTF_8), 2.3);
+    verify(writer).writeName("bob".getBytes(StandardCharsets.UTF_8));
+    verify(writer).writeDouble(2.3);
   }
 }

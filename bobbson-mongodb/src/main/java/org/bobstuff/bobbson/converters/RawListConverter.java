@@ -19,7 +19,7 @@ public class RawListConverter implements BobBsonConverter<List> {
 
   @Override
   @SuppressWarnings("PMD.AssignmentInOperand")
-  public @Nullable List read(BsonReader bsonReader) {
+  public @Nullable List readValue(BsonReader bsonReader, BsonType outerType) {
     List<Object> values = new ArrayList<>();
 
     bsonReader.readStartArray();
@@ -47,29 +47,7 @@ public class RawListConverter implements BobBsonConverter<List> {
   }
 
   @Override
-  public void write(@NonNull BsonWriter bsonWriter, byte @Nullable [] key, @NonNull List value) {
-    if (key == null) {
-      bsonWriter.writeStartArray();
-    } else {
-      bsonWriter.writeStartArray(key);
-    }
-    int i = 0;
-    for (var entry : value) {
-      bsonWriter.writeName(String.valueOf(i));
-      var clazz = entry.getClass();
-      var converter = (BobBsonConverter) bobBson.tryFindConverter(clazz);
-      if (converter == null) {
-        throw new IllegalStateException(
-            String.format("No converter registered for %s", clazz.getSimpleName()));
-      }
-      converter.write(bsonWriter, entry);
-      i += 1;
-    }
-    bsonWriter.writeEndArray();
-  }
-
-  @Override
-  public void write(@NonNull BsonWriter bsonWriter, @NonNull List value) {
+  public void writeValue(@NonNull BsonWriter bsonWriter, List value) {
     bsonWriter.writeStartArray();
     int i = 0;
     for (var entry : value) {

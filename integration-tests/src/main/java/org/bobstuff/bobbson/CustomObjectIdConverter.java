@@ -1,7 +1,6 @@
 package org.bobstuff.bobbson;
 
 import org.bobstuff.bobbson.writer.BsonWriter;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class CustomObjectIdConverter implements BobBsonConverter<byte[]> {

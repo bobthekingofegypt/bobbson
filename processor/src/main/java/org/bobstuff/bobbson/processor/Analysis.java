@@ -117,7 +117,7 @@ public class Analysis {
               var m = ElementFilter.methodsIn(element.getEnclosedElements());
               for (ExecutableElement e : m) {
                 messager.debug(e.toString());
-                if (e.getSimpleName().toString().equals("read")) {
+                if (e.getSimpleName().toString().equals("readValue")) {
                   if (types.isAssignable(e.getReturnType(), field.asType())) {
                     messager.debug("matching return types");
                     converterType = type;

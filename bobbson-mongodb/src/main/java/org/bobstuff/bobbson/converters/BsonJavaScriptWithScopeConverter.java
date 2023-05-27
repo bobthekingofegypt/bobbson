@@ -23,7 +23,7 @@ public class BsonJavaScriptWithScopeConverter implements BobBsonConverter<BsonJa
   }
 
   @Override
-  public @Nullable BsonJavaScriptWithScope read(BsonReader bsonReader) {
+  public @Nullable BsonJavaScriptWithScope readValue(BsonReader bsonReader, BsonType type) {
     var codeWithScope = bsonReader.readCodeWithScope();
     BsonReader reader =
         new BsonReaderStack(
@@ -42,41 +42,7 @@ public class BsonJavaScriptWithScopeConverter implements BobBsonConverter<BsonJa
   }
 
   @Override
-  public void write(
-      @NonNull BsonWriter bsonWriter,
-      byte @Nullable [] key,
-      @NonNull BsonJavaScriptWithScope value) {
-    var code = value.getCode();
-    var scope = value.getScope();
-
-    BobBsonBufferPool pool =
-        new NoopBobBsonBufferPool((size) -> new ByteBufferBobBsonBuffer(new byte[size]));
-    DynamicBobBsonBuffer buffer = new DynamicBobBsonBuffer(pool);
-    BsonWriter writer = new StackBsonWriter(buffer);
-
-    byte[] scopeBytes;
-
-    try {
-      bobBson.serialise(scope, BsonDocument.class, writer);
-
-      ByteArrayOutputStream os = new ByteArrayOutputStream();
-      buffer.pipe(os);
-      os.flush();
-      os.close();
-      scopeBytes = os.toByteArray();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-
-    if (key == null) {
-      bsonWriter.writeCodeWithScope(code, scopeBytes);
-    } else {
-      bsonWriter.writeCodeWithScope(key, code, scopeBytes);
-    }
-  }
-
-  @Override
-  public void write(@NonNull BsonWriter bsonWriter, @NonNull BsonJavaScriptWithScope value) {
+  public void writeValue(@NonNull BsonWriter bsonWriter, BsonJavaScriptWithScope value) {
     var code = value.getCode();
     var scope = value.getScope();
 

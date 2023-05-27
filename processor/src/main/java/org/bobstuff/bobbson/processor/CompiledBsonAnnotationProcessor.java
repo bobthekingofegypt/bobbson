@@ -63,7 +63,7 @@ public class CompiledBsonAnnotationProcessor extends AbstractProcessor {
             messager.debug("struct " + structInfo.getClassName() + ", is an enum");
             enumGenerator.generate(structInfo, writer, types, elements);
           } else {
-            ParserGenerator parserGenerator = new ParserGenerator();
+            ParserGenerator parserGenerator = new ParserGenerator(messager);
             parserGenerator.generate(structInfo, writer, types, elements);
           }
         }

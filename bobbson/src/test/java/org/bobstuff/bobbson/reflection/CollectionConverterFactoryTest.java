@@ -95,7 +95,7 @@ public class CollectionConverterFactoryTest {
     assertNull(converter);
   }
 
-  private void validateConverter(CollectionConverter converter) {
+  private void validateConverter(CollectionConverter<?, ?> converter) {
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
     var bsonWriter = new StackBsonWriter(buffer);
     bsonWriter.writeStartDocument();

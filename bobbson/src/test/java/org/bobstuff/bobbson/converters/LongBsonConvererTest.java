@@ -70,7 +70,8 @@ public class LongBsonConvererTest {
     var sut = new LongBsonConverter();
     sut.write(writer, "bob", 23L);
 
-    verify(writer).writeLong("bob".getBytes(StandardCharsets.UTF_8), 23L);
+    verify(writer).writeName("bob");
+    verify(writer).writeLong(23L);
   }
 
   @Test
@@ -100,6 +101,7 @@ public class LongBsonConvererTest {
     var sut = new LongBsonConverter();
     sut.write(writer, "bob".getBytes(StandardCharsets.UTF_8), 23L);
 
-    verify(writer).writeLong("bob".getBytes(StandardCharsets.UTF_8), 23L);
+    verify(writer).writeName("bob".getBytes(StandardCharsets.UTF_8));
+    verify(writer).writeLong(23L);
   }
 }

@@ -28,6 +28,12 @@ public class ParserGenerator {
   public static final String ARRAY_BRACKETS = "[]";
   public static final String END_OF_DOCUMENT_POST = ".END_OF_DOCUMENT";
 
+  private BobMessager messager;
+
+  public ParserGenerator(BobMessager messager) {
+    this.messager = messager;
+  }
+
   private static class ConverterTypeWrapper {
     public TypeMirror type;
     public @Nullable TypeMirror converterType;
@@ -59,6 +65,7 @@ public class ParserGenerator {
 
     var attributes = structInfo.attributes;
     for (var attribute : attributes.values()) {
+      messager.debug("LOOKUP FOR ATTRIBUTE: " + attribute);
       TypeMirror attributeType = attribute.getDeclaredType();
       TypeName typeName = TypeName.get(attributeType);
       TypeName boxSafeTypeName = boxSafeTypeName(attributeType, typeName, types);
@@ -66,8 +73,10 @@ public class ParserGenerator {
           ParameterizedTypeName.get(ClassName.get(BobBsonConverter.class), boxSafeTypeName);
 
       var converterType = attribute.getConverterType();
+      messager.debug("conv type: " + converterType);
       if (converterType != null) {
         String fieldName = CONVERTER_PRE + attribute.name;
+        messager.debug(fieldName);
         lookupData.fields.add(
             FieldSpec.builder(converter, fieldName, Modifier.PRIVATE)
                 .initializer("new $T()", converterType)
@@ -456,7 +465,7 @@ public class ParserGenerator {
         .addParameter(BsonType.class, "type")
         .returns(type)
         .addStatement("var range = reader.getFieldName()")
-        //        .addCode(generateParserPreamble(structInfo, types))
+        //                .addCode(generateParserPreamble(structInfo, types))
         //        .beginControlFlow(
         //            "while ((type = reader.readBsonType()) != $T" + END_OF_DOCUMENT_POST + ")",
         //            BsonType.class)
@@ -474,15 +483,17 @@ public class ParserGenerator {
     var type = TypeName.get(structInfo.element.asType());
     ClassName model = ClassName.get(structInfo.element);
 
-    return MethodSpec.methodBuilder("read")
+    return MethodSpec.methodBuilder("readValue")
         //        .addAnnotation(Nullable.class)
         .addModifiers(Modifier.PUBLIC)
         .addParameter(BsonReader.class, "reader")
+        .addParameter(BsonType.class, "outerType")
         .returns(type)
-        .beginControlFlow("if (reader.getCurrentBsonType() == BsonType.NULL)", BsonType.class)
-        .addStatement("reader.readNull()")
-        .addStatement("return null")
-        .endControlFlow()
+        //        .beginControlFlow("if (reader.getCurrentBsonType() == BsonType.NULL)",
+        // BsonType.class)
+        //        .addStatement("reader.readNull()")
+        //        .addStatement("return null")
+        //        .endControlFlow()
         .addStatement("$T result = new $T()", type, type)
         .addStatement("reader.readStartDocument()")
         .addStatement("var type = $T.NOT_SET", BsonType.class)
@@ -508,24 +519,25 @@ public class ParserGenerator {
     //    TypeName annotatedTypeName =
     //        arrayTypeName.annotated(AnnotationSpec.builder(Nullable.class).build());
 
-    return MethodSpec.methodBuilder("write")
+    return MethodSpec.methodBuilder("writeValue")
         .addModifiers(Modifier.PUBLIC)
         .addParameter(BsonWriter.class, "writer")
-        .addParameter(ParameterSpec.builder(arrayTypeName, "key").build())
+        //        .addParameter(ParameterSpec.builder(arrayTypeName, "key").build())
         //        .addParameter(byte[].class, "key")
         .addParameter(model, "obj")
-        .beginControlFlow("if (obj == null)")
-        .beginControlFlow("if (key == null)")
-        .addStatement("throw new $T(\"key and object cannot be null\")", RuntimeException.class)
-        .endControlFlow()
-        .addStatement("writer.writeNull(key)")
-        .addStatement("return")
-        .endControlFlow()
-        .beginControlFlow("if (key != null)")
-        .addStatement("writer.writeStartDocument(key)")
-        .nextControlFlow("else")
+        //        .beginControlFlow("if (obj == null)")
+        //        .beginControlFlow("if (key == null)")
+        //        .addStatement("throw new $T(\"key and object cannot be null\")",
+        // RuntimeException.class)
+        //        .endControlFlow()
+        //        .addStatement("writer.writeNull(key)")
+        //        .addStatement("return")
+        //        .endControlFlow()
+        //        .beginControlFlow("if (key != null)")
         .addStatement("writer.writeStartDocument()")
-        .endControlFlow()
+        //        .nextControlFlow("else")
+        //        .addStatement("writer.writeStartDocument()")
+        //        .endControlFlow()
         .addCode(generateWriterCode(structInfo))
         .addStatement("writer.writeEndDocument()")
         .build();
@@ -554,7 +566,7 @@ public class ParserGenerator {
     //      converterName += "<" + typeVarsString + ">";
     //    }
     MethodSpec readMethod = generateReadMethod(structInfo, types);
-    MethodSpec writeMethod = generateWriteMethodNoKey(type);
+    //    MethodSpec writeMethod = generateWriteMethodNoKey(type);
     var writeMethodWithKey = generateWriteMethodWithKey(structInfo, type, types);
 
     var keyByteArrays = generateKeyByteArrays(structInfo);
@@ -584,7 +596,7 @@ public class ParserGenerator {
                     .build())
             .addMethod(generateReadSlowMethod(structInfo, types))
             .addMethod(readMethod)
-            .addMethod(writeMethod)
+            //            .addMethod(writeMethod)
             .addMethod(writeMethodWithKey)
             .build();
 

@@ -5,8 +5,6 @@ import java.util.List;
 import org.bobstuff.bobbson.*;
 import org.bobstuff.bobbson.buffer.BobBsonBuffer;
 import org.bobstuff.bobbson.writer.BsonWriter;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class ReflectionBasedConverter implements BobBsonConverter<Object> {
   private BobBson bobBson;

@@ -727,7 +727,7 @@ public class FastBsonWriter implements BsonWriter {
   public void writeString(byte[] value) {
     buffer.writeByte(STRING_VALUE);
     writeNameValue();
-    buffer.skipTail(value.length + 1);
+    buffer.writeInteger(value.length + 1);
     buffer.writeBytes(value);
     buffer.writeByte((byte) 0);
     setNextState();
@@ -738,7 +738,7 @@ public class FastBsonWriter implements BsonWriter {
     buffer.writeByte(STRING_VALUE);
     buffer.writeString(field);
     buffer.writeByte((byte) 0);
-    buffer.skipTail(value.length + 1);
+    buffer.writeInteger(value.length + 1);
     buffer.writeBytes(value);
     buffer.writeByte((byte) 0);
     setNextState();

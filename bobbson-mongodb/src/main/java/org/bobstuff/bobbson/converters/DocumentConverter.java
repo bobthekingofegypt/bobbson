@@ -48,7 +48,7 @@ public class DocumentConverter implements BobBsonConverter<Document> {
 
   @Override
   @SuppressWarnings("PMD.AssignmentInOperand")
-  public @Nullable Document read(BsonReader bsonReader) {
+  public @Nullable Document readValue(BsonReader bsonReader, BsonType outerType) {
     var document = new Document();
 
     bsonReader.readStartDocument();
@@ -78,28 +78,7 @@ public class DocumentConverter implements BobBsonConverter<Document> {
   }
 
   @Override
-  public void write(
-      @NonNull BsonWriter bsonWriter, byte @Nullable [] key, @NonNull Document value) {
-    if (key == null) {
-      bsonWriter.writeStartDocument();
-    } else {
-      bsonWriter.writeStartDocument(key);
-    }
-    for (Map.Entry<String, Object> entry : value.entrySet()) {
-      bsonWriter.writeName(entry.getKey());
-      var clazz = entry.getValue().getClass();
-      var converter = (BobBsonConverter) bobBson.tryFindConverter(clazz);
-      if (converter == null) {
-        throw new IllegalStateException(
-            String.format("No converter registered for %s", clazz.getSimpleName()));
-      }
-      converter.write(bsonWriter, entry.getValue());
-    }
-    bsonWriter.writeEndDocument();
-  }
-
-  @Override
-  public void write(@NonNull BsonWriter bsonWriter, @NonNull Document value) {
+  public void writeValue(@NonNull BsonWriter bsonWriter, Document value) {
     bsonWriter.writeStartDocument();
     for (Map.Entry<String, Object> entry : value.entrySet()) {
       bsonWriter.writeName(entry.getKey());

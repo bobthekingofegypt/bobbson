@@ -13,7 +13,6 @@ import org.bson.types.Binary;
 import org.bson.types.Code;
 import org.bson.types.Decimal128;
 import org.bson.types.ObjectId;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class BasicBSONObjectConverter implements BobBsonConverter<BasicBSONObject> {
@@ -59,7 +58,7 @@ public class BasicBSONObjectConverter implements BobBsonConverter<BasicBSONObjec
 
   @Override
   @SuppressWarnings("PMD.AssignmentInOperand")
-  public @Nullable BasicBSONObject read(BsonReader bsonReader) {
+  public @Nullable BasicBSONObject readValue(BsonReader bsonReader, BsonType outerType) {
     var document = new BasicBSONObject();
 
     bsonReader.readStartDocument();
@@ -98,28 +97,7 @@ public class BasicBSONObjectConverter implements BobBsonConverter<BasicBSONObjec
   }
 
   @Override
-  public void write(
-      @NonNull BsonWriter bsonWriter, byte @Nullable [] key, @NonNull BasicBSONObject value) {
-    if (key == null) {
-      bsonWriter.writeStartDocument();
-    } else {
-      bsonWriter.writeStartDocument(key);
-    }
-    for (Map.Entry<String, Object> entry : value.entrySet()) {
-      bsonWriter.writeName(entry.getKey());
-      var clazz = entry.getValue().getClass();
-      var converter = (BobBsonConverter) bobBson.tryFindConverter(clazz);
-      if (converter == null) {
-        throw new IllegalStateException(
-            String.format("No converter registered for %s", clazz.getSimpleName()));
-      }
-      converter.write(bsonWriter, entry.getValue());
-    }
-    bsonWriter.writeEndDocument();
-  }
-
-  @Override
-  public void write(@NonNull BsonWriter bsonWriter, @NonNull BasicBSONObject value) {
+  public void writeValue(BsonWriter bsonWriter, BasicBSONObject value) {
     bsonWriter.writeStartDocument();
     for (Map.Entry<String, Object> entry : value.entrySet()) {
       bsonWriter.writeName(entry.getKey());

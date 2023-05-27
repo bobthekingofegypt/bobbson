@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import java.nio.charset.StandardCharsets;
 import org.bobstuff.bobbson.BsonReaderStack;
 import org.bobstuff.bobbson.BsonType;
+import org.bobstuff.bobbson.writer.BsonWriter;
 import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -60,7 +61,8 @@ public class BooleanBsonConverterTest {
     var sut = new BooleanBsonConverter();
     sut.write(writer, "key".getBytes(StandardCharsets.UTF_8), true);
 
-    verify(writer).writeBoolean("key".getBytes(StandardCharsets.UTF_8), true);
+    verify(writer).writeName("key".getBytes(StandardCharsets.UTF_8));
+    verify(writer).writeBoolean(true);
   }
 
   @Test
@@ -90,7 +92,8 @@ public class BooleanBsonConverterTest {
     var sut = new BooleanBsonConverter();
     sut.write(writer, "key", true);
 
-    verify(writer).writeBoolean("key".getBytes(StandardCharsets.UTF_8), true);
+    verify(writer).writeName("key");
+    verify(writer).writeBoolean(true);
   }
 
   @Test
@@ -100,7 +103,8 @@ public class BooleanBsonConverterTest {
     var sut = new BooleanBsonConverter();
     sut.write(writer, "key".getBytes(StandardCharsets.UTF_8), false);
 
-    verify(writer).writeBoolean("key".getBytes(StandardCharsets.UTF_8), false);
+    verify(writer).writeName("key".getBytes(StandardCharsets.UTF_8));
+    verify(writer).writeBoolean(false);
   }
 
   @Test
@@ -125,11 +129,12 @@ public class BooleanBsonConverterTest {
 
   @Test
   public void testWriteHandlesBooleanFalseStringKey() {
-    var writer = Mockito.mock(StackBsonWriter.class);
+    var writer = Mockito.mock(BsonWriter.class);
 
     var sut = new BooleanBsonConverter();
     sut.write(writer, "key", false);
 
-    verify(writer).writeBoolean("key".getBytes(StandardCharsets.UTF_8), false);
+    verify(writer).writeName("key");
+    verify(writer).writeBoolean(false);
   }
 }

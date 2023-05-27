@@ -11,7 +11,7 @@ import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class IntegerBsonConvererTest {
+public class IntegerConverterTest {
   @Test
   public void testReadHandlesNull() {
     var reader = Mockito.mock(BsonReaderStack.class);
@@ -70,7 +70,8 @@ public class IntegerBsonConvererTest {
     var sut = new IntegerBsonConverter();
     sut.write(writer, "bob", 23);
 
-    verify(writer).writeInteger("bob".getBytes(StandardCharsets.UTF_8), 23);
+    verify(writer).writeName("bob");
+    verify(writer).writeInteger(23);
   }
 
   @Test
@@ -100,6 +101,7 @@ public class IntegerBsonConvererTest {
     var sut = new IntegerBsonConverter();
     sut.write(writer, "bob".getBytes(StandardCharsets.UTF_8), 23);
 
-    verify(writer).writeInteger("bob".getBytes(StandardCharsets.UTF_8), 23);
+    verify(writer).writeName("bob".getBytes(StandardCharsets.UTF_8));
+    verify(writer).writeInteger(23);
   }
 }

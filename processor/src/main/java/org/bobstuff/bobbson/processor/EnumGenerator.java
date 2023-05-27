@@ -77,7 +77,7 @@ public class EnumGenerator {
       } else {
         block.nextControlFlow("else if (obj == $T.$N)", structInfo.element.asType(), entry);
       }
-      block.addStatement("writer.writeString(key, $NBytes)", entry);
+      block.addStatement("writer.writeString($NBytes)", entry);
     }
     block.endControlFlow();
     return block.build();
@@ -95,18 +95,19 @@ public class EnumGenerator {
   protected MethodSpec generateWriteMethodWithKey(StructInfo structInfo) {
     TypeName arrayTypeName = ArrayTypeName.of(byte.class);
 
-    return MethodSpec.methodBuilder("write")
+    return MethodSpec.methodBuilder("writeValue")
         .addModifiers(Modifier.PUBLIC)
         .addParameter(BsonWriter.class, "writer")
-        .addParameter(ParameterSpec.builder(arrayTypeName, "key").build())
+        //        .addParameter(ParameterSpec.builder(arrayTypeName, "key").build())
         .addParameter(TypeName.get(structInfo.element.asType()), "obj")
-        .beginControlFlow("if (obj == null)")
-        .beginControlFlow("if (key == null)")
-        .addStatement("throw new $T(\"key and object cannot be null\")", RuntimeException.class)
-        .endControlFlow()
-        .addStatement("writer.writeNull(key)")
-        .addStatement("return")
-        .endControlFlow()
+        //        .beginControlFlow("if (obj == null)")
+        //        .beginControlFlow("if (key == null)")
+        //        .addStatement("throw new $T(\"key and object cannot be null\")",
+        // RuntimeException.class)
+        //        .endControlFlow()
+        //        .addStatement("writer.writeNull(key)")
+        //        .addStatement("return")
+        //        .endControlFlow()
         .addCode(generateWriteEnumClauses(structInfo))
         .build();
   }
@@ -133,14 +134,15 @@ public class EnumGenerator {
 
   private MethodSpec generateReadMethod(StructInfo structInfo, Elements elements) {
     var type = TypeName.get(structInfo.element.asType());
-    return MethodSpec.methodBuilder("read")
+    return MethodSpec.methodBuilder("readValue")
         .addModifiers(Modifier.PUBLIC)
         .addParameter(BsonReader.class, "reader")
+        .addParameter(BsonType.class, "type")
         .returns(type)
-        .beginControlFlow("if (reader.getCurrentBsonType() == $T.NULL)", BsonType.class)
-        .addStatement("reader.readNull()")
-        .addStatement("return null")
-        .endControlFlow()
+        //        .beginControlFlow("if (reader.getCurrentBsonType() == $T.NULL)", BsonType.class)
+        //        .addStatement("reader.readNull()")
+        //        .addStatement("return null")
+        //        .endControlFlow()
         .addStatement("var fieldName = reader.getFieldName()")
         .addStatement("reader.readStringRaw()")
         .addCode(generateReadEnumClauses(structInfo))
@@ -186,7 +188,7 @@ public class EnumGenerator {
                     .addStatement("this.bobBson = bobBson")
                     .build())
             .addMethod(generateReadMethod(structInfo, elements))
-            .addMethod(generateWriteMethodNoKey(structInfo))
+            //            .addMethod(generateWriteMethodNoKey(structInfo))
             .addMethod(generateWriteMethodWithKey(structInfo))
             .build();
 

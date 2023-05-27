@@ -661,7 +661,7 @@ public class StackBsonWriter implements BsonWriter {
   public void writeString(byte[] value) {
     buffer.writeByte((byte) BsonType.STRING.getValue());
     writeNameValue();
-    buffer.skipTail(value.length + 1);
+    buffer.writeInteger(value.length + 1);
     buffer.writeBytes(value);
     buffer.writeByte((byte) 0);
     setNextState();
@@ -672,7 +672,7 @@ public class StackBsonWriter implements BsonWriter {
     buffer.writeByte((byte) BsonType.STRING.getValue());
     buffer.writeString(field);
     buffer.writeByte((byte) 0);
-    buffer.skipTail(value.length + 1);
+    buffer.writeInteger(value.length + 1);
     buffer.writeBytes(value);
     buffer.writeByte((byte) 0);
     setNextState();
