@@ -12,17 +12,17 @@ public class Person {
   private String name;
   private String occupation;
 
-  @BsonConverter(target = CustomConverter.class)
+  @BsonConverter(CustomConverter.class)
   private String country;
 
   private int age;
   private double weight;
   private List<String> places;
 
-  @BsonConverter(target = CustomListConverter.class)
+  @BsonConverter(CustomListConverter.class)
   private List<String> aliases;
 
-  @BsonConverter(target = CustomListToStringConverter.class)
+  @BsonConverter(CustomListToStringConverter.class)
   private String scores;
 
   private Set<String> vacationSpots;

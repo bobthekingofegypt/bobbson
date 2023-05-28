@@ -188,7 +188,7 @@ public class AnalysisTest {
     assertNotNull(name.converter);
     assertNotNull(name.converterType);
     assertEquals(
-        "@org.bobstuff.bobbson.annotations.BsonConverter(target=org.bobstuff.bobbson.converters.StringBsonConverter.class)",
+        "@org.bobstuff.bobbson.annotations.BsonConverter(org.bobstuff.bobbson.converters.StringBsonConverter.class)",
         name.converter.toString());
     assertEquals(
         "org.bobstuff.bobbson.converters.StringBsonConverter", name.converterType.toString());
@@ -240,7 +240,7 @@ public class AnalysisTest {
   @Case("converter")
   @GenerateBobBsonConverter
   static class SampleConverter {
-    @BsonConverter(target = StringBsonConverter.class)
+    @BsonConverter(value = StringBsonConverter.class)
     private String name;
 
     public String getName() {

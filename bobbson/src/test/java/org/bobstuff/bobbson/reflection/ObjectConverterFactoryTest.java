@@ -77,10 +77,6 @@ public class ObjectConverterFactoryTest {
   @SuppressWarnings("unchecked")
   public void testTryCreateWithCollections() {
     var bobBson = Mockito.mock(BobBson.class);
-    Mockito.when(bobBson.tryFindConverter((Type) String.class))
-        .thenReturn((BobBsonConverter) new StringBsonConverter());
-    Mockito.when(bobBson.tryFindConverter((Type) int.class))
-        .thenReturn((BobBsonConverter) new IntegerBsonConverter());
     var sut = new ObjectConverterFactory();
 
     Assertions.assertNull(sut.tryCreate(HashMap.class, bobBson));
@@ -89,12 +85,36 @@ public class ObjectConverterFactoryTest {
 
   @Test
   @SuppressWarnings("unchecked")
-  public void testTryCreateNoPublicConstructor() {
+  public void testTryCreateShouldRechechConverterIfNotThereDuringCreation() {
     var bobBson = Mockito.mock(BobBson.class);
     Mockito.when(bobBson.tryFindConverter((Type) String.class))
+        .thenReturn(null)
         .thenReturn((BobBsonConverter) new StringBsonConverter());
     Mockito.when(bobBson.tryFindConverter((Type) int.class))
         .thenReturn((BobBsonConverter) new IntegerBsonConverter());
+    var sut = new ObjectConverterFactory();
+
+    var converter = sut.tryCreate(BasicTypes.class, bobBson);
+
+    var basicTypes = new BasicTypes();
+    basicTypes.setName("bob");
+    basicTypes.setAge(23);
+
+    var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
+    var bsonWriter = new StackBsonWriter(buffer);
+    converter.write(bsonWriter, basicTypes);
+
+    var reader = new BsonReaderStack(buffer);
+
+    var result = (BasicTypes) converter.read(reader);
+    assertEquals("bob", result.getName());
+    assertEquals(23, result.getAge());
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void testTryCreateNoPublicConstructor() {
+    var bobBson = Mockito.mock(BobBson.class);
     var sut = new ObjectConverterFactory();
 
     Assertions.assertThrows(

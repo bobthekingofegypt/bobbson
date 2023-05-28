@@ -1,7 +1,6 @@
 package org.bobstuff.bobbson.reflection;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.function.BiConsumer;
@@ -13,32 +12,34 @@ import org.bobstuff.bobbson.annotations.BsonConverter;
 import org.bobstuff.bobbson.annotations.BsonWriterOptions;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class ReflectionField {
+/**
+ * Class to hold the break down of a field found in a bean. This includes information about
+ * getters/setters, name, alias custom converters etc.
+ *
+ * @param <Model> the model the field is on
+ * @param <Field> the field in type
+ */
+public class ReflectionField<Model, Field> {
   public byte[] nameBytes;
   public int weakHash;
   private final String alias;
   private final String fieldName;
   private final Type type;
-  private final transient Method getter;
-  private final transient Method setter;
-  private final transient BiConsumer biConsumerSetter;
-  private final transient Function getterFunction;
-  private final transient @Nullable BobBsonConverter converter;
+  private final transient BiConsumer<Model, Field> biConsumerSetter;
+  private final transient Function<Model, Field> getterFunction;
+  private final transient @Nullable BobBsonConverter<Field> converter;
   private boolean writeNull = true;
 
+  @SuppressWarnings("unchecked")
   public ReflectionField(
       String fieldName,
       Type type,
-      Method getter,
-      Method setter,
       @Nullable BsonAttribute bsonAttribute,
       @Nullable BsonWriterOptions bsonWriterOptions,
       @Nullable BsonConverter customConverter,
-      BiConsumer biConsumerSetter,
-      Function getterFunction,
+      BiConsumer<Model, Field> biConsumerSetter,
+      Function<Model, Field> getterFunction,
       BobBson bobBson) {
-    this.getter = getter;
-    this.setter = setter;
     this.biConsumerSetter = biConsumerSetter;
     this.getterFunction = getterFunction;
     this.fieldName = fieldName;
@@ -48,26 +49,20 @@ public class ReflectionField {
       this.writeNull = bsonWriterOptions.writeNull();
     }
 
-    if (customConverter != null && customConverter.target() != null) {
+    if (customConverter != null && customConverter.value() != null) {
       try {
-        converter = customConverter.target().getConstructor().newInstance();
+        converter =
+            (BobBsonConverter<Field>) customConverter.value().getConstructor().newInstance();
       } catch (NoSuchMethodException
           | IllegalAccessException
           | InstantiationException
           | InvocationTargetException e) {
-        throw new RuntimeException("failed to create instance of " + customConverter.target());
+        throw new RuntimeException("failed to create instance of " + customConverter.value());
       }
     } else {
-      var t = bobBson.tryFindConverter(type);
-      if (t == null) {
-        throw new RuntimeException("no converter found for type " + type);
-      }
-      converter = t;
+      converter = (BobBsonConverter<Field>) bobBson.tryFindConverter(type);
     }
 
-    if (converter == null) {
-      throw new RuntimeException("converter shouldn't be null");
-    }
     if (bsonAttribute != null && bsonAttribute.value() != null) {
       nameBytes = bsonAttribute.value().getBytes(StandardCharsets.UTF_8);
       alias = bsonAttribute.value();
@@ -93,27 +88,19 @@ public class ReflectionField {
     return type;
   }
 
-  public @Nullable BobBsonConverter getConverter() {
+  public @Nullable BobBsonConverter<Field> getConverter() {
     return converter;
   }
 
   public Class<?> getClazz() {
-    return type.getClass();
+    return (Class<?>) type;
   }
 
-  public Method getGetter() {
-    return getter;
-  }
-
-  public Method getSetter() {
-    return setter;
-  }
-
-  public BiConsumer getBiConsumerSetter() {
+  public BiConsumer<Model, Field> getBiConsumerSetter() {
     return biConsumerSetter;
   }
 
-  public Function getGetterFunction() {
+  public Function<Model, Field> getGetterFunction() {
     return getterFunction;
   }
 

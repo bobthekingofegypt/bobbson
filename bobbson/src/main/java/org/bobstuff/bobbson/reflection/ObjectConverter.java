@@ -6,11 +6,23 @@ import org.bobstuff.bobbson.*;
 import org.bobstuff.bobbson.buffer.BobBsonBuffer;
 import org.bobstuff.bobbson.writer.BsonWriter;
 
+/**
+ * ObjectConverter handles reflection based read/write of objects with no specific registered
+ * converters.
+ */
 public class ObjectConverter implements BobBsonConverter<Object> {
   private final BobBson bobBson;
   private final List<ReflectionField> fields;
   private final Class<?> instanceClazz;
 
+  /**
+   * Construct a new object converter. Object converter will ask bobBson instance for converters for
+   * each field of the bean as required to read/write its values.
+   *
+   * @param bobBson instance to query for field converters
+   * @param instanceClazz type of class to be read/writen
+   * @param fields list of fields on the bean
+   */
   public ObjectConverter(BobBson bobBson, Class<?> instanceClazz, List<ReflectionField> fields) {
     this.bobBson = bobBson;
     this.fields = fields;
@@ -52,7 +64,7 @@ public class ObjectConverter implements BobBsonConverter<Object> {
 
     bsonReader.readStartDocument();
 
-    BobBsonBuffer.ByteRangeComparator nameComparitor = bsonReader.getFieldName();
+    BobBsonBuffer.ByteRangeComparator nameComparator = bsonReader.getFieldName();
     while (bsonReader.readBsonType() != BsonType.END_OF_DOCUMENT) {
       if (bsonReader.getCurrentBsonType() == BsonType.NULL) {
         bsonReader.readNull();
@@ -60,7 +72,7 @@ public class ObjectConverter implements BobBsonConverter<Object> {
       }
       boolean found = false;
       for (var field : fields) {
-        if (nameComparitor.equalsArray(field.nameBytes, field.weakHash)) {
+        if (nameComparator.equalsArray(field.nameBytes, field.weakHash)) {
           var converter = field.getConverter();
           if (converter == null) {
             converter = bobBson.tryFindConverter(field.getType());

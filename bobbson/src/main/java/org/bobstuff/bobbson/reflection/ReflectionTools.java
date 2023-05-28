@@ -12,6 +12,7 @@ import org.bobstuff.bobbson.annotations.BsonConverter;
 import org.bobstuff.bobbson.annotations.BsonWriterOptions;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/** Helpful tools for the reflection converters to use to inspect beans and fields */
 public class ReflectionTools {
   public static final Map<Class<?>, Class<?>> map = new HashMap<>();
 
@@ -26,7 +27,18 @@ public class ReflectionTools {
     map.put(double.class, Double.class);
   }
 
-  @SuppressWarnings("PMD.AvoidCatchingThrowable")
+  /**
+   * Parse a list of all fields in the requested bean that can be accessed by a bson converter to
+   * read/write the classes state.
+   *
+   * @param clazz bean to be scanned
+   * @param bobBson used to find pre-registered converters to fields, if none found they will be
+   *     requested again at runtime
+   * @return list of scanned fields
+   * @param <T> type of bean to be scanned
+   * @throws Exception if problem creating reflection getter/setters
+   */
+  @SuppressWarnings({"unchecked", "PMD.AvoidCatchingThrowable"})
   public static <T> List<ReflectionField> parseBeanFields(Class<T> clazz, BobBson bobBson)
       throws Exception {
     var beanFields = new ArrayList<ReflectionField>();
@@ -72,8 +84,6 @@ public class ReflectionTools {
             new ReflectionField(
                 name,
                 field.getGenericType(),
-                getter,
-                setter,
                 bsonAttribute,
                 bsonWriterOptions,
                 customConverter,
@@ -119,8 +129,6 @@ public class ReflectionTools {
             new ReflectionField(
                 fieldName,
                 fieldType,
-                method,
-                setter,
                 bsonAttribute,
                 bsonWriterOptions,
                 customConverter,
@@ -132,6 +140,14 @@ public class ReflectionTools {
     return beanFields;
   }
 
+  /**
+   * Extract a field name from its getter method name.
+   *
+   * <p>ex - getBanana would return banana, or isOld would return old
+   *
+   * @param methodName name to parse
+   * @return lowercase name
+   */
   @SuppressWarnings("PMD.UnnecessaryCaseChange")
   private static @Nullable String extractNameFromMethod(String methodName) {
     int getPlusOneLetter = 4;

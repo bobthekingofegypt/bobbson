@@ -7,6 +7,7 @@ import org.bobstuff.bobbson.BobBson;
 import org.bobstuff.bobbson.BobBsonConverterFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/** Factory to return object converters configured for requested bean type. */
 public class ObjectConverterFactory implements BobBsonConverterFactory<ObjectConverter> {
   @Override
   public @Nullable ObjectConverter tryCreate(Type manifest, BobBson bobBson) {

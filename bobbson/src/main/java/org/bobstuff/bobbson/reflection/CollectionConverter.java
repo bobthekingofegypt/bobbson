@@ -8,12 +8,25 @@ import org.bobstuff.bobbson.BsonType;
 import org.bobstuff.bobbson.writer.BsonWriter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * Converter to handle reflection based read/write of bson arrays as java collections list/set etc.
+ *
+ * @param <E> model type contained in collection
+ * @param <T> type of collection
+ */
 public class CollectionConverter<@Nullable E, T extends Collection<@Nullable E>>
     implements BobBsonConverter<T> {
   private final BobBsonConverter<@Nullable E> converter;
   private final InstanceFactory<T> instanceFactory;
   private final Type manifest;
 
+  /**
+   * Construct new converter for given collection type.
+   *
+   * @param manifest type of collection
+   * @param instanceFactory factory to create new instances of manifest
+   * @param converter for the values inside the collection
+   */
   public CollectionConverter(
       Type manifest, InstanceFactory<T> instanceFactory, BobBsonConverter<E> converter) {
     this.converter = converter;

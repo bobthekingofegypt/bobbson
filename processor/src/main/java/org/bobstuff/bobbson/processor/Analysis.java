@@ -104,7 +104,7 @@ public class Analysis {
         TypeMirror converterType = null;
         if (converter != null) {
           for (ExecutableElement ee : converter.getElementValues().keySet()) {
-            if (ee.toString().equals("target()")) {
+            if (ee.toString().equals("value()")) {
               messager.debug(converter.getElementValues().get(ee).getValue().toString());
               String clazz = converter.getElementValues().get(ee).getValue().toString();
 

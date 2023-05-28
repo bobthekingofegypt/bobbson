@@ -5,7 +5,7 @@ import org.bobstuff.bobbson.annotations.GenerateBobBsonConverter;
 
 @GenerateBobBsonConverter
 public class BeanWithByteArray {
-  @BsonConverter(target = CustomObjectIdConverter.class)
+  @BsonConverter(value = CustomObjectIdConverter.class)
   private byte[] key;
 
   public byte[] getKey() {

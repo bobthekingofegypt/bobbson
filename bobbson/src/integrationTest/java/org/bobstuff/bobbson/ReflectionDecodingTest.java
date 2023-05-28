@@ -59,7 +59,7 @@ public class ReflectionDecodingTest {
   }
 
   public static class CustomConverterTest {
-    @BsonConverter(target = CustomConverter.class)
+    @BsonConverter(value = CustomConverter.class)
     private String names;
 
     public String getNames() {

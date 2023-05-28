@@ -8,6 +8,13 @@ import org.bobstuff.bobbson.BobBsonConverter;
 import org.bobstuff.bobbson.BobBsonConverterFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * Factory to return reflection based collection converters if requested type is compatible with a
+ * java collection
+ *
+ * @param <E> type of objects in collection
+ * @param <T> type of collection
+ */
 public class CollectionConverterFactory<@Nullable E, T extends Collection<@Nullable E>>
     implements BobBsonConverterFactory<CollectionConverter<E, T>> {
   private static final int SINGLE_ARG_LENGTH = 1;
