@@ -8,6 +8,11 @@ import org.bobstuff.bobbson.BsonType;
 import org.bobstuff.bobbson.writer.BsonWriter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * Reflection converter to read/write basic enums using their name field.
+ *
+ * @param <T> type of enum
+ */
 public class EnumConverter<T extends Enum<T>> implements BobBsonConverter<T> {
   private class EnumValue {
     public byte[] nameBytes;
@@ -27,8 +32,15 @@ public class EnumConverter<T extends Enum<T>> implements BobBsonConverter<T> {
   }
 
   private EnumValue[] values;
-  private Class<T> instanceClazz;
+  private final Class<T> instanceClazz;
 
+  /**
+   * Construct enum converter for the given enum class and its array of name values
+   *
+   * @param instanceClazz enum class
+   * @param constants array of name values
+   */
+  @SuppressWarnings("unchecked")
   public EnumConverter(Class<T> instanceClazz, T[] constants) {
     this.instanceClazz = instanceClazz;
     var values = (EnumValue[]) Array.newInstance(EnumValue.class, constants.length);
@@ -40,13 +52,11 @@ public class EnumConverter<T extends Enum<T>> implements BobBsonConverter<T> {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public void writeValue(BsonWriter bsonWriter, T instance) {
     bsonWriter.writeString(instance.name());
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public @Nullable T readValue(BsonReader bsonReader, BsonType type) {
     var fieldName = bsonReader.getFieldName();
     bsonReader.readStringRaw();

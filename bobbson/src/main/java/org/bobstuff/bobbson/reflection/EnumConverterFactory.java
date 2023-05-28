@@ -7,22 +7,26 @@ import org.bobstuff.bobbson.BobBson;
 import org.bobstuff.bobbson.BobBsonConverterFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class EnumConverterFactory implements BobBsonConverterFactory<EnumConverter> {
+/**
+ * Reflection based factory that returns an enum converter if possible to create one, null
+ * otherwise.
+ *
+ * @param <T> enum type
+ */
+public class EnumConverterFactory<T extends Enum<T>>
+    implements BobBsonConverterFactory<EnumConverter<T>> {
   @Override
-  @Nullable
   @SuppressWarnings({"PMD.AvoidLiteralsInIfCondition", "unchecked"})
-  public EnumConverter tryCreate(Type manifest, BobBson bobBson) {
+  public @Nullable EnumConverter<T> tryCreate(Type manifest, BobBson bobBson) {
     if (manifest instanceof Class<?> && ((Class<?>) manifest).isEnum()) {
-      return analyze(manifest, (Class<Enum>) manifest, bobBson);
+      return analyze(manifest, (Class<T>) manifest, bobBson);
     }
-    // TODO support paramaterized enums
     return null;
   }
 
-  @Nullable
   @SuppressWarnings({"argument"})
-  private static EnumConverter analyze(
-      final Type manifest, final Class<Enum> raw, final BobBson bobBson) {
+  private @Nullable EnumConverter<T> analyze(
+      final Type manifest, final Class<T> raw, final BobBson bobBson) {
     if (raw.isArray()
         || Collection.class.isAssignableFrom(raw)
         || (raw.getModifiers() & Modifier.ABSTRACT) != 0
