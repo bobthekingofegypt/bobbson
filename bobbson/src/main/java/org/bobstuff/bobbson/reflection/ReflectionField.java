@@ -16,21 +16,17 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public class ReflectionField {
   public byte[] nameBytes;
   public int weakHash;
-  private String alias;
-  private String fieldName;
-
-  private Type type;
-  //  private transient Field field;
-  private transient Method getter;
-  private transient Method setter;
-  private transient BiConsumer biConsumerSetter;
-  private transient Function getterFunction;
-  private transient @Nullable BobBsonConverter converter;
-
+  private final String alias;
+  private final String fieldName;
+  private final Type type;
+  private final transient Method getter;
+  private final transient Method setter;
+  private final transient BiConsumer biConsumerSetter;
+  private final transient Function getterFunction;
+  private final transient @Nullable BobBsonConverter converter;
   private boolean writeNull = true;
 
   public ReflectionField(
-      //      Field field,
       String fieldName,
       Type type,
       Method getter,
@@ -41,7 +37,6 @@ public class ReflectionField {
       BiConsumer biConsumerSetter,
       Function getterFunction,
       BobBson bobBson) {
-    //    this.field = field;
     this.getter = getter;
     this.setter = setter;
     this.biConsumerSetter = biConsumerSetter;

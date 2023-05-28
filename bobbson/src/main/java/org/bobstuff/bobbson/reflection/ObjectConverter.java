@@ -6,13 +6,12 @@ import org.bobstuff.bobbson.*;
 import org.bobstuff.bobbson.buffer.BobBsonBuffer;
 import org.bobstuff.bobbson.writer.BsonWriter;
 
-public class ReflectionBasedConverter implements BobBsonConverter<Object> {
-  private BobBson bobBson;
-  private List<ReflectionField> fields;
-  private Class<?> instanceClazz;
+public class ObjectConverter implements BobBsonConverter<Object> {
+  private final BobBson bobBson;
+  private final List<ReflectionField> fields;
+  private final Class<?> instanceClazz;
 
-  public ReflectionBasedConverter(
-      BobBson bobBson, Class<?> instanceClazz, List<ReflectionField> fields) {
+  public ObjectConverter(BobBson bobBson, Class<?> instanceClazz, List<ReflectionField> fields) {
     this.bobBson = bobBson;
     this.fields = fields;
     this.instanceClazz = instanceClazz;

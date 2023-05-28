@@ -47,12 +47,13 @@ public class CollectionConverterFactory<@Nullable E, T extends Collection<@Nulla
     } else {
       return null;
     }
+    final InstanceFactory<T> n = (InstanceFactory<T>) newInstance;
     final BobBsonConverter<?> typeConverter = bobBson.tryFindConverter(element);
     if (typeConverter == null) {
       return null;
     }
-    final CollectionConverter converter =
-        new CollectionConverter(manifest, newInstance, typeConverter);
+    final BobBsonConverter<E> c = (BobBsonConverter<E>) typeConverter;
+    final CollectionConverter<E, T> converter = new CollectionConverter<>(manifest, n, c);
     bobBson.registerConverter(manifest, converter);
     return converter;
   }
