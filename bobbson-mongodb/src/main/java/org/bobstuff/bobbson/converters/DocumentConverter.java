@@ -2,8 +2,9 @@ package org.bobstuff.bobbson.converters;
 
 import java.util.*;
 import org.bobstuff.bobbson.*;
-import org.bobstuff.bobbson.BsonReader;
 import org.bobstuff.bobbson.BsonType;
+import org.bobstuff.bobbson.models.BobBsonBinary;
+import org.bobstuff.bobbson.reader.BsonReader;
 import org.bobstuff.bobbson.writer.BsonWriter;
 import org.bson.*;
 import org.bson.types.Code;

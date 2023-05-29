@@ -11,6 +11,7 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import org.bobstuff.bobbson.*;
+import org.bobstuff.bobbson.reader.BsonReader;
 import org.bobstuff.bobbson.writer.BsonWriter;
 import org.checkerframework.checker.nullness.qual.NonNull;
 

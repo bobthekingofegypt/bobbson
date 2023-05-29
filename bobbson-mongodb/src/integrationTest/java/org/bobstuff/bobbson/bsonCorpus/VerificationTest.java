@@ -10,6 +10,8 @@ import org.bobstuff.bobbson.buffer.DynamicBobBsonBuffer;
 import org.bobstuff.bobbson.buffer.pool.BobBsonBufferPool;
 import org.bobstuff.bobbson.buffer.pool.NoopBobBsonBufferPool;
 import org.bobstuff.bobbson.converters.BsonValueConverters;
+import org.bobstuff.bobbson.reader.BsonReader;
+import org.bobstuff.bobbson.reader.StackBsonReader;
 import org.bobstuff.bobbson.writer.BsonWriter;
 import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.bson.BsonDocument;
@@ -21,7 +23,7 @@ public class VerificationTest {
   public void verification() throws Exception {
     var bson = "10000000016400120000000000F87F00";
     BsonReader reader =
-        new BsonReaderStack(
+        new StackBsonReader(
             ByteBuffer.wrap(BaseEncoding.base16().decode(bson.toUpperCase()))
                 .order(ByteOrder.LITTLE_ENDIAN));
     BobBson bobBson = new BobBson();

@@ -1,7 +1,7 @@
 package org.bobstuff.bobbson.converters;
 
-import org.bobstuff.bobbson.BsonReader;
 import org.bobstuff.bobbson.BsonType;
+import org.bobstuff.bobbson.reader.BsonReader;
 
 public class PrimitiveConverters {
   public static int parseInteger(BsonReader reader) {

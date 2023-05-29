@@ -1,4 +1,4 @@
-package org.bobstuff.bobbson;
+package org.bobstuff.bobbson.models;
 
 public class BobBsonBinary {
   private final byte type;

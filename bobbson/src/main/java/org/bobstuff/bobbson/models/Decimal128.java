@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.bobstuff.bobbson;
+package org.bobstuff.bobbson.models;
 
 import static java.math.MathContext.DECIMAL128;
 import static java.util.Arrays.asList;

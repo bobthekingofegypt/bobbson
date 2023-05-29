@@ -1,10 +1,9 @@
 package org.bobstuff.bobbson.converters;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
-import org.bobstuff.bobbson.BsonReader;
 import org.bobstuff.bobbson.BsonType;
+import org.bobstuff.bobbson.reader.BsonReader;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

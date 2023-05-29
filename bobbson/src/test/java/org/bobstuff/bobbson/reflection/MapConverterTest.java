@@ -3,9 +3,9 @@ package org.bobstuff.bobbson.reflection;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.HashMap;
-import org.bobstuff.bobbson.BsonReaderStack;
 import org.bobstuff.bobbson.buffer.BobBufferBobBsonBuffer;
 import org.bobstuff.bobbson.converters.IntegerBsonConverter;
+import org.bobstuff.bobbson.reader.StackBsonReader;
 import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,7 @@ public class MapConverterTest {
     bsonWriter.writeEndDocument();
     bsonWriter.writeEndDocument();
 
-    var reader = new BsonReaderStack(buffer);
+    var reader = new StackBsonReader(buffer);
     reader.readStartDocument();
     reader.readBsonType();
 
@@ -50,7 +50,7 @@ public class MapConverterTest {
     bsonWriter.writeEndDocument();
     bsonWriter.writeEndDocument();
 
-    var reader = new BsonReaderStack(buffer);
+    var reader = new StackBsonReader(buffer);
     reader.readStartDocument();
     reader.readBsonType();
 
@@ -76,7 +76,7 @@ public class MapConverterTest {
     sut.write(bsonWriter, "ages", ages);
     bsonWriter.writeEndDocument();
 
-    var reader = new BsonReaderStack(buffer);
+    var reader = new StackBsonReader(buffer);
     reader.readStartDocument();
     reader.readBsonType();
 
@@ -102,7 +102,7 @@ public class MapConverterTest {
     sut.write(bsonWriter, "ages", ages);
     bsonWriter.writeEndDocument();
 
-    var reader = new BsonReaderStack(buffer);
+    var reader = new StackBsonReader(buffer);
     reader.readStartDocument();
     reader.readBsonType();
 

@@ -5,6 +5,8 @@ import org.bobstuff.bobbson.buffer.ByteBufferBobBsonBuffer;
 import org.bobstuff.bobbson.buffer.DynamicBobBsonBuffer;
 import org.bobstuff.bobbson.buffer.pool.BobBsonBufferPool;
 import org.bobstuff.bobbson.buffer.pool.NoopBobBsonBufferPool;
+import org.bobstuff.bobbson.reader.BsonReader;
+import org.bobstuff.bobbson.reader.StackBsonReader;
 import org.bobstuff.bobbson.writer.BsonWriter;
 import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.bson.types.ObjectId;
@@ -32,7 +34,7 @@ public class BeanWithByteArrayTest {
     byte[] bytes = os.toByteArray();
 
     BobBson bobBson = new BobBson();
-    BsonReader reader = new BsonReaderStack(new ByteBufferBobBsonBuffer(bytes));
+    BsonReader reader = new StackBsonReader(new ByteBufferBobBsonBuffer(bytes));
     var result = bobBson.deserialise(BeanWithByteArray.class, reader);
     Assertions.assertArrayEquals(id, result.getKey());
   }

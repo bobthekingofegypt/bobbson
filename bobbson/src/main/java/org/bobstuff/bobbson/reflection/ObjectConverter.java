@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import org.bobstuff.bobbson.*;
 import org.bobstuff.bobbson.buffer.BobBsonBuffer;
+import org.bobstuff.bobbson.reader.BsonReader;
 import org.bobstuff.bobbson.writer.BsonWriter;
 
 /**

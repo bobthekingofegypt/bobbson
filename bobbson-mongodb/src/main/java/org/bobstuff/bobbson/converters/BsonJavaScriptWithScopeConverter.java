@@ -8,6 +8,8 @@ import org.bobstuff.bobbson.buffer.ByteBufferBobBsonBuffer;
 import org.bobstuff.bobbson.buffer.DynamicBobBsonBuffer;
 import org.bobstuff.bobbson.buffer.pool.BobBsonBufferPool;
 import org.bobstuff.bobbson.buffer.pool.NoopBobBsonBufferPool;
+import org.bobstuff.bobbson.reader.BsonReader;
+import org.bobstuff.bobbson.reader.StackBsonReader;
 import org.bobstuff.bobbson.writer.BsonWriter;
 import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.bson.BsonDocument;
@@ -26,7 +28,7 @@ public class BsonJavaScriptWithScopeConverter implements BobBsonConverter<BsonJa
   public @Nullable BsonJavaScriptWithScope readValue(BsonReader bsonReader, BsonType type) {
     var codeWithScope = bsonReader.readCodeWithScope();
     BsonReader reader =
-        new BsonReaderStack(
+        new StackBsonReader(
             ByteBuffer.wrap(codeWithScope.getScope()).order(ByteOrder.LITTLE_ENDIAN));
     BsonDocument document;
     try {

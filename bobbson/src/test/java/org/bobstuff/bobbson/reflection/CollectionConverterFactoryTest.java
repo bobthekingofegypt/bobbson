@@ -7,9 +7,9 @@ import java.lang.reflect.Type;
 import java.util.*;
 import org.bobstuff.bobbson.BobBson;
 import org.bobstuff.bobbson.BobBsonConverter;
-import org.bobstuff.bobbson.BsonReaderStack;
 import org.bobstuff.bobbson.buffer.BobBufferBobBsonBuffer;
 import org.bobstuff.bobbson.converters.IntegerBsonConverter;
+import org.bobstuff.bobbson.reader.StackBsonReader;
 import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -17,6 +17,7 @@ import org.mockito.Mockito;
 public class CollectionConverterFactoryTest {
 
   @Test
+  @SuppressWarnings("unchecked")
   public void testTryCreateList() {
     var bobBson = Mockito.mock(BobBson.class);
     Mockito.when(bobBson.tryFindConverter((Type) Integer.class))
@@ -29,6 +30,7 @@ public class CollectionConverterFactoryTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void testTryCreateSet() {
     var bobBson = Mockito.mock(BobBson.class);
     Mockito.when(bobBson.tryFindConverter((Type) Integer.class))
@@ -41,6 +43,7 @@ public class CollectionConverterFactoryTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void testTryCreateSetInterface() {
     var bobBson = Mockito.mock(BobBson.class);
     Mockito.when(bobBson.tryFindConverter((Type) Integer.class))
@@ -52,6 +55,7 @@ public class CollectionConverterFactoryTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void testTryCreateListInterface() {
     var bobBson = Mockito.mock(BobBson.class);
     Mockito.when(bobBson.tryFindConverter((Type) Integer.class))
@@ -63,6 +67,7 @@ public class CollectionConverterFactoryTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void testTryCreateQueueInterface() {
     var bobBson = Mockito.mock(BobBson.class);
     Mockito.when(bobBson.tryFindConverter((Type) Integer.class))
@@ -74,6 +79,7 @@ public class CollectionConverterFactoryTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void testTryCreateNonCollectionInterface() {
     var bobBson = Mockito.mock(BobBson.class);
     Mockito.when(bobBson.tryFindConverter((Type) Integer.class))
@@ -85,6 +91,7 @@ public class CollectionConverterFactoryTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void testTryCreateNonGenericType() {
     var bobBson = Mockito.mock(BobBson.class);
     Mockito.when(bobBson.tryFindConverter((Type) Integer.class))
@@ -105,7 +112,7 @@ public class CollectionConverterFactoryTest {
     bsonWriter.writeEndArray();
     bsonWriter.writeEndDocument();
 
-    var reader = new BsonReaderStack(buffer);
+    var reader = new StackBsonReader(buffer);
     reader.readStartDocument();
     reader.readBsonType();
 

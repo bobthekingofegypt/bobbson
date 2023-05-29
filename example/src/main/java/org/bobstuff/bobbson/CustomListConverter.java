@@ -2,6 +2,7 @@ package org.bobstuff.bobbson;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.bobstuff.bobbson.reader.BsonReader;
 import org.bobstuff.bobbson.writer.BsonWriter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

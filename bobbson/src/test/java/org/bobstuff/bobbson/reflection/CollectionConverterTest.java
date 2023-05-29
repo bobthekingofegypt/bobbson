@@ -7,9 +7,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.bobstuff.bobbson.BsonReaderStack;
 import org.bobstuff.bobbson.buffer.BobBufferBobBsonBuffer;
 import org.bobstuff.bobbson.converters.IntegerBsonConverter;
+import org.bobstuff.bobbson.reader.StackBsonReader;
 import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -31,7 +31,7 @@ public class CollectionConverterTest {
     bsonWriter.writeEndArray();
     bsonWriter.writeEndDocument();
 
-    var reader = new BsonReaderStack(buffer);
+    var reader = new StackBsonReader(buffer);
     reader.readStartDocument();
     reader.readBsonType();
 
@@ -56,7 +56,7 @@ public class CollectionConverterTest {
     bsonWriter.writeEndArray();
     bsonWriter.writeEndDocument();
 
-    var reader = new BsonReaderStack(buffer);
+    var reader = new StackBsonReader(buffer);
     reader.readStartDocument();
     reader.readBsonType();
 
@@ -84,7 +84,7 @@ public class CollectionConverterTest {
     sut.write(bsonWriter, "ages", values);
     bsonWriter.writeEndDocument();
 
-    var reader = new BsonReaderStack(buffer);
+    var reader = new StackBsonReader(buffer);
     reader.readStartDocument();
     reader.readBsonType();
 
@@ -113,7 +113,7 @@ public class CollectionConverterTest {
     sut.write(bsonWriter, "ages", values);
     bsonWriter.writeEndDocument();
 
-    var reader = new BsonReaderStack(buffer);
+    var reader = new StackBsonReader(buffer);
     reader.readStartDocument();
     reader.readBsonType();
 
@@ -143,7 +143,7 @@ public class CollectionConverterTest {
     sut.write(bsonWriter, "ages", valuesSet);
     bsonWriter.writeEndDocument();
 
-    var reader = new BsonReaderStack(buffer);
+    var reader = new StackBsonReader(buffer);
     reader.readStartDocument();
     reader.readBsonType();
 
@@ -177,7 +177,7 @@ public class CollectionConverterTest {
     sut.write(bsonWriter, "ages", valuesSet);
     bsonWriter.writeEndDocument();
 
-    var reader = new BsonReaderStack(buffer);
+    var reader = new StackBsonReader(buffer);
     reader.readStartDocument();
     reader.readBsonType();
 

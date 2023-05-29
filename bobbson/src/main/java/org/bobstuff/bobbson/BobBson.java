@@ -6,13 +6,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.bobstuff.bobbson.converters.*;
+import org.bobstuff.bobbson.models.BobBsonBinary;
+import org.bobstuff.bobbson.reader.BsonReader;
 import org.bobstuff.bobbson.writer.BsonWriter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class BobBson {
   private final ConcurrentMap<Type, BobBsonConverter> converters;
   private final List<BobBsonConverterFactory<BobBsonConverter>> converterFactories;
-  private final ConcurrentMap<String, BobBsonConverter> keyConverters;
   private final ExternalConverterLookup externalConverterLookup;
   private final BobBsonConfig config;
 
@@ -24,7 +25,6 @@ public class BobBson {
     this.config = config;
     converterFactories = new CopyOnWriteArrayList<>();
 
-    keyConverters = new ConcurrentHashMap<>();
     converters = new ConcurrentHashMap<>();
     converters.put(String.class, new StringBsonConverter());
     converters.put(Integer.class, new IntegerBsonConverter());
@@ -82,13 +82,10 @@ public class BobBson {
     converters.put(type, converter);
   }
 
+  @SuppressWarnings("unchecked")
   public void registerFactory(BobBsonConverterFactory factory) {
     converterFactories.add(factory);
   }
-
-  //  public void registerKeyConverter(String key, BobBsonConverter converter) {
-  //    keyConverters.put(key, converter);
-  //  }
 
   @SuppressWarnings("unchecked")
   public <T> @Nullable T deserialise(Class<T> manifest, BsonReader reader) throws Exception {
@@ -96,7 +93,7 @@ public class BobBson {
       throw new IllegalArgumentException("manifest can't be null");
     }
 
-    BobBsonConverter<T> converter = (BobBsonConverter<T>) tryFindConverter(manifest);
+    BobBsonConverter<T> converter = tryFindConverter(manifest);
     if (converter == null) {
       throw new IllegalStateException("no converter found for type " + manifest);
     }
@@ -104,7 +101,7 @@ public class BobBson {
   }
 
   public <T> void serialise(T obj, Class<T> manifest, BsonWriter writer) throws Exception {
-    BobBsonConverter<T> converter = (BobBsonConverter<T>) tryFindConverter(manifest);
+    BobBsonConverter<T> converter = tryFindConverter(manifest);
     if (converter == null) {
       throw new IllegalStateException("no converter found for type " + manifest);
     }

@@ -21,6 +21,7 @@ public class ExternalConverterLookupTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void testRegistersConverterFromClasspath() throws Exception {
     var mockCl = Mockito.mock(ClassLoader.class);
     var bobBson = Mockito.mock(BobBson.class);
@@ -38,6 +39,7 @@ public class ExternalConverterLookupTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void testRegistersConverterFromClasspathNonConverter() throws Exception {
     var mockCl = Mockito.mock(ClassLoader.class);
     var bobBson = Mockito.mock(BobBson.class);

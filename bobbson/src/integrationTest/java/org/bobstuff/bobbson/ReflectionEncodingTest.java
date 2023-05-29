@@ -10,6 +10,7 @@ import org.bobstuff.bobbson.buffer.BobBufferBobBsonBuffer;
 import org.bobstuff.bobbson.buffer.DynamicBobBsonBuffer;
 import org.bobstuff.bobbson.buffer.pool.BobBsonBufferPool;
 import org.bobstuff.bobbson.buffer.pool.NoopBobBsonBufferPool;
+import org.bobstuff.bobbson.reader.StackBsonReader;
 import org.bobstuff.bobbson.reflection.CollectionConverterFactory;
 import org.bobstuff.bobbson.reflection.MapConverterFactory;
 import org.bobstuff.bobbson.reflection.ObjectConverterFactory;
@@ -38,7 +39,7 @@ public class ReflectionEncodingTest {
     buffer.pipe(bos);
     var data = bos.toByteArray();
 
-    var reader = new BsonReaderStack(new BobBufferBobBsonBuffer(data, 0, data.length));
+    var reader = new StackBsonReader(new BobBufferBobBsonBuffer(data, 0, data.length));
     var result = bobBson.deserialise(Simple.class, reader);
 
     assertEquals("bob", result.getName());
@@ -64,7 +65,7 @@ public class ReflectionEncodingTest {
     buffer.pipe(bos);
     var data = bos.toByteArray();
 
-    var reader = new BsonReaderStack(new BobBufferBobBsonBuffer(data, 0, data.length));
+    var reader = new StackBsonReader(new BobBufferBobBsonBuffer(data, 0, data.length));
     var result = bobBson.deserialise(AliasTest.class, reader);
 
     assertEquals("bob", result.getNames());
@@ -89,7 +90,7 @@ public class ReflectionEncodingTest {
     buffer.pipe(bos);
     var data = bos.toByteArray();
 
-    var reader = new BsonReaderStack(new BobBufferBobBsonBuffer(data, 0, data.length));
+    var reader = new StackBsonReader(new BobBufferBobBsonBuffer(data, 0, data.length));
     reader.readStartDocument();
     reader.readBsonType();
     var result = reader.readString();
@@ -125,7 +126,7 @@ public class ReflectionEncodingTest {
     buffer.pipe(bos);
     var data = bos.toByteArray();
 
-    var reader = new BsonReaderStack(new BobBufferBobBsonBuffer(data, 0, data.length));
+    var reader = new StackBsonReader(new BobBufferBobBsonBuffer(data, 0, data.length));
     var result = bobBson.deserialise(SimpleCollections.class, reader);
 
     assertEquals(names, result.getNames());
@@ -161,7 +162,7 @@ public class ReflectionEncodingTest {
     buffer.pipe(bos);
     var data = bos.toByteArray();
 
-    var reader = new BsonReaderStack(new BobBufferBobBsonBuffer(data, 0, data.length));
+    var reader = new StackBsonReader(new BobBufferBobBsonBuffer(data, 0, data.length));
     var result = bobBson.deserialise(RecursiveMaps.class, reader);
 
     assertEquals("bob", result.getRecursive().get("holder2").get("holder").get("name"));

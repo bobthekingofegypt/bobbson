@@ -14,71 +14,51 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.bobstuff.bobbson;
+package org.bobstuff.bobbson.reader;
 
 import static java.lang.String.format;
 
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
+import java.nio.ByteBuffer;
+import org.bobstuff.bobbson.*;
 import org.bobstuff.bobbson.buffer.BobBsonBuffer;
+import org.bobstuff.bobbson.buffer.ByteBufferBobBsonBuffer;
+import org.bobstuff.bobbson.models.*;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class FastBsonReader implements BsonReader {
-  private static final Charset UTF8_CHARSET = StandardCharsets.UTF_8;
+/**
+ * A bson reader that maintains an internal stack to track states as a documents indentation
+ * increases.
+ */
+public class StackBsonReader implements BsonReader {
   public static final String NOT_TERMINATED_WITH_NULL_BYTE =
       "readString value was not terminated" + " with null byte";
-  private BobBsonBuffer buffer;
+  private final BobBsonBuffer buffer;
   private BsonState state;
   private BsonType currentBsonType;
+  private final ContextStack contextStack;
 
-  private int[] contextStack;
-  private int contextStackIndex;
-  private int contextStackRemaining;
-  private BsonContextType contextStackType;
+  public StackBsonReader(@NonNull ByteBuffer buffer) {
+    this(buffer, new ContextStack());
+  }
 
-  public FastBsonReader(@NonNull BobBsonBuffer buffer) {
+  public StackBsonReader(@NonNull ByteBuffer buffer, ContextStack contextStack) {
+    this(new ByteBufferBobBsonBuffer(buffer), contextStack);
+  }
+
+  public StackBsonReader(@NonNull BobBsonBuffer buffer) {
+    this(buffer, new ContextStack());
+  }
+
+  public StackBsonReader(@NonNull BobBsonBuffer buffer, ContextStack contextStack) {
+    this.contextStack = contextStack;
     this.buffer = buffer;
     this.state = BsonState.INITIAL;
     this.currentBsonType = BsonType.NOT_SET;
-    this.contextStack = new int[8];
-    contextStackType = BsonContextType.TOP_LEVEL;
-  }
-
-  private void pushContext(BsonContextType type, int remaining) {
-    if (contextStack.length == contextStackIndex - 1) {
-      contextStack = Arrays.copyOf(contextStack, contextStack.length * 2);
-    }
-    contextStack[contextStackIndex] = (contextStackRemaining << 4) | contextStackType.ordinal();
-    contextStackIndex += 1;
-    contextStack[contextStackIndex] = (remaining << 4) | type.ordinal();
-    contextStackRemaining = remaining;
-    contextStackType = type;
-  }
-
-  private void popContext() {
-    contextStackIndex -= 1;
-    var value = contextStack[contextStackIndex];
-    contextStackRemaining = value >> 4;
-    var contextTypeValue = value & 0xf;
-    contextStackType =
-        switch (contextTypeValue) {
-          case 0 -> BsonContextType.TOP_LEVEL;
-          case 1 -> BsonContextType.DOCUMENT;
-          case 2 -> BsonContextType.ARRAY;
-          default -> throw new RuntimeException("Unknown context type");
-        };
-  }
-
-  public void reset() {
-    contextStackIndex = 0;
-    contextStackRemaining = 0;
-    contextStackType = BsonContextType.TOP_LEVEL;
   }
 
   @Override
   public ContextStack getContextStack() {
-    throw new RuntimeException("Who calls get context stack");
+    return contextStack;
   }
 
   @Override
@@ -86,21 +66,13 @@ public class FastBsonReader implements BsonReader {
     return state;
   }
 
-  //  public void reset(BobBsonBuffer buffer) {
-  //    this.buffer = buffer;
-  //    // TODO re-asses reset functionality
-  //    // buffer.reset();
-  //    contextStack.reset();
-  //    state = BsonState.INITIAL;
-  //  }
-
   @Override
   public void readStartDocument() {
     int length = buffer.getInt();
-    if (contextStackIndex != 0) {
-      contextStackRemaining -= length;
+    if (!contextStack.isRootContext()) {
+      contextStack.adjustRemaining(length);
     }
-    pushContext(BsonContextType.DOCUMENT, length - 4);
+    contextStack.add(length - 4, BsonContextType.DOCUMENT);
     state = BsonState.TYPE;
   }
 
@@ -110,7 +82,7 @@ public class FastBsonReader implements BsonReader {
       readBsonType();
     }
 
-    popContext();
+    contextStack.pop();
 
     setStateOnEnd();
   }
@@ -118,8 +90,8 @@ public class FastBsonReader implements BsonReader {
   @Override
   public void readStartArray() {
     int length = buffer.getInt();
-    contextStackRemaining -= length;
-    pushContext(BsonContextType.ARRAY, length - 4);
+    contextStack.adjustRemaining(length);
+    contextStack.add(length - 4, BsonContextType.ARRAY);
     state = BsonState.TYPE;
   }
 
@@ -129,7 +101,7 @@ public class FastBsonReader implements BsonReader {
       readBsonType();
     }
 
-    popContext();
+    contextStack.pop();
 
     setStateOnEnd();
   }
@@ -141,12 +113,12 @@ public class FastBsonReader implements BsonReader {
     }
 
     byte bsonTypeByte = buffer.getByte();
-    contextStackRemaining -= 1;
+    contextStack.adjustRemaining(1);
 
     currentBsonType = BsonType.findByValue(bsonTypeByte);
 
     if (currentBsonType == BsonType.END_OF_DOCUMENT) {
-      var currentContextBsonType = contextStackType;
+      var currentContextBsonType = contextStack.getCurrentBsonType();
       if (currentContextBsonType == BsonContextType.ARRAY) {
         state = BsonState.END_OF_ARRAY;
       } else if (currentContextBsonType == BsonContextType.DOCUMENT) {
@@ -158,13 +130,13 @@ public class FastBsonReader implements BsonReader {
       }
 
     } else {
-      switch (contextStackType) {
+      switch (contextStack.getCurrentBsonType()) {
         case DOCUMENT, ARRAY -> {
           readCString();
           state = BsonState.VALUE;
         }
         default -> throw new RuntimeException(
-            format("Unexpected ContextType. %s", contextStackType));
+            format("Unexpected ContextType. %s", contextStack.getCurrentBsonType()));
       }
     }
     return currentBsonType;
@@ -172,13 +144,13 @@ public class FastBsonReader implements BsonReader {
 
   private void readCString() {
     int bytes = buffer.readUntil((byte) 0);
-    contextStackRemaining -= bytes;
+    contextStack.adjustRemaining(bytes);
   }
 
   @Override
   public void readStringRaw() {
     buffer.getInt();
-    contextStackRemaining -= 4;
+    contextStack.adjustRemaining(4);
     readCString();
     state = getNextState();
   }
@@ -200,13 +172,13 @@ public class FastBsonReader implements BsonReader {
 
   @Override
   public BsonContextType getCurrentContextType() {
-    return contextStackType;
+    return contextStack.getCurrentBsonType();
   }
 
   @Override
   public boolean readBoolean() {
     var value = buffer.getByte();
-    contextStackRemaining -= 1;
+    contextStack.adjustRemaining(1);
     state = getNextState();
     if (value != 0 && value != 1) {
       throw new RuntimeException("invalid boolean value");
@@ -220,7 +192,7 @@ public class FastBsonReader implements BsonReader {
     String regex = buffer.getByteRangeComparator().value();
     size += buffer.readUntil((byte) 0);
     String options = buffer.getByteRangeComparator().value();
-    contextStackRemaining -= size;
+    contextStack.adjustRemaining(size);
     state = getNextState();
     return new RegexRaw(regex, options);
   }
@@ -234,7 +206,7 @@ public class FastBsonReader implements BsonReader {
       throw new IllegalStateException(NOT_TERMINATED_WITH_NULL_BYTE);
     }
     byte[] id = buffer.getBytes(12);
-    contextStackRemaining -= size + 16;
+    contextStack.adjustRemaining(size + 16);
     state = getNextState();
     return new DbPointerRaw(value, id);
   }
@@ -251,7 +223,7 @@ public class FastBsonReader implements BsonReader {
 
     int scopeSize = size - codeSize - 8;
     byte[] scope = buffer.getBytes(scopeSize);
-    contextStackRemaining -= size;
+    contextStack.adjustRemaining(size);
     state = getNextState();
     return new CodeWithScopeRaw(code, scope);
   }
@@ -273,7 +245,7 @@ public class FastBsonReader implements BsonReader {
     }
 
     byte[] value = buffer.getBytes(bytesSize);
-    contextStackRemaining -= size + 5;
+    contextStack.adjustRemaining(size + 5);
     state = getNextState();
     return new BobBsonBinary(subtype, value);
   }
@@ -281,7 +253,7 @@ public class FastBsonReader implements BsonReader {
   @Override
   public byte[] readObjectId() {
     byte[] objectId = buffer.getBytes(12);
-    contextStackRemaining -= 12;
+    contextStack.adjustRemaining(12);
     state = getNextState();
     return objectId;
   }
@@ -290,7 +262,7 @@ public class FastBsonReader implements BsonReader {
   public Decimal128 readDecimal128() {
     long low = buffer.getLong();
     long high = buffer.getLong();
-    contextStackRemaining -= 16;
+    contextStack.adjustRemaining(16);
     state = getNextState();
     return Decimal128.fromIEEE754BIDEncoding(high, low);
   }
@@ -303,7 +275,7 @@ public class FastBsonReader implements BsonReader {
     if (nullByte != 0) {
       throw new IllegalStateException(NOT_TERMINATED_WITH_NULL_BYTE);
     }
-    contextStackRemaining -= size + 4;
+    contextStack.adjustRemaining(size + 4);
     state = getNextState();
     return value;
   }
@@ -312,7 +284,7 @@ public class FastBsonReader implements BsonReader {
   public int readInt32() {
     state = getNextState();
     var value = buffer.getInt();
-    contextStackRemaining -= 4;
+    contextStack.adjustRemaining(4);
     state = getNextState();
     return value;
   }
@@ -321,7 +293,7 @@ public class FastBsonReader implements BsonReader {
   public long readInt64() {
     state = getNextState();
     var value = buffer.getLong();
-    contextStackRemaining -= 8;
+    contextStack.adjustRemaining(8);
     state = getNextState();
     return value;
   }
@@ -330,7 +302,7 @@ public class FastBsonReader implements BsonReader {
   public long readDateTime() {
     state = getNextState();
     var value = buffer.getLong();
-    contextStackRemaining -= 8;
+    contextStack.adjustRemaining(8);
     state = getNextState();
     return value;
   }
@@ -349,24 +321,10 @@ public class FastBsonReader implements BsonReader {
   public double readDouble() {
     state = getNextState();
     var value = buffer.getDouble();
-    contextStackRemaining -= 8;
+    contextStack.adjustRemaining(8);
     state = getNextState();
     return value;
   }
-
-  // TODO re-look at this.  It was for making a faster mongodump
-  //  public void readValue(OutputStream stream) {
-  //    var size = buffer.readSizeValue(stream);
-  //    state = getNextState();
-  //    //    stream.write();
-  //    //    buffer.read(size - 5);
-  //    //    byte nullByte = buffer.get();
-  //    //    if (nullByte != 0) {
-  //    //      throw new IllegalStateException("object value was not terminated with null byte");
-  //    //    }
-  //    //    context.adjustRemaining(-(size));
-  //    //    buffer.read(stream, )
-  //  }
 
   @Override
   public void skipValue() {
@@ -379,22 +337,22 @@ public class FastBsonReader implements BsonReader {
     switch (currentBsonType) {
       case INT32 -> {
         buffer.skipHead(4);
-        contextStackRemaining -= 4;
+        contextStack.adjustRemaining(4);
       }
       case INT64, DOUBLE, DATE_TIME, TIMESTAMP -> {
         buffer.skipHead(8);
-        contextStackRemaining -= 8;
+        contextStack.adjustRemaining(8);
       }
       case NULL -> {
         // NO OP
       }
       case BOOLEAN -> {
         buffer.skipHead(1);
-        contextStackRemaining -= 1;
+        contextStack.adjustRemaining(1);
       }
       case OBJECT_ID -> {
         buffer.skipHead(12);
-        contextStackRemaining -= 12;
+        contextStack.adjustRemaining(12);
       }
       case STRING -> {
         var size = buffer.getInt();
@@ -403,17 +361,12 @@ public class FastBsonReader implements BsonReader {
         if (nullByte != 0) {
           throw new IllegalStateException(NOT_TERMINATED_WITH_NULL_BYTE);
         }
-        contextStackRemaining -= size + 4;
+        contextStack.adjustRemaining(size + 4);
       }
       case BINARY -> {
         var size = buffer.getInt();
         buffer.skipHead(size + 1);
-        //        byte nullByte = buffer.getByte();
-        //        if (nullByte != 0) {
-        //          throw new IllegalStateException("readBinary value was not terminated with null
-        // byte");
-        //        }
-        contextStackRemaining -= size + 5;
+        contextStack.adjustRemaining(size + 5);
       }
       case DOCUMENT -> {
         var size = buffer.getInt();
@@ -422,7 +375,7 @@ public class FastBsonReader implements BsonReader {
         if (nullByte != 0) {
           throw new IllegalStateException("object value was not terminated with null byte");
         }
-        contextStackRemaining -= size;
+        contextStack.adjustRemaining(size);
       }
       case ARRAY -> {
         var size = buffer.getInt();
@@ -431,7 +384,7 @@ public class FastBsonReader implements BsonReader {
         if (nullByte != 0) {
           throw new IllegalStateException("array value was not terminated with null byte");
         }
-        contextStackRemaining -= size;
+        contextStack.adjustRemaining(size);
       }
       default -> throw new UnsupportedOperationException(
           format("todo add skip support for %s", currentBsonType));
@@ -448,15 +401,15 @@ public class FastBsonReader implements BsonReader {
    */
   @Override
   public void skipContext() {
-    var remaining = contextStackRemaining;
+    var remaining = contextStack.getRemaining();
     buffer.skipHead(remaining - 1);
-    contextStackRemaining = 1;
+    contextStack.adjustRemaining(remaining - 1);
     state = BsonState.TYPE;
   }
 
   @Override
   public void skipToEnd() {
-    while (contextStackIndex != 0) {
+    while (!contextStack.isRootContext()) {
       skipContext();
       readEndDocument();
     }
@@ -464,19 +417,20 @@ public class FastBsonReader implements BsonReader {
   }
 
   protected BsonState getNextState() {
-    switch (contextStackType) {
+    switch (contextStack.getCurrentBsonType()) {
       case ARRAY:
       case DOCUMENT:
         return BsonState.TYPE;
       case TOP_LEVEL:
         return BsonState.DONE;
       default:
-        throw new RuntimeException(format("Unexpected ContextType %s.", contextStackType));
+        throw new RuntimeException(
+            format("Unexpected ContextType %s.", contextStack.getCurrentBsonType()));
     }
   }
 
   private void setStateOnEnd() {
-    switch (contextStackType) {
+    switch (contextStack.getCurrentBsonType()) {
       case ARRAY:
       case DOCUMENT:
         state = BsonState.TYPE;
@@ -485,7 +439,8 @@ public class FastBsonReader implements BsonReader {
         state = BsonState.DONE;
         break;
       default:
-        throw new RuntimeException(format("Unexpected ContextType %s.", contextStackType));
+        throw new RuntimeException(
+            format("Unexpected ContextType %s.", contextStack.getCurrentBsonType()));
     }
   }
 }

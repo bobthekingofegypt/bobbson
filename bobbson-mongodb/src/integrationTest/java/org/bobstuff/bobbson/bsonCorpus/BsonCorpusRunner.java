@@ -10,6 +10,8 @@ import org.bobstuff.bobbson.buffer.DynamicBobBsonBuffer;
 import org.bobstuff.bobbson.buffer.pool.BobBsonBufferPool;
 import org.bobstuff.bobbson.buffer.pool.NoopBobBsonBufferPool;
 import org.bobstuff.bobbson.converters.BsonValueConverters;
+import org.bobstuff.bobbson.reader.BsonReader;
+import org.bobstuff.bobbson.reader.StackBsonReader;
 import org.bobstuff.bobbson.writer.BsonWriter;
 import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.bson.BsonDocument;
@@ -36,7 +38,7 @@ public class BsonCorpusRunner {
     ByteBuffer readBuffer =
         ByteBuffer.wrap(BaseEncoding.base16().decode(decodeErrorCase.getBson().toUpperCase()))
             .order(ByteOrder.LITTLE_ENDIAN);
-    BsonReader reader = new BsonReaderStack(readBuffer);
+    BsonReader reader = new StackBsonReader(readBuffer);
     BobBson bobBson = new BobBson();
     BsonValueConverters.register(bobBson);
 
@@ -70,7 +72,7 @@ public class BsonCorpusRunner {
     ByteBuffer readBuffer =
         ByteBuffer.wrap(BaseEncoding.base16().decode(canonicalBson.toUpperCase()))
             .order(ByteOrder.LITTLE_ENDIAN);
-    BsonReader reader = new BsonReaderStack(readBuffer);
+    BsonReader reader = new StackBsonReader(readBuffer);
     BobBson bobBson = new BobBson();
     BsonValueConverters.register(bobBson);
 

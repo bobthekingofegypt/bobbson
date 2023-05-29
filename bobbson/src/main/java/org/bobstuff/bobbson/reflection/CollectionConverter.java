@@ -3,8 +3,8 @@ package org.bobstuff.bobbson.reflection;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import org.bobstuff.bobbson.BobBsonConverter;
-import org.bobstuff.bobbson.BsonReader;
 import org.bobstuff.bobbson.BsonType;
+import org.bobstuff.bobbson.reader.BsonReader;
 import org.bobstuff.bobbson.writer.BsonWriter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

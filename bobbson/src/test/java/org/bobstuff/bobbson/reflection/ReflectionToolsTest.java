@@ -51,6 +51,7 @@ public class ReflectionToolsTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void testParseBeanFieldsAlias() throws Exception {
     var bobBson = Mockito.mock(BobBson.class);
     Mockito.when(bobBson.tryFindConverter((Type) String.class))
@@ -62,6 +63,7 @@ public class ReflectionToolsTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void testParseBeanFieldsDontIncludeTransient() throws Exception {
     var bobBson = Mockito.mock(BobBson.class);
     Mockito.when(bobBson.tryFindConverter((Type) String.class))
@@ -73,6 +75,7 @@ public class ReflectionToolsTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void testParseBeanFieldsNoFieldButGetterAnnotated() throws Exception {
     var bobBson = Mockito.mock(BobBson.class);
     Mockito.when(bobBson.tryFindConverter((Type) String.class))
@@ -87,6 +90,7 @@ public class ReflectionToolsTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void testParseBeanFieldsDontWriteNull() throws Exception {
     var bobBson = Mockito.mock(BobBson.class);
     Mockito.when(bobBson.tryFindConverter((Type) String.class))

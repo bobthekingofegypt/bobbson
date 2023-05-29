@@ -8,6 +8,7 @@ import org.bobstuff.bobbson.buffer.BobBufferBobBsonBuffer;
 import org.bobstuff.bobbson.buffer.DynamicBobBsonBuffer;
 import org.bobstuff.bobbson.buffer.pool.BobBsonBufferPool;
 import org.bobstuff.bobbson.buffer.pool.NoopBobBsonBufferPool;
+import org.bobstuff.bobbson.reader.StackBsonReader;
 import org.bobstuff.bobbson.reflection.ObjectConverterFactory;
 import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.junit.jupiter.api.Test;
@@ -35,7 +36,7 @@ public class DelegateObjectTest {
 
     buffer.release();
 
-    var reader = new BsonReaderStack(new BobBufferBobBsonBuffer(data, 0, data.length));
+    var reader = new StackBsonReader(new BobBufferBobBsonBuffer(data, 0, data.length));
     var result = bobBson.deserialise(DelegateObject.class, reader);
 
     assertEquals(sut, result);

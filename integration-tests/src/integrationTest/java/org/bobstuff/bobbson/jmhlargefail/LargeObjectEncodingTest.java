@@ -8,6 +8,7 @@ import org.bobstuff.bobbson.buffer.BobBufferBobBsonBuffer;
 import org.bobstuff.bobbson.buffer.DynamicBobBsonBuffer;
 import org.bobstuff.bobbson.buffer.pool.BobBsonBufferPool;
 import org.bobstuff.bobbson.buffer.pool.NoopBobBsonBufferPool;
+import org.bobstuff.bobbson.reader.StackBsonReader;
 import org.bobstuff.bobbson.reflection.CollectionConverterFactory;
 import org.bobstuff.bobbson.reflection.ObjectConverterFactory;
 import org.bobstuff.bobbson.writer.StackBsonWriter;
@@ -32,7 +33,7 @@ public class LargeObjectEncodingTest {
 
     buffer.release();
 
-    var reader = new BsonReaderStack(new BobBufferBobBsonBuffer(data, 0, data.length));
+    var reader = new StackBsonReader(new BobBufferBobBsonBuffer(data, 0, data.length));
     var result = bobBson.deserialise(LargeObject.class, reader);
 
     assertEquals(obj, result);
@@ -61,7 +62,7 @@ public class LargeObjectEncodingTest {
     BobBson bobBson2 = new BobBson();
     //        var reader = new BsonReader(new BobBufferBobBsonBuffer(data, 0, data.length));
     //        var result = bobBson2.deserialise(LargeObject.class, reader);
-    var reader = new BsonReaderStack(new BobBufferBobBsonBuffer(data, 0, data.length));
+    var reader = new StackBsonReader(new BobBufferBobBsonBuffer(data, 0, data.length));
     var result = bobBson.deserialise(LargeObject.class, reader);
 
     assertEquals(obj, result);

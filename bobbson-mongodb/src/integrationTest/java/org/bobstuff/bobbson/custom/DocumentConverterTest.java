@@ -2,9 +2,9 @@ package org.bobstuff.bobbson.custom;
 
 import java.io.ByteArrayOutputStream;
 import org.bobstuff.bobbson.BobBson;
-import org.bobstuff.bobbson.BsonReaderStack;
 import org.bobstuff.bobbson.buffer.BobBufferBobBsonBuffer;
 import org.bobstuff.bobbson.converters.BsonValueConverters;
+import org.bobstuff.bobbson.reader.StackBsonReader;
 import org.bobstuff.bobbson.utils.MDBBsonWriter;
 import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.bson.BsonDocument;
@@ -44,7 +44,7 @@ public class DocumentConverterTest {
     bos.write(buffer.getArray(), 0, buffer.getTail());
     var data = bos.toByteArray();
 
-    var reader = new BsonReaderStack(new BobBufferBobBsonBuffer(data, 0, data.length));
+    var reader = new StackBsonReader(new BobBufferBobBsonBuffer(data, 0, data.length));
     var bsonDoc = bobBson.deserialise(BsonDocument.class, reader);
 
     Assertions.assertEquals("bob", bsonDoc.getString("name").getValue());

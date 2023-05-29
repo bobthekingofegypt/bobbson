@@ -3,26 +3,21 @@ package org.bobstuff.bobbson.writer;
 import java.nio.charset.StandardCharsets;
 import org.bobstuff.bobbson.*;
 import org.bobstuff.bobbson.buffer.BobBsonBuffer;
-import org.bobstuff.bobbson.buffer.ByteBufferBobBsonBuffer;
-import org.bobstuff.bobbson.buffer.pool.BobBsonBufferPool;
+import org.bobstuff.bobbson.models.Decimal128;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * A bson writer that maintains an internal stack to track states as a documents indentation
+ * increases.
+ */
 @SuppressWarnings("PMD.NullAssignment")
 public class StackBsonWriter implements BsonWriter {
-  private BobBsonBuffer buffer;
-  private ContextStack contextStack;
+  private final BobBsonBuffer buffer;
+  private final ContextStack contextStack;
   private @Nullable String name;
   private byte @Nullable [] nameBytes;
   private BsonState state;
-  private byte[] indexNumberCache = new byte[32];
-
-  public StackBsonWriter(BobBsonBufferPool bufferDataPool) {
-    this(bufferDataPool, new ContextStack());
-  }
-
-  public StackBsonWriter(BobBsonBufferPool bufferDataPool, ContextStack contextStack) {
-    this(new ByteBufferBobBsonBuffer(new byte[1024]), contextStack);
-  }
+  private final byte[] indexNumberCache = new byte[32];
 
   public StackBsonWriter(BobBsonBuffer buffer) {
     this(buffer, new ContextStack());
@@ -139,87 +134,13 @@ public class StackBsonWriter implements BsonWriter {
       this.name = null;
     } else if (contextStack.context.getCurrentBsonType() == BsonContextType.ARRAY) {
       var index = contextStack.context.getAndIncrementArrayIndex();
-      var size = stringSize(index);
-      var c = getChars(index, size, indexNumberCache);
-      //      buffer.writeString((contextStack.context.getAndIncrementArrayIndex()));
+      var size = ArrayIntegerKeyUtils.stringSize(index);
+      ArrayIntegerKeyUtils.getChars(index, size, indexNumberCache);
       buffer.writeBytes(indexNumberCache, 0, size);
       buffer.writeByte((byte) 0);
     } else {
       throw new IllegalStateException("write name value is confused");
     }
-  }
-
-  static final byte[] DigitOnes =
-      new byte[] {
-        48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50,
-        51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53,
-        54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54, 55, 56,
-        57, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49,
-        50, 51, 52, 53, 54, 55, 56, 57
-      };
-  static final byte[] DigitTens =
-      new byte[] {
-        48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 50, 50, 50,
-        50, 50, 50, 50, 50, 50, 50, 51, 51, 51, 51, 51, 51, 51, 51, 51, 51, 52, 52, 52, 52, 52, 52,
-        52, 52, 52, 52, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 54, 54, 54, 54, 54, 54, 54, 54, 54,
-        54, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 56, 56, 56, 56, 56, 56, 56, 56, 56, 56, 57, 57,
-        57, 57, 57, 57, 57, 57, 57, 57
-      };
-
-  static int getChars(int i, int index, byte[] buf) {
-    int charPos = index;
-    boolean negative = i < 0;
-    if (!negative) {
-      i = -i;
-    }
-
-    int q;
-    int r;
-    while (i <= -100) {
-      q = i / 100;
-      r = q * 100 - i;
-      i = q;
-      --charPos;
-      buf[charPos] = DigitOnes[r];
-      --charPos;
-      buf[charPos] = DigitTens[r];
-    }
-
-    q = i / 10;
-    r = q * 10 - i;
-    --charPos;
-    buf[charPos] = (byte) (48 + r);
-    if (q < 0) {
-      --charPos;
-      buf[charPos] = (byte) (48 - q);
-    }
-
-    if (negative) {
-      --charPos;
-      buf[charPos] = 45;
-    }
-
-    return charPos;
-  }
-
-  static int stringSize(int x) {
-    int d = 1;
-    if (x >= 0) {
-      d = 0;
-      x = -x;
-    }
-
-    int p = -10;
-
-    for (int i = 1; i < 10; ++i) {
-      if (x > p) {
-        return i + d;
-      }
-
-      p = 10 * p;
-    }
-
-    return 10 + d;
   }
 
   @Override

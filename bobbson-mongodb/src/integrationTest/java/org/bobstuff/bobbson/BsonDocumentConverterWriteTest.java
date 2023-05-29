@@ -8,6 +8,8 @@ import org.bobstuff.bobbson.buffer.DynamicBobBsonBuffer;
 import org.bobstuff.bobbson.buffer.pool.BobBsonBufferPool;
 import org.bobstuff.bobbson.buffer.pool.NoopBobBsonBufferPool;
 import org.bobstuff.bobbson.converters.BsonValueConverters;
+import org.bobstuff.bobbson.reader.BsonReader;
+import org.bobstuff.bobbson.reader.StackBsonReader;
 import org.bobstuff.bobbson.writer.BsonWriter;
 import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.bson.BsonDocument;
@@ -38,7 +40,7 @@ public class BsonDocumentConverterWriteTest {
     os.close();
     byte[] bytes = os.toByteArray();
 
-    BsonReader reader = new BsonReaderStack(ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN));
+    BsonReader reader = new StackBsonReader(ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN));
 
     reader.readStartDocument();
     reader.readBsonType();

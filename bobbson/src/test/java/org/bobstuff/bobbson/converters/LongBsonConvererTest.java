@@ -5,8 +5,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.nio.charset.StandardCharsets;
-import org.bobstuff.bobbson.BsonReaderStack;
 import org.bobstuff.bobbson.BsonType;
+import org.bobstuff.bobbson.reader.StackBsonReader;
 import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -14,7 +14,7 @@ import org.mockito.Mockito;
 public class LongBsonConvererTest {
   @Test
   public void testReadHandlesNull() {
-    var reader = Mockito.mock(BsonReaderStack.class);
+    var reader = Mockito.mock(StackBsonReader.class);
     when(reader.getCurrentBsonType()).thenReturn(BsonType.NULL);
 
     var sut = new LongBsonConverter();
@@ -26,7 +26,7 @@ public class LongBsonConvererTest {
 
   @Test
   public void testReadHandlesInteger() {
-    var reader = Mockito.mock(BsonReaderStack.class);
+    var reader = Mockito.mock(StackBsonReader.class);
     when(reader.getCurrentBsonType()).thenReturn(BsonType.INT32);
     when(reader.readInt32()).thenReturn(24);
 
@@ -36,7 +36,7 @@ public class LongBsonConvererTest {
 
   @Test
   public void testReadHandlesLong() {
-    var reader = Mockito.mock(BsonReaderStack.class);
+    var reader = Mockito.mock(StackBsonReader.class);
     when(reader.getCurrentBsonType()).thenReturn(BsonType.INT64);
     when(reader.readInt64()).thenReturn(24L);
 
@@ -46,7 +46,7 @@ public class LongBsonConvererTest {
 
   @Test
   public void testReadHandlesDouble() {
-    var reader = Mockito.mock(BsonReaderStack.class);
+    var reader = Mockito.mock(StackBsonReader.class);
     when(reader.getCurrentBsonType()).thenReturn(BsonType.DOUBLE);
     when(reader.readDouble()).thenReturn(24.34);
 
@@ -56,7 +56,7 @@ public class LongBsonConvererTest {
 
   @Test
   public void testReadThrowsOnIncompatibleType() {
-    var reader = Mockito.mock(BsonReaderStack.class);
+    var reader = Mockito.mock(StackBsonReader.class);
     when(reader.getCurrentBsonType()).thenReturn(BsonType.STRING);
 
     var sut = new LongBsonConverter();

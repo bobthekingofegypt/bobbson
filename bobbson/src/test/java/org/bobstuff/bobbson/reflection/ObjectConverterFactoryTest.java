@@ -10,6 +10,7 @@ import org.bobstuff.bobbson.annotations.BsonWriterOptions;
 import org.bobstuff.bobbson.buffer.BobBufferBobBsonBuffer;
 import org.bobstuff.bobbson.converters.IntegerBsonConverter;
 import org.bobstuff.bobbson.converters.StringBsonConverter;
+import org.bobstuff.bobbson.reader.StackBsonReader;
 import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -104,7 +105,7 @@ public class ObjectConverterFactoryTest {
     var bsonWriter = new StackBsonWriter(buffer);
     converter.write(bsonWriter, basicTypes);
 
-    var reader = new BsonReaderStack(buffer);
+    var reader = new StackBsonReader(buffer);
 
     var result = (BasicTypes) converter.read(reader);
     assertEquals("bob", result.getName());
@@ -139,7 +140,7 @@ public class ObjectConverterFactoryTest {
     bsonWriter.writeInteger("age", 23);
     bsonWriter.writeEndDocument();
 
-    var reader = new BsonReaderStack(buffer);
+    var reader = new StackBsonReader(buffer);
 
     var result = (BasicTypes) converter.read(reader);
     assertEquals("bob", result.getName());
@@ -161,7 +162,7 @@ public class ObjectConverterFactoryTest {
     var bsonWriter = new StackBsonWriter(buffer);
     converter.write(bsonWriter, testModel);
 
-    var reader = new BsonReaderStack(buffer);
+    var reader = new StackBsonReader(buffer);
     reader.readStartDocument();
     assertEquals(BsonType.STRING, reader.readBsonType());
     assertEquals("other", reader.getFieldName().value());

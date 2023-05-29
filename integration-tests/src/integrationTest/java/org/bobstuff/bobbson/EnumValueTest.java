@@ -2,6 +2,8 @@ package org.bobstuff.bobbson;
 
 import org.bobstuff.bobbson.buffer.BobBsonBuffer;
 import org.bobstuff.bobbson.buffer.ByteBufferBobBsonBuffer;
+import org.bobstuff.bobbson.reader.BsonReader;
+import org.bobstuff.bobbson.reader.StackBsonReader;
 import org.bobstuff.bobbson.writer.BsonWriter;
 import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.junit.jupiter.api.Assertions;
@@ -24,7 +26,7 @@ public class EnumValueTest {
 
     var bytes = buffer.toByteArray();
 
-    BsonReader reader = new BsonReaderStack(new ByteBufferBobBsonBuffer(bytes));
+    BsonReader reader = new StackBsonReader(new ByteBufferBobBsonBuffer(bytes));
     var result = bobBson.deserialise(EnumValue.class, reader);
     Assertions.assertEquals(beanWithEnum, result);
   }

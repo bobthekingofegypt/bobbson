@@ -2,8 +2,11 @@ package org.bobstuff.bobbson.writer;
 
 import org.bobstuff.bobbson.BsonContextType;
 import org.bobstuff.bobbson.BsonState;
-import org.bobstuff.bobbson.Decimal128;
+import org.bobstuff.bobbson.models.Decimal128;
 
+/**
+ * A writer that understands bson and can write the various types defined in the BSON specification.
+ */
 public interface BsonWriter {
   void writeStartDocument();
 

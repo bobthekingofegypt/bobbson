@@ -7,6 +7,8 @@ import org.bobstuff.bobbson.buffer.ByteBufferBobBsonBuffer;
 import org.bobstuff.bobbson.buffer.DynamicBobBsonBuffer;
 import org.bobstuff.bobbson.buffer.pool.BobBsonBufferPool;
 import org.bobstuff.bobbson.buffer.pool.NoopBobBsonBufferPool;
+import org.bobstuff.bobbson.reader.BsonReader;
+import org.bobstuff.bobbson.reader.StackBsonReader;
 import org.bobstuff.bobbson.writer.BsonWriter;
 import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.junit.jupiter.api.Assertions;
@@ -32,7 +34,7 @@ public class BsonWriterInt {
 
     Files.write(Paths.get("/tmp/data.bin"), bytes);
 
-    BsonReader reader = new BsonReaderStack(new ByteBufferBobBsonBuffer(bytes));
+    BsonReader reader = new StackBsonReader(new ByteBufferBobBsonBuffer(bytes));
     reader.readStartDocument();
     Assertions.assertEquals(BsonType.STRING, reader.readBsonType());
     Assertions.assertEquals("name", reader.currentFieldName());
@@ -61,7 +63,7 @@ public class BsonWriterInt {
 
     Files.write(Paths.get("/tmp/data.bin"), bytes);
 
-    BsonReader reader = new BsonReaderStack(new ByteBufferBobBsonBuffer(bytes));
+    BsonReader reader = new StackBsonReader(new ByteBufferBobBsonBuffer(bytes));
     reader.readStartDocument();
     Assertions.assertEquals(BsonType.STRING, reader.readBsonType());
     Assertions.assertEquals("name", reader.currentFieldName());
@@ -96,7 +98,7 @@ public class BsonWriterInt {
 
     Files.write(Paths.get("/tmp/data.bin"), bytes);
 
-    BsonReader reader = new BsonReaderStack(new ByteBufferBobBsonBuffer(bytes));
+    BsonReader reader = new StackBsonReader(new ByteBufferBobBsonBuffer(bytes));
     reader.readStartDocument();
     Assertions.assertEquals(BsonType.STRING, reader.readBsonType());
     Assertions.assertEquals("name", reader.currentFieldName());

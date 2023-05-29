@@ -11,6 +11,7 @@ import org.bobstuff.bobbson.buffer.ByteBufferBobBsonBuffer;
 import org.bobstuff.bobbson.buffer.DynamicBobBsonBuffer;
 import org.bobstuff.bobbson.buffer.pool.BobBsonBufferPool;
 import org.bobstuff.bobbson.buffer.pool.NoopBobBsonBufferPool;
+import org.bobstuff.bobbson.reader.StackBsonReader;
 import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.bson.BsonBinaryWriter;
 import org.bson.io.BasicOutputBuffer;
@@ -73,7 +74,7 @@ public class Main {
 
     BobBson bobBson = new BobBson();
     Person person =
-        bobBson.deserialise(Person.class, new BsonReaderStack(new ByteBufferBobBsonBuffer(buffer)));
+        bobBson.deserialise(Person.class, new StackBsonReader(new ByteBufferBobBsonBuffer(buffer)));
     System.out.println(person);
 
     BasicObject bo = new BasicObject();
@@ -112,7 +113,7 @@ public class Main {
 
     BasicObject bo2 =
         bobBson.deserialise(
-            BasicObject.class, new BsonReaderStack(new ByteBufferBobBsonBuffer(bas.toByteArray())));
+            BasicObject.class, new StackBsonReader(new ByteBufferBobBsonBuffer(bas.toByteArray())));
     System.out.println(bo2);
 
     testPersonSerializeThenDeserialise();
@@ -160,7 +161,7 @@ public class Main {
 
     Person p2 =
         bobBson.deserialise(
-            Person.class, new BsonReaderStack(new ByteBufferBobBsonBuffer(bas.toByteArray())));
+            Person.class, new StackBsonReader(new ByteBufferBobBsonBuffer(bas.toByteArray())));
     System.out.println(p);
     System.out.println(p2);
 

@@ -2,6 +2,8 @@ package org.bobstuff.bobbson.unicode;
 
 import org.bobstuff.bobbson.*;
 import org.bobstuff.bobbson.buffer.BobBsonBuffer;
+import org.bobstuff.bobbson.reader.BsonReader;
+import org.bobstuff.bobbson.reader.StackBsonReader;
 import org.bobstuff.bobbson.writer.BsonWriter;
 import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.junit.jupiter.api.Assertions;
@@ -23,7 +25,7 @@ public class UnicodeChars {
     BsonWriter writer = new StackBsonWriter(buffer);
     bobBson.serialise(beanWithString, BeanWithString.class, writer);
 
-    BsonReader reader = new BsonReaderStack(buffer);
+    BsonReader reader = new StackBsonReader(buffer);
     var result = bobBson.deserialise(BeanWithString.class, reader);
     System.out.println(result);
     System.out.println(beanWithString);

@@ -481,7 +481,8 @@
 //        """
 //                               public org.bobstuff.bobbson.processor.ParserGeneratorTest.Sample
 // read(
-//                                   org.bobstuff.bobbson.BsonReader reader, boolean readEnvolope) {
+//                                   org.bobstuff.bobbson.reader.BsonReader reader, boolean
+// readEnvolope) {
 //                                 if (reader.getCurrentBsonType() == BsonType.NULL) {
 //                                   reader.readNull();
 //                                   return null;

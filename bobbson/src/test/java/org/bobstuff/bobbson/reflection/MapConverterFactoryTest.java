@@ -9,9 +9,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import org.bobstuff.bobbson.BobBson;
 import org.bobstuff.bobbson.BobBsonConverter;
-import org.bobstuff.bobbson.BsonReaderStack;
 import org.bobstuff.bobbson.buffer.BobBufferBobBsonBuffer;
 import org.bobstuff.bobbson.converters.IntegerBsonConverter;
+import org.bobstuff.bobbson.reader.StackBsonReader;
 import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -19,6 +19,7 @@ import org.mockito.Mockito;
 
 public class MapConverterFactoryTest {
   @Test
+  @SuppressWarnings("unchecked")
   public void testTryCreateHashMap() {
     var bobBson = Mockito.mock(BobBson.class);
     Mockito.when(bobBson.tryFindConverter((Type) Integer.class))
@@ -47,6 +48,7 @@ public class MapConverterFactoryTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void testTryCreateLinkedHashMap() {
     var bobBson = Mockito.mock(BobBson.class);
     Mockito.when(bobBson.tryFindConverter((Type) Integer.class))
@@ -64,6 +66,7 @@ public class MapConverterFactoryTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void testTryCreateMapNonStringKey() {
     var bobBson = Mockito.mock(BobBson.class);
     Mockito.when(bobBson.tryFindConverter((Type) Integer.class))
@@ -77,6 +80,7 @@ public class MapConverterFactoryTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void testTryCreateNonMapParamaterizedType() {
     var bobBson = Mockito.mock(BobBson.class);
     Mockito.when(bobBson.tryFindConverter((Type) Integer.class))
@@ -89,6 +93,7 @@ public class MapConverterFactoryTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void testTryCreateNonMap() {
     var bobBson = Mockito.mock(BobBson.class);
     Mockito.when(bobBson.tryFindConverter((Type) Integer.class))
@@ -99,6 +104,8 @@ public class MapConverterFactoryTest {
     Assertions.assertNull(converter);
   }
 
+
+  @SuppressWarnings("unchecked")
   private void validateConverter(MapConverter converter, Map<String, Integer> value) {
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
     var bsonWriter = new StackBsonWriter(buffer);
@@ -106,7 +113,7 @@ public class MapConverterFactoryTest {
     converter.write(bsonWriter, "ages", value);
     bsonWriter.writeEndDocument();
 
-    var reader = new BsonReaderStack(buffer);
+    var reader = new StackBsonReader(buffer);
     reader.readStartDocument();
     reader.readBsonType();
 

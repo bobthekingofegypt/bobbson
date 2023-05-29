@@ -1,9 +1,12 @@
-package org.bobstuff.bobbson;
+package org.bobstuff.bobbson.reader;
 
 import static org.bobstuff.bobbson.BsonContextType.DOCUMENT;
 import static org.bobstuff.bobbson.BsonContextType.TOP_LEVEL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.bobstuff.bobbson.BsonType;
+import org.bobstuff.bobbson.BufferDataMockBuilder;
+import org.bobstuff.bobbson.ContextStack;
 import org.bobstuff.bobbson.buffer.BobBsonBuffer;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +20,7 @@ public class BsonReaderContextTests {
   public void testContextSizeIsSet_singleDoc() {
     ContextStack contextStack = new ContextStack();
     BobBsonBuffer buffer = BufferDataMockBuilder.builder().addDocumentLength(80).build();
-    BsonReader reader = new BsonReaderStack(buffer, contextStack);
+    BsonReader reader = new StackBsonReader(buffer, contextStack);
 
     assertEquals(0, contextStack.getCurrentContextIndex());
     assertEquals(TOP_LEVEL, contextStack.context.getCurrentBsonType());
@@ -43,7 +46,7 @@ public class BsonReaderContextTests {
             .addDocumentLength(80)
             .addType(BsonType.END_OF_DOCUMENT)
             .build();
-    BsonReader reader = new BsonReaderStack(buffer, contextStack);
+    BsonReader reader = new StackBsonReader(buffer, contextStack);
 
     reader.readStartDocument();
     reader.skipContext();
@@ -73,7 +76,7 @@ public class BsonReaderContextTests {
             .addReadUntil(5)
             .addType(BsonType.END_OF_DOCUMENT)
             .build();
-    BsonReader reader = new BsonReaderStack(buffer, contextStack);
+    BsonReader reader = new StackBsonReader(buffer, contextStack);
 
     reader.readStartDocument();
 
@@ -97,7 +100,7 @@ public class BsonReaderContextTests {
             .addType(BsonType.END_OF_DOCUMENT)
             .addType(BsonType.END_OF_DOCUMENT)
             .build();
-    BsonReader reader = new BsonReaderStack(buffer, contextStack);
+    BsonReader reader = new StackBsonReader(buffer, contextStack);
 
     reader.readStartDocument();
 
@@ -145,7 +148,7 @@ public class BsonReaderContextTests {
             .addType(BsonType.END_OF_DOCUMENT)
             .addType(BsonType.END_OF_DOCUMENT)
             .build();
-    BsonReader reader = new BsonReaderStack(buffer, contextStack);
+    BsonReader reader = new StackBsonReader(buffer, contextStack);
 
     reader.readStartDocument();
 
@@ -208,7 +211,7 @@ public class BsonReaderContextTests {
             .addType(BsonType.END_OF_DOCUMENT)
             .addType(BsonType.END_OF_DOCUMENT)
             .build();
-    BsonReader reader = new BsonReaderStack(buffer, contextStack);
+    BsonReader reader = new StackBsonReader(buffer, contextStack);
 
     reader.readStartDocument();
 

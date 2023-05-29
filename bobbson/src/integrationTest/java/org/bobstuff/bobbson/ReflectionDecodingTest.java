@@ -6,6 +6,7 @@ import org.bobstuff.bobbson.annotations.BsonAttribute;
 import org.bobstuff.bobbson.annotations.BsonConverter;
 import org.bobstuff.bobbson.buffer.BobBufferBobBsonBuffer;
 import org.bobstuff.bobbson.buffer.ByteBufferBobBsonBuffer;
+import org.bobstuff.bobbson.reader.StackBsonReader;
 import org.bobstuff.bobbson.reflection.ObjectConverterFactory;
 import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.junit.jupiter.api.Test;
@@ -23,7 +24,7 @@ public class ReflectionDecodingTest {
     var bobBson = new BobBson();
     bobBson.registerFactory(new ObjectConverterFactory());
 
-    var reader = new BsonReaderStack(new BobBufferBobBsonBuffer(buffer, 0, buffer.length));
+    var reader = new StackBsonReader(new BobBufferBobBsonBuffer(buffer, 0, buffer.length));
     var result = bobBson.deserialise(AliasTest.class, reader);
     assertEquals("a value", result.getNames());
   }
@@ -40,7 +41,7 @@ public class ReflectionDecodingTest {
     var bobBson = new BobBson();
     bobBson.registerFactory(new ObjectConverterFactory());
 
-    var reader = new BsonReaderStack(new BobBufferBobBsonBuffer(buffer, 0, buffer.length));
+    var reader = new StackBsonReader(new BobBufferBobBsonBuffer(buffer, 0, buffer.length));
     var result = bobBson.deserialise(CustomConverterTest.class, reader);
     assertEquals("custom: a value", result.getNames());
   }
