@@ -69,7 +69,8 @@ public class ReflectionField<Model, Field> {
       order = bsonAttribute.order();
     }
 
-    if (bsonAttribute != null && !BsonAttribute.DEFAULT_NON_VALID_ALIAS.equals(bsonAttribute.value())) {
+    if (bsonAttribute != null
+        && !BsonAttribute.DEFAULT_NON_VALID_ALIAS.equals(bsonAttribute.value())) {
       nameBytes = bsonAttribute.value().getBytes(StandardCharsets.UTF_8);
       alias = bsonAttribute.value();
     } else {

@@ -56,7 +56,10 @@ public class StructInfo {
 
   public String getPackageName() {
     int dotIndex = binaryName.lastIndexOf('.');
-    return binaryName.substring(0, dotIndex);
+    if (dotIndex != -1) {
+      return binaryName.substring(0, dotIndex);
+    }
+    return "";
   }
 
   public String getAttributeReadAllBooleanLogic() {

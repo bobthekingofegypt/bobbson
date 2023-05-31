@@ -308,10 +308,11 @@ public class ParserGenerator {
       int hash = HashUtils.generateHash(attribute.getAliasName());
 
       block.beginControlFlow("if (!range.equalsArray($NBytes, $L))", attributeName, hash);
-      block.addStatement("readSlow(reader, result, type)");
+      block.addStatement("readSlow(reader, result, type, fieldsRead)");
       block.addStatement("return result");
       block.endControlFlow();
 
+      block.addStatement("fieldsRead += 1");
       if (attribute.isList() && attribute.getConverterType() == null) {
         block.add(generateParserCollectionCode(ArrayList.class, attribute));
       } else if (attribute.isSet() && attribute.getConverterType() == null) {
@@ -385,6 +386,8 @@ public class ParserGenerator {
         block.nextControlFlow("else if (range.equalsArray($NBytes, $L))", attributeName, hash);
       }
 
+      block.addStatement("fieldsRead += 1");
+
       if (attribute.isList() && attribute.getConverterType() == null) {
         block.add(generateParserCollectionCode(ArrayList.class, attribute));
       } else if (attribute.isSet() && attribute.getConverterType() == null) {
@@ -437,6 +440,12 @@ public class ParserGenerator {
     // block.nextControlFlow("else").addStatement("System.out.println(range.name())").addStatement("reader.skipValue()");
     block.endControlFlow();
 
+    block
+        .beginControlFlow("if (fieldsRead == EXPECTED_FIELD_COUNT)")
+        .addStatement("reader.skipContext()")
+        .addStatement("return result")
+        .endControlFlow();
+
     //    block.beginControlFlow(
     //        "if (!readAllValues && $L)", structInfo.getAttributeReadAllBooleanLogic());
     //    block.addStatement("reader.skipContext()");
@@ -467,6 +476,7 @@ public class ParserGenerator {
         .addParameter(BsonReader.class, "reader")
         .addParameter(type, "result")
         .addParameter(BsonType.class, "type")
+        .addParameter(int.class, "fieldsRead")
         .returns(type)
         .addStatement("var range = reader.getFieldName()")
         .addCode(generateParserCode(structInfo))
@@ -494,6 +504,7 @@ public class ParserGenerator {
         //        .addStatement("reader.readNull()")
         //        .addStatement("return null")
         //        .endControlFlow()
+        .addStatement("var fieldsRead = 0", type, type)
         .addStatement("$T result = new $T()", type, type)
         .addStatement("reader.readStartDocument()")
         .addStatement("var type = $T.NOT_SET", BsonType.class)
@@ -566,6 +577,11 @@ public class ParserGenerator {
                     .build())
             .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
             .addField(BobBson.class, "bobBson", Modifier.PRIVATE)
+            .addField(
+                FieldSpec.builder(
+                        int.class, "EXPECTED_FIELD_COUNT", Modifier.PRIVATE, Modifier.STATIC)
+                    .initializer(String.valueOf(structInfo.attributes.size()))
+                    .build())
             .addFields(lookupData.fields)
             .addFields(keyByteArrays)
             .addMethods(lookupData.lookupMethods.values())

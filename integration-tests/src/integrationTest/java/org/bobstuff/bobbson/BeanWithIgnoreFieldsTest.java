@@ -8,9 +8,7 @@ import org.bobstuff.bobbson.reader.BsonReader;
 import org.bobstuff.bobbson.reader.StackBsonReader;
 import org.bobstuff.bobbson.writer.BsonWriter;
 import org.bobstuff.bobbson.writer.StackBsonWriter;
-import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
@@ -43,7 +41,7 @@ public class BeanWithIgnoreFieldsTest {
   @ArgumentsSource(BobBsonProvider.class)
   public void testWrite(BobBsonProvider.BobBsonImplProvider bobBsonProvider) throws Exception {
     BobBsonBufferPool pool =
-            new NoopBobBsonBufferPool((size) -> new ByteBufferBobBsonBuffer(new byte[100]));
+        new NoopBobBsonBufferPool((size) -> new ByteBufferBobBsonBuffer(new byte[100]));
     DynamicBobBsonBuffer buffer = new DynamicBobBsonBuffer(pool);
     BobBson bobBson = bobBsonProvider.provide();
 

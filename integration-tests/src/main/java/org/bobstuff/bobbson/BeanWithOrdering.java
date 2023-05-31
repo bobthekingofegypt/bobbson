@@ -5,64 +5,69 @@ import org.bobstuff.bobbson.annotations.GenerateBobBsonConverter;
 
 @GenerateBobBsonConverter
 public class BeanWithOrdering {
-    @BsonAttribute(order = 1)
-    private String fieldOne;
-    @BsonAttribute(order = 2)
-    private String fieldTwo;
-    @BsonAttribute(order = 3)
-    private String fieldThree;
-    @BsonAttribute(order = 5)
-    private String fieldFive;
-    @BsonAttribute(order = 6)
-    private String fieldSix;
-    @BsonAttribute(order = 4)
-    private String fieldFour;
+  @BsonAttribute(order = 1)
+  private String fieldOne;
 
-    public String getFieldOne() {
-        return fieldOne;
-    }
+  @BsonAttribute(order = 2)
+  private String fieldTwo;
 
-    public void setFieldOne(String fieldOne) {
-        this.fieldOne = fieldOne;
-    }
+  @BsonAttribute(order = 3)
+  private String fieldThree;
 
-    public String getFieldTwo() {
-        return fieldTwo;
-    }
+  @BsonAttribute(order = 5)
+  private String fieldFive;
 
-    public void setFieldTwo(String fieldTwo) {
-        this.fieldTwo = fieldTwo;
-    }
+  @BsonAttribute(order = 6)
+  private String fieldSix;
 
-    public String getFieldThree() {
-        return fieldThree;
-    }
+  @BsonAttribute(order = 4)
+  private String fieldFour;
 
-    public void setFieldThree(String fieldThree) {
-        this.fieldThree = fieldThree;
-    }
+  public String getFieldOne() {
+    return fieldOne;
+  }
 
-    public String getFieldFive() {
-        return fieldFive;
-    }
+  public void setFieldOne(String fieldOne) {
+    this.fieldOne = fieldOne;
+  }
 
-    public void setFieldFive(String fieldFive) {
-        this.fieldFive = fieldFive;
-    }
+  public String getFieldTwo() {
+    return fieldTwo;
+  }
 
-    public String getFieldSix() {
-        return fieldSix;
-    }
+  public void setFieldTwo(String fieldTwo) {
+    this.fieldTwo = fieldTwo;
+  }
 
-    public void setFieldSix(String fieldSix) {
-        this.fieldSix = fieldSix;
-    }
+  public String getFieldThree() {
+    return fieldThree;
+  }
 
-    public String getFieldFour() {
-        return fieldFour;
-    }
+  public void setFieldThree(String fieldThree) {
+    this.fieldThree = fieldThree;
+  }
 
-    public void setFieldFour(String fieldFour) {
-        this.fieldFour = fieldFour;
-    }
+  public String getFieldFive() {
+    return fieldFive;
+  }
+
+  public void setFieldFive(String fieldFive) {
+    this.fieldFive = fieldFive;
+  }
+
+  public String getFieldSix() {
+    return fieldSix;
+  }
+
+  public void setFieldSix(String fieldSix) {
+    this.fieldSix = fieldSix;
+  }
+
+  public String getFieldFour() {
+    return fieldFour;
+  }
+
+  public void setFieldFour(String fieldFour) {
+    this.fieldFour = fieldFour;
+  }
 }

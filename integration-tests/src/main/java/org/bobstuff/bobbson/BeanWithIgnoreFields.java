@@ -5,33 +5,35 @@ import org.bobstuff.bobbson.annotations.GenerateBobBsonConverter;
 
 @GenerateBobBsonConverter
 public class BeanWithIgnoreFields {
-    private String name;
-    @BsonAttribute(ignore = true)
-    private String description;
-    @BsonAttribute("nottitle")
-    private String title;
+  private String name;
 
-    public String getName() {
-        return name;
-    }
+  @BsonAttribute(ignore = true)
+  private String description;
 
-    public void setName(String name) {
-        this.name = name;
-    }
+  @BsonAttribute("nottitle")
+  private String title;
 
-    public String getDescription() {
-        return description;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+  public void setName(String name) {
+    this.name = name;
+  }
 
-    public String getTitle() {
-        return title;
-    }
+  public String getDescription() {
+    return description;
+  }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  public String getTitle() {
+    return title;
+  }
+
+  public void setTitle(String title) {
+    this.title = title;
+  }
 }

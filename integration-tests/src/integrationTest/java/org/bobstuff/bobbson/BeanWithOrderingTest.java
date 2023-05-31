@@ -8,7 +8,6 @@ import org.bobstuff.bobbson.reader.BsonReader;
 import org.bobstuff.bobbson.reader.StackBsonReader;
 import org.bobstuff.bobbson.writer.BsonWriter;
 import org.bobstuff.bobbson.writer.StackBsonWriter;
-import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
@@ -16,7 +15,8 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 public class BeanWithOrderingTest {
   @ParameterizedTest(name = "{0}")
   @ArgumentsSource(BobBsonProvider.class)
-  public void testReadWriteKeyAsByteArray(BobBsonProvider.BobBsonImplProvider configurationProvider) throws Exception {
+  public void testReadWriteKeyAsByteArray(BobBsonProvider.BobBsonImplProvider configurationProvider)
+      throws Exception {
     // this test case should just pass, no need to validate anything
     BobBsonBufferPool pool =
         new NoopBobBsonBufferPool((size) -> new ByteBufferBobBsonBuffer(new byte[100]));
@@ -55,6 +55,6 @@ public class BeanWithOrderingTest {
     Assertions.assertEquals("fieldFive", fieldName.value());
     reader.readString();
     reader.readBsonType();
-    Assertions.assertEquals("fieldSix", fieldName.value());
+    Assertions.assertEquals("fieldSixjjk", fieldName.value());
   }
 }
