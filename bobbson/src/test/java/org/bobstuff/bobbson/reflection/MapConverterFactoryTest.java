@@ -104,7 +104,6 @@ public class MapConverterFactoryTest {
     Assertions.assertNull(converter);
   }
 
-
   @SuppressWarnings("unchecked")
   private void validateConverter(MapConverter converter, Map<String, Integer> value) {
     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);

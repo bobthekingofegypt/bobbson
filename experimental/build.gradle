@@ -6,6 +6,7 @@ plugins {
 
 dependencies {
     implementation project(':bobbson')
+    implementation project(':activej')
     implementation group: 'io.activej', name: 'activej-bytebuf', version: '5.1'
 
 }

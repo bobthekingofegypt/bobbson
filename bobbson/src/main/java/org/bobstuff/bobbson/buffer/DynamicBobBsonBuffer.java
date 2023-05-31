@@ -641,7 +641,8 @@ public class DynamicBobBsonBuffer implements BobBsonBuffer {
 
   @Override
   public byte[] toByteArray() {
-    if (buffers.size() == 1) {
+    var singleBuffer = 1;
+    if (buffers.size() == singleBuffer) {
       return buffers.get(0).toByteArray();
     }
 

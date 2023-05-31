@@ -20,7 +20,6 @@ import static org.bobstuff.bobbson.models.Decimal128.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigDecimal;
-
 import org.bobstuff.bobbson.models.Decimal128;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

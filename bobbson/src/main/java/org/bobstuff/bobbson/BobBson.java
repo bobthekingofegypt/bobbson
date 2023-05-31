@@ -12,15 +12,17 @@ import org.bobstuff.bobbson.writer.BsonWriter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class BobBson {
+  public static final String UNCHECKED = "unchecked";
   private final ConcurrentMap<Type, BobBsonConverter> converters;
   private final List<BobBsonConverterFactory<BobBsonConverter>> converterFactories;
   private final ExternalConverterLookup externalConverterLookup;
   private final BobBsonConfig config;
 
   public BobBson() {
-    this(new BobBsonConfig(true));
+    this(BobBsonConfig.Builder.builder().build());
   }
 
+  @SuppressWarnings(UNCHECKED)
   public BobBson(BobBsonConfig config) {
     this.config = config;
     converterFactories = new CopyOnWriteArrayList<>();
@@ -43,9 +45,16 @@ public class BobBson {
     }
     var classLoaders = List.of(classLoader);
     externalConverterLookup = new ExternalConverterLookup(classLoaders);
+
+    for (var module : config.getModules()) {
+      converters.putAll(module.converters());
+      for (var factory : module.factories()) {
+        converterFactories.add(factory);
+      }
+    }
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings(UNCHECKED)
   public @Nullable <T> BobBsonConverter<T> tryFindConverter(Class<T> clazz) {
     return (BobBsonConverter<T>) tryFindConverter((Type) clazz);
   }
@@ -56,7 +65,7 @@ public class BobBson {
       return converter;
     }
 
-    if (manifest instanceof Class<?> && config.isAllowExternalLookup()) {
+    if (manifest instanceof Class<?> && config.isScanning()) {
       var found = externalConverterLookup.lookupFromClasspath((Class<?>) manifest, this);
       if (found) {
         converter = converters.get(manifest);
@@ -82,12 +91,12 @@ public class BobBson {
     converters.put(type, converter);
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings(UNCHECKED)
   public void registerFactory(BobBsonConverterFactory factory) {
     converterFactories.add(factory);
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings(UNCHECKED)
   public <T> @Nullable T deserialise(Class<T> manifest, BsonReader reader) throws Exception {
     if (manifest == null) {
       throw new IllegalArgumentException("manifest can't be null");

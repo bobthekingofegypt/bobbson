@@ -1,7 +1,6 @@
 package org.bobstuff.bobbson;
 
 import java.net.URL;
-
 import org.bobstuff.bobbson.models.BobBsonBinary;
 import org.bobstuff.bobbson.reader.StackBsonReader;
 import org.bobstuff.bobbson.writer.StackBsonWriter;

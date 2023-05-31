@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.bobstuff.bobbson.models.BobBsonBinary;
 import org.bobstuff.bobbson.BsonType;
+import org.bobstuff.bobbson.models.BobBsonBinary;
 import org.bobstuff.bobbson.reader.BsonReader;
 import org.bobstuff.bobbson.writer.BsonWriter;
 import org.junit.jupiter.api.Test;

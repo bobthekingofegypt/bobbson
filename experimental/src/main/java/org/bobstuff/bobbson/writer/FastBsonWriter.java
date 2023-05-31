@@ -155,6 +155,7 @@ public class FastBsonWriter implements BsonWriter {
   }
 
   @Override
+  @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
   public void writeEndDocument() {
     buffer.writeByte((byte) 0);
     int startPosition = contextStackStart;

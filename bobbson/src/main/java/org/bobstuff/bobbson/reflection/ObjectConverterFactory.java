@@ -8,9 +8,10 @@ import org.bobstuff.bobbson.BobBsonConverterFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /** Factory to return object converters configured for requested bean type. */
-public class ObjectConverterFactory implements BobBsonConverterFactory<ObjectConverter> {
+public class ObjectConverterFactory<@Nullable T>
+    implements BobBsonConverterFactory<ObjectConverter<T>> {
   @Override
-  public @Nullable ObjectConverter tryCreate(Type manifest, BobBson bobBson) {
+  public @Nullable ObjectConverter<T> tryCreate(Type manifest, BobBson bobBson) {
     // TODO should I deal with parameterized types
     try {
       return analyse((Class<?>) manifest, bobBson);
@@ -19,7 +20,7 @@ public class ObjectConverterFactory implements BobBsonConverterFactory<ObjectCon
     }
   }
 
-  private @Nullable ObjectConverter analyse(Class<?> clazz, BobBson bobBson) throws Exception {
+  private @Nullable ObjectConverter<T> analyse(Class<?> clazz, BobBson bobBson) throws Exception {
     if (Map.class.isAssignableFrom(clazz)) {
       return null;
     }
@@ -31,6 +32,6 @@ public class ObjectConverterFactory implements BobBsonConverterFactory<ObjectCon
     clazz.getConstructor().newInstance();
 
     var beanFields = ReflectionTools.parseBeanFields(clazz, bobBson);
-    return new ObjectConverter(bobBson, clazz, beanFields);
+    return new ObjectConverter<>(bobBson, clazz, beanFields);
   }
 }

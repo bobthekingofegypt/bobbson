@@ -38,10 +38,11 @@ public class BobBsonByteRange implements BobBsonBuffer.ByteRangeComparator {
   }
 
   public boolean equalsArray(byte[] array, int otherWeakHash) {
+    var cutOffForLoopCheck = 10;
     if (weakHash != otherWeakHash) {
       return false;
     }
-    if (array.length < 10) {
+    if (array.length < cutOffForLoopCheck) {
       if (array.length != size - 1) {
         return false;
       }

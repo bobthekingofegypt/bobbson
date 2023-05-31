@@ -6,12 +6,13 @@ import org.bobstuff.bobbson.*;
 import org.bobstuff.bobbson.buffer.BobBsonBuffer;
 import org.bobstuff.bobbson.reader.BsonReader;
 import org.bobstuff.bobbson.writer.BsonWriter;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * ObjectConverter handles reflection based read/write of objects with no specific registered
  * converters.
  */
-public class ObjectConverter implements BobBsonConverter<Object> {
+public class ObjectConverter<@Nullable T> implements BobBsonConverter<T> {
   private final BobBson bobBson;
   private final List<ReflectionField> fields;
   private final Class<?> instanceClazz;
@@ -32,7 +33,7 @@ public class ObjectConverter implements BobBsonConverter<Object> {
 
   @Override
   @SuppressWarnings("unchecked")
-  public void writeValue(BsonWriter bsonWriter, Object instance) {
+  public void writeValue(BsonWriter bsonWriter, T instance) {
     bsonWriter.writeStartDocument();
     for (var field : fields) {
       var converter = field.getConverter();
@@ -52,10 +53,10 @@ public class ObjectConverter implements BobBsonConverter<Object> {
 
   @Override
   @SuppressWarnings("unchecked")
-  public Object readValue(BsonReader bsonReader, BsonType type) {
-    Object instance = null;
+  public @Nullable T readValue(BsonReader bsonReader, BsonType type) {
+    T instance = null;
     try {
-      instance = instanceClazz.getConstructor().newInstance();
+      instance = (T) instanceClazz.getConstructor().newInstance();
     } catch (InvocationTargetException
         | InstantiationException
         | IllegalAccessException

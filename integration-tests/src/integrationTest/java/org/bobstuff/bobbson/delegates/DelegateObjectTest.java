@@ -24,7 +24,7 @@ public class DelegateObjectTest {
     BobBsonBufferPool pool =
         new NoopBobBsonBufferPool((size) -> new BobBufferBobBsonBuffer(new byte[size], 0, 0));
     DynamicBobBsonBuffer buffer = new DynamicBobBsonBuffer(pool);
-    BobBson bobBson = new BobBson(new BobBsonConfig(false));
+    BobBson bobBson = new BobBson(BobBsonConfig.Builder.builder().withScanning(false).build());
     bobBson.registerFactory(new ObjectConverterFactory());
 
     org.bobstuff.bobbson.writer.BsonWriter bsonWriter = new StackBsonWriter(buffer);
