@@ -44,7 +44,7 @@ public class LargeObjectEncodingTest {
     BobBsonBufferPool pool =
         new NoopBobBsonBufferPool((size) -> new BobBufferBobBsonBuffer(new byte[size], 0, 0));
     DynamicBobBsonBuffer buffer = new DynamicBobBsonBuffer(pool);
-    BobBson bobBson = new BobBson(new BobBsonConfig(false));
+    BobBson bobBson = new BobBson(BobBsonConfig.Builder.builder().withScanning(false).build());
     bobBson.registerFactory(new CollectionConverterFactory());
     bobBson.registerFactory(new ObjectConverterFactory());
 

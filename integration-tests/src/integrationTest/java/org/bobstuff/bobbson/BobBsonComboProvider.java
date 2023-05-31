@@ -29,7 +29,7 @@ public class BobBsonComboProvider implements ArgumentsProvider {
 
   public class BobBsonRelflectionProvider implements BobBsonProvider {
     public BobBson provide() {
-      var bobBson = new BobBson(new BobBsonConfig(false));
+      var bobBson = new BobBson(BobBsonConfig.Builder.builder().withScanning(false).build());
       bobBson.registerFactory(new EnumConverterFactory());
       bobBson.registerFactory(new ObjectConverterFactory());
       bobBson.registerFactory(new CollectionConverterFactory());
