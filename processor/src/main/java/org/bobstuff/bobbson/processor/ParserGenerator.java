@@ -362,6 +362,10 @@ public class ParserGenerator {
   protected CodeBlock generateParserCode(StructInfo structInfo) {
     CodeBlock.Builder block = CodeBlock.builder();
 
+    if (structInfo.attributes.size() == 0) {
+      return block.build();
+    }
+
     var first = true;
     for (var entry : structInfo.attributes.entrySet()) {
       var attribute = entry.getValue();
@@ -459,17 +463,12 @@ public class ParserGenerator {
     ClassName model = ClassName.get(structInfo.element);
 
     return MethodSpec.methodBuilder("readSlow")
-        //        .addAnnotation(Nullable.class)
         .addModifiers(Modifier.PRIVATE)
         .addParameter(BsonReader.class, "reader")
         .addParameter(type, "result")
         .addParameter(BsonType.class, "type")
         .returns(type)
         .addStatement("var range = reader.getFieldName()")
-        //                .addCode(generateParserPreamble(structInfo, types))
-        //        .beginControlFlow(
-        //            "while ((type = reader.readBsonType()) != $T" + END_OF_DOCUMENT_POST + ")",
-        //            BsonType.class)
         .addCode(generateParserCode(structInfo))
         .beginControlFlow(
             "while ((type = reader.readBsonType()) != $T" + END_OF_DOCUMENT_POST + ")",
@@ -546,28 +545,13 @@ public class ParserGenerator {
 
   public void generate(StructInfo structInfo, Writer writer, Types types, Elements elements)
       throws Exception {
-
     var typevars =
         structInfo.element.getTypeParameters().stream()
             .map(TypeVariableName::get)
             .collect(toList());
-    //    TypeVariableName[] typeArguments = typevars.toArray(new
-    // TypeVariableName[typevars.size()]);
-    //    TypeName typeClassName = ParameterizedTypeName.get(className, typeArguments);
     TypeName type = TypeName.get(structInfo.element.asType());
     ClassName model = ClassName.get(structInfo.element);
-    var converterName =
-        "_" + structInfo.getClassName().replaceAll("\\$", "_") + "_BobBsonConverter";
-    //    if (structInfo.isParameterized()) {
-    //      List<String> typevars = structInfo.element.getTypeParameters().stream()
-    //                                                   .map(TypeVariableName::get)
-    //              .map(TypeVariableName::toString)
-    //                                                   .collect(toList());
-    //      var typeVarsString = String.join(",", typevars);
-    //      converterName += "<" + typeVarsString + ">";
-    //    }
     MethodSpec readMethod = generateReadMethod(structInfo, types);
-    //    MethodSpec writeMethod = generateWriteMethodNoKey(type);
     var writeMethodWithKey = generateWriteMethodWithKey(structInfo, type, types);
 
     var keyByteArrays = generateKeyByteArrays(structInfo);
@@ -597,7 +581,6 @@ public class ParserGenerator {
                     .build())
             .addMethod(generateReadSlowMethod(structInfo, types))
             .addMethod(readMethod)
-            //            .addMethod(writeMethod)
             .addMethod(writeMethodWithKey)
             .build();
 
@@ -612,15 +595,6 @@ public class ParserGenerator {
     JavaFile javaFile = JavaFile.builder(structInfo.getPackageName(), struct).indent("  ").build();
 
     javaFile.writeTo(writer);
-  }
-
-  protected @NonNull MethodSpec generateWriteMethodNoKey(TypeName model) {
-    return MethodSpec.methodBuilder("write")
-        .addModifiers(Modifier.PUBLIC)
-        .addParameter(BsonWriter.class, "writer")
-        .addParameter(model, "obj")
-        .addStatement("this.write(writer, (byte[]) null, obj)")
-        .build();
   }
 
   public static @NonNull MethodSpec getRegisterMethod(String className, ClassName model) {
