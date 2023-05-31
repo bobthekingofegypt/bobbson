@@ -5,6 +5,8 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
+
+import org.bobstuff.bobbson.annotations.BsonAttribute;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -18,7 +20,6 @@ public class AttributeResult {
   public final String name;
   public final ExecutableElement readMethod;
   public final ExecutableElement writeMethod;
-  //  public final VariableElement field;
   public final TypeMirror type;
   public final boolean list;
   public final boolean set;
@@ -34,7 +35,6 @@ public class AttributeResult {
       String name,
       ExecutableElement readMethod,
       ExecutableElement writeMethod,
-      //      VariableElement field,
       TypeMirror type,
       boolean list,
       boolean set,
@@ -46,7 +46,6 @@ public class AttributeResult {
     this.name = name;
     this.readMethod = readMethod;
     this.writeMethod = writeMethod;
-    //    this.field = field;
     this.type = type;
     this.list = list;
     this.set = set;
@@ -142,10 +141,6 @@ public class AttributeResult {
     return writeMethod;
   }
 
-  //  public VariableElement getField() {
-  //    return field;
-  //  }
-
   public boolean isMap() {
     return map;
   }
@@ -192,7 +187,10 @@ public class AttributeResult {
 
     for (ExecutableElement ee : annotation.getElementValues().keySet()) {
       if (ee.toString().equals("value()")) {
-        return annotation.getElementValues().get(ee).getValue().toString();
+        var value = annotation.getElementValues().get(ee).getValue().toString();
+        if (!BsonAttribute.DEFAULT_NON_VALID_ALIAS.equals(value)) {
+          return annotation.getElementValues().get(ee).getValue().toString();
+        }
       }
     }
 

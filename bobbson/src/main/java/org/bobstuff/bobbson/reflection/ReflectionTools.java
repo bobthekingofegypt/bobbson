@@ -55,6 +55,10 @@ public class ReflectionTools {
       var bsonWriterOptions = field.getAnnotation(BsonWriterOptions.class);
       var customConverter = field.getAnnotation(BsonConverter.class);
 
+      if (bsonAttribute != null && bsonAttribute.ignore()) {
+        continue;
+      }
+
       var name = field.getName();
       var capitalisedName =
           name.substring(0, 1).toUpperCase(Locale.getDefault()) + name.substring(1);
@@ -137,6 +141,9 @@ public class ReflectionTools {
                 bobBson));
       }
     }
+
+    beanFields.sort(Comparator.comparing(ReflectionField::getOrder));
+
     return beanFields;
   }
 

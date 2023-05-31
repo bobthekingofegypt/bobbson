@@ -10,10 +10,13 @@ import org.bobstuff.bobbson.writer.BsonWriter;
 import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ArgumentsSource;
 
 public class BeanWithNoFieldsTest {
-  @Test
-  public void testReadWriteKeyAsByteArray() throws Exception {
+  @ParameterizedTest(name = "{0}")
+  @ArgumentsSource(BobBsonComboProvider.class)
+  public void testReadWriteKeyAsByteArray(BobBsonComboProvider.ConfigurationProvider configurationProvider) throws Exception {
     // this test case should just pass, no need to validate anything
     BobBsonBufferPool pool =
         new NoopBobBsonBufferPool((size) -> new ByteBufferBobBsonBuffer(new byte[100]));
@@ -27,7 +30,7 @@ public class BeanWithNoFieldsTest {
 
     var bytes = buffer.toByteArray();
 
-    BobBson bobBson = new BobBson();
+    BobBson bobBson = configurationProvider.getBobBson();
     BsonReader reader = new StackBsonReader(new ByteBufferBobBsonBuffer(bytes));
     var result = bobBson.deserialise(BeanWithNoFields.class, reader);
   }

@@ -130,6 +130,19 @@ public class Analysis {
           }
         }
 
+        var ignore = false;
+        if (annotation != null) {
+          for (ExecutableElement ee : annotation.getElementValues().keySet()) {
+            if (ee.toString().equals("ignore()")) {
+              ignore = (Boolean) annotation.getElementValues().get(ee).getValue();
+            }
+          }
+        }
+
+        if (ignore) {
+          continue;
+        }
+
         if (getter == null || setter == null) {
           messager.debug(
               "Field (" + field.getSimpleName() + ") excluded due to missing getter or setter");
@@ -186,6 +199,17 @@ public class Analysis {
         }
       } else {
 
+        continue;
+      }
+
+      var ignore = false;
+      for (ExecutableElement ee : annotation.getElementValues().keySet()) {
+        if (ee.toString().equals("ignore()")) {
+          ignore = (Boolean) annotation.getElementValues().get(ee).getValue();
+        }
+      }
+
+      if (ignore) {
         continue;
       }
 

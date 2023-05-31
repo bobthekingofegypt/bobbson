@@ -22,6 +22,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public class ReflectionField<Model, Field> {
   public byte[] nameBytes;
   public int weakHash;
+
+  private int order;
   private final String alias;
   private final String fieldName;
   private final Type type;
@@ -63,7 +65,11 @@ public class ReflectionField<Model, Field> {
       converter = (BobBsonConverter<Field>) bobBson.tryFindConverter(type);
     }
 
-    if (bsonAttribute != null && bsonAttribute.value() != null) {
+    if (bsonAttribute != null) {
+      order = bsonAttribute.order();
+    }
+
+    if (bsonAttribute != null && !BsonAttribute.DEFAULT_NON_VALID_ALIAS.equals(bsonAttribute.value())) {
       nameBytes = bsonAttribute.value().getBytes(StandardCharsets.UTF_8);
       alias = bsonAttribute.value();
     } else {
@@ -82,6 +88,10 @@ public class ReflectionField<Model, Field> {
 
   public String getAlias() {
     return alias;
+  }
+
+  public int getOrder() {
+    return order;
   }
 
   public Type getType() {
