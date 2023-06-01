@@ -34,10 +34,12 @@ public class PrimitiveConverters {
     if (reader.getCurrentBsonType() == BsonType.NULL) {
       throw new RuntimeException("Attempting to read null into a primitive double type");
     }
-    if (reader.getCurrentBsonType() != BsonType.DOUBLE) {
-      throw new RuntimeException("Attempting to read non double type into double field");
+    if (reader.getCurrentBsonType() == BsonType.DOUBLE) {
+      return reader.readDouble();
+    } else if (reader.getCurrentBsonType() == BsonType.INT32) {
+      return reader.readInt32();
     }
-    return reader.readDouble();
+    throw new RuntimeException("Attempting to read non double type into double field");
   }
 
   public static boolean parseBoolean(BsonReader reader) {
