@@ -69,6 +69,8 @@ spotbugs {
 }
 
 allprojects {
+    apply plugin: 'maven-publish'
+
     spotless {
         java {
             googleJavaFormat('1.13.0').reflowLongStrings()

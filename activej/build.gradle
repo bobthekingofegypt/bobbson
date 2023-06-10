@@ -19,14 +19,14 @@ jacocoTestReport {
     }
 }
 
-publishing {
-    publications {
-        maven(MavenPublication) {
-            groupId = 'org.bobstuff.bobbson'
-            artifactId = 'activej'
-            version = '1.0'
-
-            from components.java
-        }
-    }
-}
+//publishing {
+//    publications {
+//        maven(MavenPublication) {
+//            groupId = 'org.bobstuff.bobbson'
+//            artifactId = 'activej'
+//            version = '1.0-alpha1'
+//
+//            from components.java
+//        }
+//    }
+//}
