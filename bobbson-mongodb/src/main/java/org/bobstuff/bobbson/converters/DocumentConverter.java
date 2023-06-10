@@ -48,7 +48,7 @@ public class DocumentConverter implements BobBsonConverter<Document> {
   }
 
   @Override
-  @SuppressWarnings("PMD.AssignmentInOperand")
+  @SuppressWarnings({"PMD.AssignmentInOperand", "argument"})
   public @Nullable Document readValue(BsonReader bsonReader, BsonType outerType) {
     var document = new Document();
 
@@ -68,9 +68,9 @@ public class DocumentConverter implements BobBsonConverter<Document> {
             String.format("No converter registered for %s", clazz.getSimpleName()));
       }
       var value = converter.read(bsonReader);
-      if (value == null) {
-        throw new IllegalStateException(String.format("Decoded BSONValue value is null"));
-      }
+      //      if (value == null) {
+      //        throw new IllegalStateException(String.format("Decoded BSONValue value is null"));
+      //      }
       document.put(fieldName, value);
     }
     bsonReader.readEndDocument();

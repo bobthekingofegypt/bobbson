@@ -40,4 +40,6 @@ tasks.withType(JavaCompile).configureEach {
             skipCheckerFramework = true
         }
     }
+
+    options.compilerArgs << '-Abobbsonprocessorlogging=false'
 }

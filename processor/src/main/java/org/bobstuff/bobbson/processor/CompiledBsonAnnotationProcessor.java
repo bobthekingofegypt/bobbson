@@ -2,10 +2,7 @@ package org.bobstuff.bobbson.processor;
 
 import java.io.Writer;
 import java.util.Set;
-import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.RoundEnvironment;
-import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -17,6 +14,7 @@ import org.bobstuff.bobbson.annotations.GenerateBobBsonConverter;
 @SupportedAnnotationTypes({
   "org.bobstuff.bobbson.annotations.GenerateBobBsonConverter",
 })
+@SupportedOptions({"bobbsonprocessorlogging"})
 @SuppressWarnings("initialization")
 public class CompiledBsonAnnotationProcessor extends AbstractProcessor {
   private BobMessager messager;
@@ -26,7 +24,11 @@ public class CompiledBsonAnnotationProcessor extends AbstractProcessor {
   @Override
   public synchronized void init(ProcessingEnvironment processingEnv) {
     super.init(processingEnv);
-    messager = new BobMessager(processingEnv.getMessager(), true);
+    messager =
+        new BobMessager(
+            processingEnv.getMessager(),
+            Boolean.parseBoolean(
+                processingEnv.getOptions().getOrDefault("bobbsonprocessorlogging", "false")));
     types = processingEnv.getTypeUtils();
     elements = processingEnv.getElementUtils();
   }

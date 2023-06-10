@@ -149,7 +149,7 @@ public class StackBsonReader implements BsonReader {
 
   @Override
   public void readStringRaw() {
-    buffer.getInt();
+    var i = buffer.getInt();
     contextStack.adjustRemaining(4);
     readCString();
     state = getNextState();

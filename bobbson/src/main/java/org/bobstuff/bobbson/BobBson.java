@@ -11,6 +11,29 @@ import org.bobstuff.bobbson.reader.BsonReader;
 import org.bobstuff.bobbson.writer.BsonWriter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * BobBson provides functionality for reading and writing BSON data.
+ *
+ * <p>Provides access to {@code Converters} as well as utility methods to serialise and deserialise.
+ *
+ * <p>Parsing of java types into bson types is handled by the concept of {@code Converters}, there
+ * are several converters built in to handle basic types like String/Integer/Double etc. Custom
+ * converters can be registered through BobBson instance. Factories can also be registered, these
+ * factories can provide their own mappings of object types, reflection support is handled by custom
+ * factories.
+ *
+ * <p>Java beans marked with {@code GenerateBobBsonConverter} can have converters created at compile
+ * time with the annotation processor. These converters can be automatically detected if scanning is
+ * enabled (it is by default).
+ *
+ * <p>The bson writer and bson reader interfaces can be used directly to create custom parsers
+ * <code>
+ *     var bobBson = new BobBson();
+ *     var buffer = new BobBufferBobBsonBuffer(new byte[1000], 0, 0);
+ *
+ *
+ * </code>
+ */
 public class BobBson {
   public static final String UNCHECKED = "unchecked";
   private final ConcurrentMap<Type, BobBsonConverter> converters;

@@ -28,6 +28,7 @@ public class ParserGenerator {
   public static final String ESCAPED_DOT = "\\.";
   public static final String ARRAY_BRACKETS = "[]";
   public static final String END_OF_DOCUMENT_POST = ".END_OF_DOCUMENT";
+  public static final String RETURN_RESULT = "return result";
 
   private BobMessager messager;
 
@@ -295,8 +296,17 @@ public class ParserGenerator {
     block.addStatement("type = reader.readBsonType()");
     block.addStatement("var range = reader.getFieldName()");
 
-    var first = true;
-    for (var entry : structInfo.attributes.entrySet()) {
+    Map<String, AttributeResult> result =
+        structInfo.attributes.entrySet().stream()
+            .sorted(Comparator.comparingInt(a -> a.getValue().getOrder()))
+            .collect(
+                Collectors.toMap(
+                    Map.Entry::getKey,
+                    Map.Entry::getValue,
+                    (oldValue, newValue) -> oldValue,
+                    LinkedHashMap::new));
+
+    for (var entry : result.entrySet()) {
       var attribute = entry.getValue();
       var attributeName = entry.getKey();
       String fieldName = attribute.getConverterFieldName();
@@ -309,7 +319,7 @@ public class ParserGenerator {
 
       block.beginControlFlow("if (!range.equalsArray($NBytes, $L))", attributeName, hash);
       block.addStatement("readSlow(reader, result, type, fieldsRead)");
-      block.addStatement("return result");
+      block.addStatement(RETURN_RESULT);
       block.endControlFlow();
 
       block.addStatement("fieldsRead += 1");
@@ -366,9 +376,17 @@ public class ParserGenerator {
     if (structInfo.attributes.size() == 0) {
       return block.build();
     }
-
+    Map<String, AttributeResult> result =
+        structInfo.attributes.entrySet().stream()
+            .sorted(Comparator.comparingInt(a -> a.getValue().getOrder()))
+            .collect(
+                Collectors.toMap(
+                    Map.Entry::getKey,
+                    Map.Entry::getValue,
+                    (oldValue, newValue) -> oldValue,
+                    LinkedHashMap::new));
     var first = true;
-    for (var entry : structInfo.attributes.entrySet()) {
+    for (var entry : result.entrySet()) {
       var attribute = entry.getValue();
       var attributeName = entry.getKey();
       String fieldName = attribute.getConverterFieldName();
@@ -443,7 +461,8 @@ public class ParserGenerator {
     block
         .beginControlFlow("if (fieldsRead == EXPECTED_FIELD_COUNT)")
         .addStatement("reader.skipContext()")
-        .addStatement("return result")
+        .addStatement("reader.readEndDocument()")
+        .addStatement(RETURN_RESULT)
         .endControlFlow();
 
     //    block.beginControlFlow(
@@ -485,7 +504,7 @@ public class ParserGenerator {
             BsonType.class)
         .addCode(generateParserCode(structInfo))
         .endControlFlow()
-        .addStatement("return result")
+        .addStatement(RETURN_RESULT)
         .build();
   }
 
@@ -519,7 +538,7 @@ public class ParserGenerator {
         //        .addCode(generateParserCode(structInfo))
         //        .endControlFlow()
         .addStatement("reader.readEndDocument()")
-        .addStatement("return result")
+        .addStatement(RETURN_RESULT)
         .build();
   }
 
@@ -581,6 +600,7 @@ public class ParserGenerator {
                 FieldSpec.builder(
                         int.class, "EXPECTED_FIELD_COUNT", Modifier.PRIVATE, Modifier.STATIC)
                     .initializer(String.valueOf(structInfo.attributes.size()))
+                    //                    .initializer(String.valueOf(100000))
                     .build())
             .addFields(lookupData.fields)
             .addFields(keyByteArrays)
