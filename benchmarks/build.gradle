@@ -37,3 +37,5 @@ tasks.jmh.finalizedBy tasks.jmhReport
 checkerFramework {
     skipCheckerFramework = true
 }
+
+pmdJmh.enabled = false
