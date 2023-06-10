@@ -7,8 +7,8 @@ plugins {
     id 'org.checkerframework'
 }
 
-version = '1.0.2'
-group = 'org.bobstuff.bobbson'
+//version = '1.0.2'
+//group = 'org.bobstuff.bobbson'
 
 repositories {
     mavenCentral()
@@ -69,7 +69,7 @@ spotbugs {
 }
 
 allprojects {
-    apply plugin: 'maven-publish'
+//    apply plugin: 'maven-publish'
 
     spotless {
         java {
