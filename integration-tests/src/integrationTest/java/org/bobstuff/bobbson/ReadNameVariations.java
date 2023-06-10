@@ -1,6 +1,7 @@
 package org.bobstuff.bobbson;
 
 import java.nio.charset.StandardCharsets;
+import org.bobstuff.bobbson.buffer.BobBsonBuffer;
 import org.bobstuff.bobbson.utils.MDBBsonWriter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -21,7 +22,7 @@ public class ReadNameVariations {
 
     BsonType type = reader.readBsonType();
     Assertions.assertEquals(BsonType.INT64, type);
-    BobBsonBuffer.ByteRangeComparitor range = reader.getFieldName();
+    BobBsonBuffer.ByteRangeComparator range = reader.getFieldName();
 
     var ageBytes = "age".getBytes(StandardCharsets.UTF_8);
     Assertions.assertTrue(range.equalsArray(ageBytes));

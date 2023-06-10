@@ -2,9 +2,12 @@ package org.bobstuff.bobbson.converters;
 
 import org.bobstuff.bobbson.BobBson;
 import org.bson.*;
+import org.bson.types.Binary;
 
 public class BsonValueConverters {
   public static void register(BobBson bobBson) {
+    bobBson.registerConverter(Document.class, new DocumentConverter(bobBson));
+    bobBson.registerConverter(BasicBSONObject.class, new BasicBSONObjectConverter(bobBson));
     bobBson.registerConverter(BsonDocument.class, new BsonDocumentConverter(bobBson));
     bobBson.registerConverter(BsonString.class, new BsonStringConverter());
     bobBson.registerConverter(BsonNull.class, new BsonNullConverter());
@@ -15,6 +18,7 @@ public class BsonValueConverters {
     bobBson.registerConverter(BsonInt32.class, new BsonInt32Converter());
     bobBson.registerConverter(BsonInt64.class, new BsonInt64Converter());
     bobBson.registerConverter(BsonBinary.class, new BsonBinaryConverter());
+    bobBson.registerConverter(Binary.class, new BinaryConverter());
     bobBson.registerConverter(BsonDouble.class, new BsonDoubleConverter());
     bobBson.registerConverter(BsonDateTime.class, new BsonDateTimeConverter());
     bobBson.registerConverter(BsonTimestamp.class, new BsonTimestampConverter());
@@ -28,5 +32,6 @@ public class BsonValueConverters {
     bobBson.registerConverter(
         BsonJavaScriptWithScope.class, new BsonJavaScriptWithScopeConverter(bobBson));
     bobBson.registerConverter(BsonRegularExpression.class, new BsonRegularExpressionConverter());
+    bobBson.registerConverter(RawList.class, new RawListConverter(bobBson));
   }
 }

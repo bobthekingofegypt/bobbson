@@ -2,21 +2,19 @@ package org.bobstuff.bobbson.processor;
 
 import java.io.Writer;
 import java.util.Set;
-import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.RoundEnvironment;
-import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.JavaFileObject;
-import org.bobstuff.bobbson.annotations.CompiledBson;
+import org.bobstuff.bobbson.annotations.GenerateBobBsonConverter;
 
 @SupportedAnnotationTypes({
-  "org.bobstuff.bobbson.annotations.CompiledBson",
+  "org.bobstuff.bobbson.annotations.GenerateBobBsonConverter",
 })
+@SupportedOptions({"bobbsonprocessorlogging"})
 @SuppressWarnings("initialization")
 public class CompiledBsonAnnotationProcessor extends AbstractProcessor {
   private BobMessager messager;
@@ -26,7 +24,11 @@ public class CompiledBsonAnnotationProcessor extends AbstractProcessor {
   @Override
   public synchronized void init(ProcessingEnvironment processingEnv) {
     super.init(processingEnv);
-    messager = new BobMessager(processingEnv.getMessager(), false);
+    messager =
+        new BobMessager(
+            processingEnv.getMessager(),
+            Boolean.parseBoolean(
+                processingEnv.getOptions().getOrDefault("bobbsonprocessorlogging", "false")));
     types = processingEnv.getTypeUtils();
     elements = processingEnv.getElementUtils();
   }
@@ -39,7 +41,7 @@ public class CompiledBsonAnnotationProcessor extends AbstractProcessor {
     messager.debug("running the processor for a round");
 
     Set<? extends Element> compiledBsonInstances =
-        roundEnv.getElementsAnnotatedWith(CompiledBson.class);
+        roundEnv.getElementsAnnotatedWith(GenerateBobBsonConverter.class);
     messager.debug("found " + compiledBsonInstances.size() + " items marked as BsonCompiler");
     if (compiledBsonInstances.isEmpty()) {
       return false;
@@ -58,11 +60,18 @@ public class CompiledBsonAnnotationProcessor extends AbstractProcessor {
         JavaFileObject converterFile =
             processingEnv.getFiler().createSourceFile(classNamePath, structInfo.element);
         try (Writer writer = converterFile.openWriter()) {
-          ParserGenerator parserGenerator = new ParserGenerator();
-          parserGenerator.generate(structInfo, writer, types, elements);
+          if (structInfo.isEnum()) {
+            EnumGenerator enumGenerator = new EnumGenerator();
+            messager.debug("struct " + structInfo.getClassName() + ", is an enum");
+            enumGenerator.generate(structInfo, writer, types, elements);
+          } else {
+            ParserGenerator parserGenerator = new ParserGenerator(messager);
+            parserGenerator.generate(structInfo, writer, types, elements);
+          }
         }
       } catch (Exception e) {
         messager.error("failed writing out file : " + e.getMessage());
+        messager.error(e);
       }
     }
 

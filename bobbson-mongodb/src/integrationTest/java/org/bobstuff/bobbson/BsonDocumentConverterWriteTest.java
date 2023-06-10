@@ -3,8 +3,15 @@ package org.bobstuff.bobbson;
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import org.bobstuff.bobbson.buffer.ByteBufferBobBsonBuffer;
+import org.bobstuff.bobbson.buffer.DynamicBobBsonBuffer;
+import org.bobstuff.bobbson.buffer.pool.BobBsonBufferPool;
+import org.bobstuff.bobbson.buffer.pool.NoopBobBsonBufferPool;
 import org.bobstuff.bobbson.converters.BsonValueConverters;
+import org.bobstuff.bobbson.reader.BsonReader;
+import org.bobstuff.bobbson.reader.StackBsonReader;
 import org.bobstuff.bobbson.writer.BsonWriter;
+import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.bson.BsonDocument;
 import org.bson.BsonString;
 import org.junit.jupiter.api.Assertions;
@@ -16,11 +23,11 @@ public class BsonDocumentConverterWriteTest {
     BobBson bobBson = new BobBson();
     BsonValueConverters.register(bobBson);
 
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new ByteBufferBobBsonBuffer(new byte[10]));
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new ByteBufferBobBsonBuffer(new byte[10]));
     DynamicBobBsonBuffer buffer = new DynamicBobBsonBuffer(pool);
 
-    BsonWriter writer = new BsonWriter(buffer);
+    BsonWriter writer = new StackBsonWriter(buffer);
 
     BsonDocument document = new BsonDocument();
     document.append("name", new BsonString("bob"));
@@ -33,7 +40,7 @@ public class BsonDocumentConverterWriteTest {
     os.close();
     byte[] bytes = os.toByteArray();
 
-    BsonReader reader = new BsonReader(ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN));
+    BsonReader reader = new StackBsonReader(ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN));
 
     reader.readStartDocument();
     reader.readBsonType();

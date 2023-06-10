@@ -1,6 +1,8 @@
 package org.bobstuff.bobbson;
 
 import java.nio.charset.StandardCharsets;
+import org.bobstuff.bobbson.reader.BsonReader;
+import org.bobstuff.bobbson.reader.StackBsonReader;
 import org.bobstuff.bobbson.utils.MDBBsonWriter;
 import org.bson.BsonBinary;
 import org.junit.jupiter.api.Assertions;
@@ -15,7 +17,7 @@ public class Simple1 {
     bsonWriter.writeString("monks", "are a thing");
 
     var buffer = MDBBsonWriter.data(bsonWriter);
-    BsonReader reader = new BsonReader(builder.build(buffer));
+    BsonReader reader = new StackBsonReader(builder.build(buffer));
 
     reader.readStartDocument();
     BsonType type = reader.readBsonType();
@@ -34,7 +36,7 @@ public class Simple1 {
         "monks", new BsonBinary("are a thing".getBytes(StandardCharsets.UTF_8)));
 
     var buffer = MDBBsonWriter.data(bsonWriter);
-    BsonReader reader = new BsonReader(builder.build(buffer));
+    BsonReader reader = new StackBsonReader(builder.build(buffer));
 
     reader.readStartDocument();
     BsonType type = reader.readBsonType();
@@ -53,7 +55,7 @@ public class Simple1 {
     bsonWriter.writeString("cats", "aren't dogs");
 
     var buffer = MDBBsonWriter.data(bsonWriter);
-    BsonReader reader = new BsonReader(builder.build(buffer));
+    BsonReader reader = new StackBsonReader(builder.build(buffer));
 
     reader.readStartDocument();
     BsonType type = reader.readBsonType();

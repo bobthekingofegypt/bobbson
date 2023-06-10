@@ -1,0 +1,39 @@
+plugins {
+    id 'bobbson.java-conventions'
+    id 'java'
+    id "me.champeau.jmh" version "0.7.1"
+    id "io.morethan.jmhreport" version "0.9.0"
+}
+
+
+dependencies {
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.1'
+    implementation 'de.undercouch:bson4jackson:2.13.0'
+    implementation 'org.mongodb:mongodb-driver-sync:4.5.0'
+    implementation 'org.mongodb:mongodb-driver-core:4.5.0'
+    implementation 'org.mongodb:bson:4.5.0'
+    implementation project(':bobbson')
+    implementation project(':activej')
+    jmhAnnotationProcessor project(':processor')
+    jmhAnnotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:1.36'
+}
+
+jmh {
+    includes = ['.*']
+    profilers = ['gc']
+    warmupIterations = 1
+    iterations = 3
+    fork = 1
+    resultFormat = "json"
+}
+
+jmhReport {
+    jmhResultPath = project.file('build/results/jmh/results.json')
+    jmhReportOutput = project.file('build/results/jmh')
+}
+
+tasks.jmh.finalizedBy tasks.jmhReport
+
+checkerFramework {
+    skipCheckerFramework = true
+}

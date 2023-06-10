@@ -3,40 +3,24 @@ package org.bobstuff.bobbson.converters;
 import static java.lang.String.format;
 
 import org.bobstuff.bobbson.BobBsonConverter;
-import org.bobstuff.bobbson.BsonReader;
 import org.bobstuff.bobbson.BsonType;
+import org.bobstuff.bobbson.reader.BsonReader;
 import org.bobstuff.bobbson.writer.BsonWriter;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class BooleanBsonConverter implements BobBsonConverter<Boolean> {
   @Override
-  public @Nullable Boolean read(@NonNull BsonReader bsonReader) {
-    BsonType type = bsonReader.getCurrentBsonType();
-
-    if (type == BsonType.NULL) {
-      bsonReader.readNull();
-      return null;
+  public @Nullable Boolean readValue(BsonReader bsonReader, BsonType type) {
+    if (type == BsonType.BOOLEAN) {
+      return bsonReader.readBoolean();
     }
 
-    if (type != BsonType.BOOLEAN) {
-      throw new RuntimeException(format("Attempting to read %s bson type as a boolean", type));
-    }
-
-    return bsonReader.readBoolean();
+    throw new RuntimeException(format("Attempting to read %s bson type as a boolean", type));
   }
 
   @Override
-  public void write(@NonNull BsonWriter bsonWriter, byte @Nullable [] key, Boolean value) {
-    if (key == null) {
-      bsonWriter.writeBoolean(value);
-    } else {
-      bsonWriter.writeBoolean(key, value);
-    }
-  }
-
-  @Override
-  public void write(@NonNull BsonWriter bsonWriter, @NonNull Boolean value) {
+  public void writeValue(@NonNull BsonWriter bsonWriter, Boolean value) {
     bsonWriter.writeBoolean(value);
   }
 }

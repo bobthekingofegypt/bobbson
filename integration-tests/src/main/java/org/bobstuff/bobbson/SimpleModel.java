@@ -1,8 +1,8 @@
 package org.bobstuff.bobbson;
 
-import org.bobstuff.bobbson.annotations.CompiledBson;
+import org.bobstuff.bobbson.annotations.GenerateBobBsonConverter;
 
-@CompiledBson
+@GenerateBobBsonConverter
 public class SimpleModel {
   private String name;
 

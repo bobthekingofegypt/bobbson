@@ -11,7 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import org.bobstuff.bobbson.annotations.BsonAttribute;
 import org.bobstuff.bobbson.annotations.BsonConverter;
-import org.bobstuff.bobbson.annotations.CompiledBson;
+import org.bobstuff.bobbson.annotations.GenerateBobBsonConverter;
 import org.bobstuff.bobbson.converters.StringBsonConverter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,9 +30,10 @@ public class AnalysisTest {
 
     assertEquals("org.bobstuff.bobbson.processor.AnalysisTest$Sample", si.binaryName);
     assertEquals(
-        "org.bobstuff.bobbson.annotations.CompiledBson",
+        "org.bobstuff.bobbson.annotations.GenerateBobBsonConverter",
         si.annotation.getAnnotationType().toString());
-    assertEquals("org.bobstuff.bobbson.annotations.CompiledBson", si.discoveredBy.toString());
+    assertEquals(
+        "org.bobstuff.bobbson.annotations.GenerateBobBsonConverter", si.discoveredBy.toString());
 
     var attributes = si.attributes;
     assertTrue(attributes.containsKey("name"));
@@ -62,9 +63,10 @@ public class AnalysisTest {
 
     assertEquals("org.bobstuff.bobbson.processor.AnalysisTest$SampleList", si.binaryName);
     assertEquals(
-        "org.bobstuff.bobbson.annotations.CompiledBson",
+        "org.bobstuff.bobbson.annotations.GenerateBobBsonConverter",
         si.annotation.getAnnotationType().toString());
-    assertEquals("org.bobstuff.bobbson.annotations.CompiledBson", si.discoveredBy.toString());
+    assertEquals(
+        "org.bobstuff.bobbson.annotations.GenerateBobBsonConverter", si.discoveredBy.toString());
 
     var attributes = si.attributes;
     assertTrue(attributes.containsKey("names"));
@@ -96,9 +98,10 @@ public class AnalysisTest {
 
     assertEquals("org.bobstuff.bobbson.processor.AnalysisTest$SampleAlias", si.binaryName);
     assertEquals(
-        "org.bobstuff.bobbson.annotations.CompiledBson",
+        "org.bobstuff.bobbson.annotations.GenerateBobBsonConverter",
         si.annotation.getAnnotationType().toString());
-    assertEquals("org.bobstuff.bobbson.annotations.CompiledBson", si.discoveredBy.toString());
+    assertEquals(
+        "org.bobstuff.bobbson.annotations.GenerateBobBsonConverter", si.discoveredBy.toString());
 
     var attributes = si.attributes;
     assertTrue(attributes.containsKey("name"));
@@ -120,6 +123,38 @@ public class AnalysisTest {
   }
 
   @Test
+  public void testIsIsGetterByLombok(Cases cases) {
+    var sample = cases.one("isiscase");
+
+    var sut =
+        new Analysis(Tools.types(), Tools.elements(), new BobMessager(Tools.messager(), false));
+    var result = sut.analyse(new HashSet<>(List.of(sample)));
+    var si = result.get("org.bobstuff.bobbson.processor.AnalysisTest.IsIsCase");
+
+    assertEquals("org.bobstuff.bobbson.processor.AnalysisTest$IsIsCase", si.binaryName);
+    assertEquals(
+        "org.bobstuff.bobbson.annotations.GenerateBobBsonConverter",
+        si.annotation.getAnnotationType().toString());
+    assertEquals(
+        "org.bobstuff.bobbson.annotations.GenerateBobBsonConverter", si.discoveredBy.toString());
+
+    var attributes = si.attributes;
+    assertTrue(attributes.containsKey("isName"));
+    var name = attributes.get("isName");
+    assertEquals("isName", name.getReadMethod().getSimpleName().toString());
+    assertEquals("boolean", name.getReadMethod().getReturnType().toString());
+    assertEquals("setName", name.getWriteMethod().getSimpleName().toString());
+    assertEquals("boolean", name.getWriteMethod().getParameters().get(0).asType().toString());
+    assertEquals("void", name.getWriteMethod().getReturnType().toString());
+    assertFalse(name.list);
+    assertFalse(name.set);
+    assertFalse(name.map);
+    assertNull(name.annotation);
+    assertNull(name.converter);
+    assertNull(name.converterType);
+  }
+
+  @Test
   public void testSimpleConverterAnalysis(Cases cases) {
     var sample = cases.one("converter");
 
@@ -130,9 +165,10 @@ public class AnalysisTest {
 
     assertEquals("org.bobstuff.bobbson.processor.AnalysisTest$SampleConverter", si.binaryName);
     assertEquals(
-        "org.bobstuff.bobbson.annotations.CompiledBson",
+        "org.bobstuff.bobbson.annotations.GenerateBobBsonConverter",
         si.annotation.getAnnotationType().toString());
-    assertEquals("org.bobstuff.bobbson.annotations.CompiledBson", si.discoveredBy.toString());
+    assertEquals(
+        "org.bobstuff.bobbson.annotations.GenerateBobBsonConverter", si.discoveredBy.toString());
 
     var attributes = si.attributes;
     assertTrue(attributes.containsKey("name"));
@@ -152,14 +188,14 @@ public class AnalysisTest {
     assertNotNull(name.converter);
     assertNotNull(name.converterType);
     assertEquals(
-        "@org.bobstuff.bobbson.annotations.BsonConverter(target=org.bobstuff.bobbson.converters.StringBsonConverter.class)",
+        "@org.bobstuff.bobbson.annotations.BsonConverter(org.bobstuff.bobbson.converters.StringBsonConverter.class)",
         name.converter.toString());
     assertEquals(
         "org.bobstuff.bobbson.converters.StringBsonConverter", name.converterType.toString());
   }
 
   @Case("first")
-  @CompiledBson
+  @GenerateBobBsonConverter
   static class Sample {
     private String name;
 
@@ -173,7 +209,7 @@ public class AnalysisTest {
   }
 
   @Case("second")
-  @CompiledBson
+  @GenerateBobBsonConverter
   static class SampleList {
     private List<String> names;
 
@@ -187,7 +223,7 @@ public class AnalysisTest {
   }
 
   @Case("alias")
-  @CompiledBson
+  @GenerateBobBsonConverter
   static class SampleAlias {
     @BsonAttribute("notcalledname")
     private String name;
@@ -202,9 +238,9 @@ public class AnalysisTest {
   }
 
   @Case("converter")
-  @CompiledBson
+  @GenerateBobBsonConverter
   static class SampleConverter {
-    @BsonConverter(target = StringBsonConverter.class)
+    @BsonConverter(value = StringBsonConverter.class)
     private String name;
 
     public String getName() {
@@ -213,6 +249,20 @@ public class AnalysisTest {
 
     public void setName(String name) {
       this.name = name;
+    }
+  }
+
+  @Case("isiscase")
+  @GenerateBobBsonConverter
+  static class IsIsCase {
+    private boolean isName;
+
+    public boolean isName() {
+      return isName;
+    }
+
+    public void setName(boolean name) {
+      this.isName = name;
     }
   }
 }

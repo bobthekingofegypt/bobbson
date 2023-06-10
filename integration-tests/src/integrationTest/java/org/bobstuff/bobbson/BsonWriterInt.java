@@ -3,18 +3,25 @@ package org.bobstuff.bobbson;
 import java.io.ByteArrayOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import org.bobstuff.bobbson.buffer.ByteBufferBobBsonBuffer;
+import org.bobstuff.bobbson.buffer.DynamicBobBsonBuffer;
+import org.bobstuff.bobbson.buffer.pool.BobBsonBufferPool;
+import org.bobstuff.bobbson.buffer.pool.NoopBobBsonBufferPool;
+import org.bobstuff.bobbson.reader.BsonReader;
+import org.bobstuff.bobbson.reader.StackBsonReader;
 import org.bobstuff.bobbson.writer.BsonWriter;
+import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class BsonWriterInt {
   @Test
   public void testStringWrite() throws Exception {
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new ByteBufferBobBsonBuffer(new byte[10]));
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new ByteBufferBobBsonBuffer(new byte[10]));
     DynamicBobBsonBuffer buffer = new DynamicBobBsonBuffer(pool);
 
-    BsonWriter writer = new BsonWriter(buffer);
+    BsonWriter writer = new StackBsonWriter(buffer);
     writer.writeStartDocument();
     writer.writeString("name", "bob");
     writer.writeEndDocument();
@@ -27,7 +34,7 @@ public class BsonWriterInt {
 
     Files.write(Paths.get("/tmp/data.bin"), bytes);
 
-    BsonReader reader = new BsonReader(new ByteBufferBobBsonBuffer(bytes));
+    BsonReader reader = new StackBsonReader(new ByteBufferBobBsonBuffer(bytes));
     reader.readStartDocument();
     Assertions.assertEquals(BsonType.STRING, reader.readBsonType());
     Assertions.assertEquals("name", reader.currentFieldName());
@@ -37,11 +44,11 @@ public class BsonWriterInt {
 
   @Test
   public void testMultipleStringWrite() throws Exception {
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new ByteBufferBobBsonBuffer(new byte[size]));
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new ByteBufferBobBsonBuffer(new byte[size]));
     ByteBufferBobBsonBuffer buffer = new ByteBufferBobBsonBuffer(new byte[2048]);
 
-    BsonWriter writer = new BsonWriter(buffer);
+    BsonWriter writer = new StackBsonWriter(buffer);
     writer.writeStartDocument();
     writer.writeString("name", "bob");
     writer.writeString("job", "programmer");
@@ -56,7 +63,7 @@ public class BsonWriterInt {
 
     Files.write(Paths.get("/tmp/data.bin"), bytes);
 
-    BsonReader reader = new BsonReader(new ByteBufferBobBsonBuffer(bytes));
+    BsonReader reader = new StackBsonReader(new ByteBufferBobBsonBuffer(bytes));
     reader.readStartDocument();
     Assertions.assertEquals(BsonType.STRING, reader.readBsonType());
     Assertions.assertEquals("name", reader.currentFieldName());
@@ -72,11 +79,11 @@ public class BsonWriterInt {
 
   @Test
   public void testMultipleStringWriteActiveJ() throws Exception {
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new ByteBufferBobBsonBuffer(new byte[size]));
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new ByteBufferBobBsonBuffer(new byte[size]));
     ByteBufferBobBsonBuffer buffer = new ByteBufferBobBsonBuffer(new byte[2048]);
 
-    BsonWriter writer = new BsonWriter(buffer);
+    BsonWriter writer = new StackBsonWriter(buffer);
     writer.writeStartDocument();
     writer.writeString("name", "bob");
     writer.writeString("job", "programmer");
@@ -91,7 +98,7 @@ public class BsonWriterInt {
 
     Files.write(Paths.get("/tmp/data.bin"), bytes);
 
-    BsonReader reader = new BsonReader(new ByteBufferBobBsonBuffer(bytes));
+    BsonReader reader = new StackBsonReader(new ByteBufferBobBsonBuffer(bytes));
     reader.readStartDocument();
     Assertions.assertEquals(BsonType.STRING, reader.readBsonType());
     Assertions.assertEquals("name", reader.currentFieldName());

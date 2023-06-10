@@ -4,7 +4,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import org.bobstuff.bobbson.BsonReader;
+import org.bobstuff.bobbson.reader.BsonReader;
+import org.bobstuff.bobbson.reader.StackBsonReader;
 import org.bson.BsonBinaryWriter;
 import org.bson.io.BasicOutputBuffer;
 
@@ -40,6 +41,6 @@ public class MDBBsonWriter {
   }
 
   public static BsonReader reader(BsonBinaryWriter writer) {
-    return new BsonReader(ByteBuffer.wrap(data(writer)).order(ByteOrder.LITTLE_ENDIAN));
+    return new StackBsonReader(ByteBuffer.wrap(data(writer)).order(ByteOrder.LITTLE_ENDIAN));
   }
 }

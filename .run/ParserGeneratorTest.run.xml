@@ -22,6 +22,7 @@
     <DebugAllEnabled>false</DebugAllEnabled>
     <method v="2">
       <option name="Gradle.BeforeRunTask" enabled="true" tasks="clean" externalProjectPath="$PROJECT_DIR$/processor" vmOptions="" scriptParameters="" />
+      <option name="Gradle.BeforeRunTask" enabled="true" tasks="clean" externalProjectPath="$PROJECT_DIR$/processor" vmOptions="" scriptParameters="" />
     </method>
   </configuration>
 </component>

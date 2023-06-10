@@ -7,7 +7,7 @@ import com.karuslabs.elementary.junit.annotations.Case;
 import com.karuslabs.elementary.junit.annotations.Introspect;
 import java.util.Collections;
 import javax.lang.model.element.TypeElement;
-import org.bobstuff.bobbson.annotations.CompiledBson;
+import org.bobstuff.bobbson.annotations.GenerateBobBsonConverter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,7 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 public class ClasspathUtilsTest {
   @Test
   void find_annotation_doesnt_exist(Cases cases) {
-    var compileElement = Tools.elements().getTypeElement(CompiledBson.class.getName());
+    var compileElement = Tools.elements().getTypeElement(GenerateBobBsonConverter.class.getName());
     var compileType = Tools.types().getDeclaredType(compileElement);
     var sample = cases.one("first");
     var am = AnnotationUtils.findAnnotationMirror(sample, compileType, Tools.types());
@@ -39,6 +39,6 @@ public class ClasspathUtilsTest {
   }
 
   @Case("first")
-  @CompiledBson
+  @GenerateBobBsonConverter
   static class Sample {}
 }

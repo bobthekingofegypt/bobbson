@@ -3,12 +3,13 @@ package org.bobstuff.bobbson.activej;
 import io.activej.bytebuf.ByteBuf;
 import java.nio.charset.StandardCharsets;
 import org.bobstuff.bobbson.*;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.bobstuff.bobbson.buffer.BobBsonBuffer;
 
 public class ActiveJBufferData implements BobBsonBuffer {
   private ByteBuf buffer;
   private int start;
   public BobBsonByteRange byteRange;
+  public byte[] data;
 
   public ActiveJBufferData(byte[] data) {
     this(data, 0, data.length);
@@ -19,13 +20,20 @@ public class ActiveJBufferData implements BobBsonBuffer {
   }
 
   public ActiveJBufferData(byte[] data, int start, int tail) {
+    this.data = data;
     buffer = ByteBuf.wrap(data, start, tail);
-    this.byteRange = new BobBsonByteRange(buffer.array());
+    this.byteRange = new BobBsonByteRange(data);
   }
 
   public ActiveJBufferData(ByteBuf buffer) {
+    this.data = buffer.array();
     this.buffer = buffer;
-    this.byteRange = new BobBsonByteRange(buffer.array());
+    this.byteRange = new BobBsonByteRange(this.data);
+  }
+
+  public void process(byte[] data, int start, int tail) {
+    buffer = ByteBuf.wrap(data, start, tail);
+    byteRange.setData(data);
   }
 
   public ByteBuf getByteBuf() {
@@ -40,8 +48,17 @@ public class ActiveJBufferData implements BobBsonBuffer {
   }
 
   @Override
-  public ByteRangeComparitor getByteRangeComparitor() {
+  public ByteRangeComparator getByteRangeComparator() {
     return byteRange;
+  }
+
+  @Override
+  public byte[] toByteArray() {
+    var array = buffer.getArray();
+    if (array == null) {
+      throw new RuntimeException("Cant access backing array of BobBsonBuffer");
+    }
+    return array;
   }
 
   @Override
@@ -78,19 +95,18 @@ public class ActiveJBufferData implements BobBsonBuffer {
 
   @Override
   public int readUntil(byte value) {
-    byte[] bufferArray = buffer.array();
-    boolean checkNext = true;
     int i = buffer.head();
     int start = i;
     int total = 0;
-    while (checkNext) {
-      var currentByte = bufferArray[i++];
+    byte currentByte = -1;
+    while (currentByte != value) {
+      currentByte = data[i++];
       total += currentByte;
-      checkNext = currentByte != value;
     }
     buffer.head(i);
-    byteRange.set(start, i - start, total);
-    return i - start;
+    var end = i - start;
+    byteRange.set(start, end, total);
+    return end;
   }
 
   @Override
@@ -109,7 +125,7 @@ public class ActiveJBufferData implements BobBsonBuffer {
   public String getString(int size) {
     int start = buffer.head();
     buffer.head(start + size);
-    return new String(buffer.array(), start, size, StandardCharsets.UTF_8);
+    return new String(data, start, size, StandardCharsets.UTF_8);
   }
 
   @Override
@@ -123,8 +139,19 @@ public class ActiveJBufferData implements BobBsonBuffer {
   }
 
   @Override
-  public byte @Nullable [] getArray() {
-    return buffer.array();
+  public byte[] getArray() {
+    return data;
+  }
+
+  /**
+   * If the buffer allows direct access to its backing array. Call this method if you need to check
+   * before trying to access array.
+   *
+   * @return true if raw byte array access is possible
+   */
+  @Override
+  public boolean canAccessArray() {
+    return true;
   }
 
   @Override
@@ -173,7 +200,7 @@ public class ActiveJBufferData implements BobBsonBuffer {
   @Override
   @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
   public void writeString(String value) {
-    var buf = buffer.array();
+    var buf = data;
     var i = buffer.tail();
     int start = i;
     char high = '\u0800';

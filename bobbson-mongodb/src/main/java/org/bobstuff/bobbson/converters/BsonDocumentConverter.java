@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 import org.bobstuff.bobbson.BobBson;
 import org.bobstuff.bobbson.BobBsonConverter;
-import org.bobstuff.bobbson.BsonReader;
 import org.bobstuff.bobbson.BsonType;
+import org.bobstuff.bobbson.reader.BsonReader;
 import org.bobstuff.bobbson.writer.BsonWriter;
 import org.bson.*;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -48,7 +48,7 @@ public class BsonDocumentConverter implements BobBsonConverter<BsonDocument> {
 
   @Override
   @SuppressWarnings("PMD.AssignmentInOperand")
-  public @Nullable BsonDocument read(BsonReader bsonReader) {
+  public @Nullable BsonDocument readValue(BsonReader bsonReader, BsonType outerType) {
     List<BsonElement> keyValuePairs = new ArrayList<BsonElement>();
 
     bsonReader.readStartDocument();
@@ -78,28 +78,7 @@ public class BsonDocumentConverter implements BobBsonConverter<BsonDocument> {
   }
 
   @Override
-  public void write(
-      @NonNull BsonWriter bsonWriter, byte @Nullable [] key, @NonNull BsonDocument value) {
-    if (key == null) {
-      bsonWriter.writeStartDocument();
-    } else {
-      bsonWriter.writeStartDocument(key);
-    }
-    for (Map.Entry<String, BsonValue> entry : value.entrySet()) {
-      bsonWriter.writeName(entry.getKey());
-      var clazz = entry.getValue().getClass();
-      var converter = (BobBsonConverter) bobBson.tryFindConverter(clazz);
-      if (converter == null) {
-        throw new IllegalStateException(
-            String.format("No converter registered for %s", clazz.getSimpleName()));
-      }
-      converter.write(bsonWriter, (BsonValue) entry.getValue());
-    }
-    bsonWriter.writeEndDocument();
-  }
-
-  @Override
-  public void write(@NonNull BsonWriter bsonWriter, @NonNull BsonDocument value) {
+  public void writeValue(@NonNull BsonWriter bsonWriter, BsonDocument value) {
     bsonWriter.writeStartDocument();
     for (Map.Entry<String, BsonValue> entry : value.entrySet()) {
       bsonWriter.writeName(entry.getKey());

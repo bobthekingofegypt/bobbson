@@ -4,9 +4,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.bobstuff.bobbson.BobBsonBinary;
-import org.bobstuff.bobbson.BsonReader;
 import org.bobstuff.bobbson.BsonType;
+import org.bobstuff.bobbson.models.BobBsonBinary;
+import org.bobstuff.bobbson.reader.BsonReader;
+import org.bobstuff.bobbson.writer.BsonWriter;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -44,5 +45,15 @@ public class BobBsonBinaryConverterTest {
     var sut = new BobBsonBinaryBsonConverter();
 
     assertThrows(RuntimeException.class, () -> sut.read(reader));
+  }
+
+  @Test
+  public void testWriteNotImplemented() {
+    var writer = Mockito.mock(BsonWriter.class);
+    var sut = new BobBsonBinaryBsonConverter();
+
+    assertThrows(
+        UnsupportedOperationException.class,
+        () -> sut.write(writer, "test", new BobBsonBinary(new byte[10])));
   }
 }

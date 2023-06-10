@@ -1,10 +1,12 @@
 package org.bobstuff.bobbson.processor;
 
+import com.squareup.javapoet.ClassName;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
+import org.bobstuff.bobbson.annotations.BsonAttribute;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class AttributeResult {
@@ -13,16 +15,17 @@ public class AttributeResult {
 
   public static final int SINGLE_GENERIC_PARAMATER = 1;
   public static final int TWO_GENERIC_PARAMETERS = 2;
+  public static final String ARRAY_TEXT = "_array_";
   public final String name;
   public final ExecutableElement readMethod;
   public final ExecutableElement writeMethod;
-  public final VariableElement field;
   public final TypeMirror type;
   public final boolean list;
   public final boolean set;
   public final boolean map;
   public final @Nullable AnnotationMirror annotation;
   public final @Nullable AnnotationMirror converter;
+  public final @MonotonicNonNull AnnotationMirror writerOptions;
   public final @Nullable TypeMirror converterType;
   public final String converterFieldName;
   public final String param;
@@ -31,24 +34,24 @@ public class AttributeResult {
       String name,
       ExecutableElement readMethod,
       ExecutableElement writeMethod,
-      VariableElement field,
       TypeMirror type,
       boolean list,
       boolean set,
       boolean map,
       @Nullable AnnotationMirror annotation,
       @Nullable AnnotationMirror converter,
+      @Nullable AnnotationMirror writerOptions,
       @Nullable TypeMirror converterType) {
     this.name = name;
     this.readMethod = readMethod;
     this.writeMethod = writeMethod;
-    this.field = field;
     this.type = type;
     this.list = list;
     this.set = set;
     this.map = map;
     this.annotation = annotation;
     this.converter = converter;
+    this.writerOptions = writerOptions;
     this.converterType = converterType;
 
     String fieldName1 = null;
@@ -59,22 +62,45 @@ public class AttributeResult {
       var typeArguments = dclt.getTypeArguments();
       if (list) {
         if (typeArguments.size() == AttributeResult.SINGLE_GENERIC_PARAMATER) {
-          fieldName1 = CONVERTER_PRE + typeArguments.get(0).toString().replaceAll(ESCAPED_DOT, "_");
+          fieldName1 =
+              CONVERTER_PRE
+                  + typeArguments
+                      .get(0)
+                      .toString()
+                      .replaceAll(ESCAPED_DOT, "_")
+                      .replace("[]", ARRAY_TEXT);
           param1 = typeArguments.get(0).toString();
         }
       } else if (map) {
         if (typeArguments.size() == AttributeResult.TWO_GENERIC_PARAMETERS) {
-          fieldName1 = CONVERTER_PRE + typeArguments.get(1).toString().replaceAll(ESCAPED_DOT, "_");
+          fieldName1 =
+              CONVERTER_PRE
+                  + typeArguments
+                      .get(1)
+                      .toString()
+                      .replaceAll(ESCAPED_DOT, "_")
+                      .replace("[]", ARRAY_TEXT);
           param1 = typeArguments.get(1).toString();
         }
       } else if (set) {
         if (typeArguments.size() == AttributeResult.SINGLE_GENERIC_PARAMATER) {
-          fieldName1 = CONVERTER_PRE + typeArguments.get(0).toString().replaceAll(ESCAPED_DOT, "_");
+          fieldName1 =
+              CONVERTER_PRE
+                  + typeArguments
+                      .get(0)
+                      .toString()
+                      .replaceAll(ESCAPED_DOT, "_")
+                      .replace("[]", ARRAY_TEXT);
           param1 = typeArguments.get(0).toString();
         }
       }
     } else {
-      fieldName1 = CONVERTER_PRE + type.toString().replaceAll(ESCAPED_DOT, "_");
+      fieldName1 =
+          CONVERTER_PRE
+              + ClassName.get(type)
+                  .toString()
+                  .replaceAll(ESCAPED_DOT, "_")
+                  .replace("[]", ARRAY_TEXT);
       param1 = "";
     }
 
@@ -114,10 +140,6 @@ public class AttributeResult {
     return writeMethod;
   }
 
-  public VariableElement getField() {
-    return field;
-  }
-
   public boolean isMap() {
     return map;
   }
@@ -153,6 +175,10 @@ public class AttributeResult {
     return converterType;
   }
 
+  public boolean isPrimitive() {
+    return type.getKind().isPrimitive();
+  }
+
   public String getAliasName() {
     if (annotation == null) {
       return name;
@@ -160,16 +186,33 @@ public class AttributeResult {
 
     for (ExecutableElement ee : annotation.getElementValues().keySet()) {
       if (ee.toString().equals("value()")) {
-        return annotation.getElementValues().get(ee).getValue().toString();
+        var value = annotation.getElementValues().get(ee).getValue().toString();
+        if (!BsonAttribute.DEFAULT_NON_VALID_ALIAS.equals(value)) {
+          return annotation.getElementValues().get(ee).getValue().toString();
+        }
       }
     }
 
     return name;
   }
 
+  public boolean writerOptionWriteNull() {
+    if (writerOptions == null) {
+      return true;
+    }
+
+    for (ExecutableElement ee : writerOptions.getElementValues().keySet()) {
+      if (ee.toString().equals("writeNull()")) {
+        return (boolean) writerOptions.getElementValues().get(ee).getValue();
+      }
+    }
+
+    return true;
+  }
+
   public int getOrder() {
     if (annotation == null) {
-      return -1;
+      return Integer.MAX_VALUE;
     }
 
     for (ExecutableElement ee : annotation.getElementValues().keySet()) {
@@ -178,7 +221,7 @@ public class AttributeResult {
       }
     }
 
-    return -1;
+    return Integer.MAX_VALUE;
   }
 
   public boolean isList() {
@@ -199,8 +242,8 @@ public class AttributeResult {
         + readMethod
         + ", writeMethod="
         + writeMethod
-        + ", field="
-        + field
+        //        + ", field="
+        //        + field
         + ", type="
         + type
         + ", list="

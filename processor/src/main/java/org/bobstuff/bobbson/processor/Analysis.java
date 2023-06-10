@@ -13,7 +13,8 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import org.bobstuff.bobbson.annotations.BsonAttribute;
 import org.bobstuff.bobbson.annotations.BsonConverter;
-import org.bobstuff.bobbson.annotations.CompiledBson;
+import org.bobstuff.bobbson.annotations.BsonWriterOptions;
+import org.bobstuff.bobbson.annotations.GenerateBobBsonConverter;
 
 public class Analysis {
   private Types types;
@@ -25,19 +26,24 @@ public class Analysis {
   private DeclaredType attributeType;
   private TypeElement converterElement;
   private DeclaredType converterType;
+  private TypeElement writerOptionsElement;
+  private DeclaredType writerOptionsType;
 
   public Analysis(Types types, Elements elements, BobMessager bobMessager) {
     this.types = types;
     this.elements = elements;
     this.messager = bobMessager;
-    this.compileElement = elements.getTypeElement(CompiledBson.class.getName());
+    this.compileElement = elements.getTypeElement(GenerateBobBsonConverter.class.getName());
     this.compileType = types.getDeclaredType(compileElement);
     this.attributeElement = elements.getTypeElement(BsonAttribute.class.getName());
     this.attributeType = types.getDeclaredType(attributeElement);
     this.converterElement = elements.getTypeElement(BsonConverter.class.getName());
     this.converterType = types.getDeclaredType(converterElement);
+    this.writerOptionsElement = elements.getTypeElement(BsonWriterOptions.class.getName());
+    this.writerOptionsType = types.getDeclaredType(writerOptionsElement);
   }
 
+  @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
   public Map<String, AttributeResult> getAttributes(TypeElement typeElement) {
     if (typeElement == null) {
       return Collections.emptyMap();
@@ -54,7 +60,6 @@ public class Analysis {
           || modifiers.contains(Modifier.TRANSIENT))) {
         messager.debug("field type - " + field.asType());
         TypeMirror t = field.asType();
-        TypeMirror comparable = types.erasure(field.asType());
 
         boolean isList = false;
         boolean isSet = false;
@@ -95,10 +100,11 @@ public class Analysis {
 
         var annotation = findAnnotationMirror(field, attributeType, types);
         var converter = findAnnotationMirror(field, converterType, types);
+        var writerOptions = findAnnotationMirror(field, writerOptionsType, types);
         TypeMirror converterType = null;
         if (converter != null) {
           for (ExecutableElement ee : converter.getElementValues().keySet()) {
-            if (ee.toString().equals("target()")) {
+            if (ee.toString().equals("value()")) {
               messager.debug(converter.getElementValues().get(ee).getValue().toString());
               String clazz = converter.getElementValues().get(ee).getValue().toString();
 
@@ -111,7 +117,7 @@ public class Analysis {
               var m = ElementFilter.methodsIn(element.getEnclosedElements());
               for (ExecutableElement e : m) {
                 messager.debug(e.toString());
-                if (e.getSimpleName().toString().equals("read")) {
+                if (e.getSimpleName().toString().equals("readValue")) {
                   if (types.isAssignable(e.getReturnType(), field.asType())) {
                     messager.debug("matching return types");
                     converterType = type;
@@ -122,6 +128,19 @@ public class Analysis {
               }
             }
           }
+        }
+
+        var ignore = false;
+        if (annotation != null) {
+          for (ExecutableElement ee : annotation.getElementValues().keySet()) {
+            if (ee.toString().equals("ignore()")) {
+              ignore = (Boolean) annotation.getElementValues().get(ee).getValue();
+            }
+          }
+        }
+
+        if (ignore) {
+          continue;
         }
 
         if (getter == null || setter == null) {
@@ -136,15 +155,86 @@ public class Analysis {
                 field.getSimpleName().toString(),
                 getter,
                 setter,
-                field,
+                //                field,
                 field.asType(),
                 isList,
                 isSet,
                 isMap,
                 annotation,
                 converter,
+                writerOptions,
                 converterType));
       }
+    }
+
+    for (var method : methods) {
+      var annotation = findAnnotationMirror(method, attributeType, types);
+      var writerOptions = findAnnotationMirror(method, writerOptionsType, types);
+      var methodName = method.getSimpleName().toString();
+      if (annotation == null) {
+        // method doesn't have an annotation so ignore it for now
+        continue;
+      }
+
+      var propertyName = "";
+      if (methodName.startsWith("get") && methodName.length() > 3) {
+        String propertySection = methodName.substring(3);
+        if (methodName.length() == 4) {
+          propertyName = propertySection.toLowerCase(Locale.getDefault());
+        } else {
+          propertyName =
+              propertySection.toUpperCase(Locale.getDefault()).equals(propertySection)
+                  ? propertySection
+                  : Character.toLowerCase(propertySection.charAt(0)) + propertySection.substring(1);
+        }
+      } else if (methodName.startsWith("is") && methodName.length() > 2) {
+        String propertySection = methodName.substring(2);
+        if (methodName.length() == 3) {
+          propertyName = propertySection.toLowerCase(Locale.getDefault());
+        } else {
+          propertyName =
+              propertySection.toUpperCase(Locale.getDefault()).equals(propertySection)
+                  ? propertySection
+                  : Character.toLowerCase(propertySection.charAt(0)) + propertySection.substring(1);
+        }
+      } else {
+
+        continue;
+      }
+
+      var ignore = false;
+      for (ExecutableElement ee : annotation.getElementValues().keySet()) {
+        if (ee.toString().equals("ignore()")) {
+          ignore = (Boolean) annotation.getElementValues().get(ee).getValue();
+        }
+      }
+
+      if (ignore) {
+        continue;
+      }
+
+      var setter = findSetter(methods, propertyName, method.getReturnType());
+
+      if (setter == null) {
+        messager.debug("Field (" + propertyName + ") excluded due to missing setter");
+        continue;
+      }
+
+      results.put(
+          propertyName,
+          new AttributeResult(
+              propertyName,
+              method,
+              setter,
+              //                      null,
+              method.getReturnType(),
+              false,
+              false,
+              false,
+              annotation,
+              null,
+              writerOptions,
+              null));
     }
     return results;
   }

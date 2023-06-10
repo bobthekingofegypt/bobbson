@@ -1,9 +1,9 @@
 package org.bobstuff.bobbson;
 
 import java.util.Map;
-import org.bobstuff.bobbson.annotations.CompiledBson;
+import org.bobstuff.bobbson.annotations.GenerateBobBsonConverter;
 
-@CompiledBson
+@GenerateBobBsonConverter
 public class BasicObject {
   private String name;
   private int age;

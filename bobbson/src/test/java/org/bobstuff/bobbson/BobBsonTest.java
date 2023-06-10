@@ -1,7 +1,9 @@
 package org.bobstuff.bobbson;
 
 import java.net.URL;
-import org.bobstuff.bobbson.writer.BsonWriter;
+import org.bobstuff.bobbson.models.BobBsonBinary;
+import org.bobstuff.bobbson.reader.StackBsonReader;
+import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -80,7 +82,7 @@ public class BobBsonTest {
   public void testDeserialise() throws Exception {
     var converter = Mockito.mock(BobBsonConverter.class);
     var factory = Mockito.mock(BobBsonConverterFactory.class);
-    var reader = Mockito.mock(BsonReader.class);
+    var reader = Mockito.mock(StackBsonReader.class);
     Mockito.when(factory.tryCreate(Mockito.eq(URL.class), Mockito.any(BobBson.class)))
         .thenReturn(converter);
 
@@ -95,8 +97,9 @@ public class BobBsonTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void testDeserialiseNull() throws Exception {
-    var reader = Mockito.mock(BsonReader.class);
+    var reader = Mockito.mock(StackBsonReader.class);
 
     var sut = new BobBson();
 
@@ -104,10 +107,11 @@ public class BobBsonTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void testSerialise() throws Exception {
     var converter = Mockito.mock(BobBsonConverter.class);
     var factory = Mockito.mock(BobBsonConverterFactory.class);
-    var writer = Mockito.mock(BsonWriter.class);
+    var writer = Mockito.mock(StackBsonWriter.class);
     Mockito.when(factory.tryCreate(Mockito.eq(URL.class), Mockito.any(BobBson.class)))
         .thenReturn(converter);
 

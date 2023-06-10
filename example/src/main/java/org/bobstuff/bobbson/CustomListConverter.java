@@ -2,12 +2,13 @@ package org.bobstuff.bobbson;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.bobstuff.bobbson.reader.BsonReader;
 import org.bobstuff.bobbson.writer.BsonWriter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class CustomListConverter implements BobBsonConverter<List<String>> {
   @Override
-  public @Nullable List<String> read(BsonReader bsonReader) {
+  public @Nullable List<String> readValue(BsonReader bsonReader, BsonType type) {
     System.out.println("using a custom reader for a list");
     List<String> results = new ArrayList<>();
     bsonReader.readStartArray();
@@ -19,8 +20,8 @@ public class CustomListConverter implements BobBsonConverter<List<String>> {
   }
 
   @Override
-  public void write(BsonWriter bsonWriter, byte[] key, List<String> value) {
-    bsonWriter.writeStartArray(key);
+  public void writeValue(BsonWriter bsonWriter, List<String> value) {
+    bsonWriter.writeStartArray();
     var index = 0;
     for (var entry : value) {
       bsonWriter.writeString("" + index, entry);

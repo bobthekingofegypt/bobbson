@@ -2,7 +2,7 @@ package org.bobstuff.bobbson.activej;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import org.bobstuff.bobbson.BobBsonBuffer;
+import org.bobstuff.bobbson.buffer.BobBsonBuffer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -224,9 +224,9 @@ public abstract class BobBsonBufferTest {
 
     var result = readSut.readUntil((byte) 0);
 
-    var byteRange = readSut.getByteRangeComparitor();
+    var byteRange = readSut.getByteRangeComparator();
 
-    Assertions.assertEquals(test, byteRange.name());
+    Assertions.assertEquals(test, byteRange.value());
     Assertions.assertEquals(test.getBytes(StandardCharsets.UTF_8).length + 1, result);
   }
 

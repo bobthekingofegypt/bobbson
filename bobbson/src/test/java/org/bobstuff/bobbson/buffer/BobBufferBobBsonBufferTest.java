@@ -16,6 +16,11 @@ public class BobBufferBobBsonBufferTest extends BobBsonBufferTest {
   }
 
   @Test
+  public void testCanAccessArray() {
+    Assertions.assertTrue(writeSut.canAccessArray());
+  }
+
+  @Test
   public void testGetArray() {
     Assertions.assertNotNull(writeSut.getArray());
   }
@@ -23,6 +28,18 @@ public class BobBufferBobBsonBufferTest extends BobBsonBufferTest {
   @Test
   public void testGetRawBobBuffer() {
     Assertions.assertNotNull(((BobBufferBobBsonBuffer) readSut).getBobBuffer());
+  }
+
+  @Test
+  public void testProcess() {
+    byte[] data = new byte[100];
+    ByteBuffer comp = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN);
+    comp.putInt(48);
+
+    var sut = new BobBufferBobBsonBuffer(new byte[100], 0, 0);
+    sut.process(data, 0, data.length);
+
+    Assertions.assertEquals(48, sut.getInt());
   }
 
   @Test

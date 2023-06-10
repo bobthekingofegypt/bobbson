@@ -4,7 +4,14 @@ import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import org.bobstuff.bobbson.*;
+import org.bobstuff.bobbson.buffer.ByteBufferBobBsonBuffer;
+import org.bobstuff.bobbson.buffer.DynamicBobBsonBuffer;
+import org.bobstuff.bobbson.buffer.pool.BobBsonBufferPool;
+import org.bobstuff.bobbson.buffer.pool.NoopBobBsonBufferPool;
+import org.bobstuff.bobbson.reader.BsonReader;
+import org.bobstuff.bobbson.reader.StackBsonReader;
 import org.bobstuff.bobbson.writer.BsonWriter;
+import org.bobstuff.bobbson.writer.StackBsonWriter;
 import org.bson.BsonDocument;
 import org.bson.BsonJavaScriptWithScope;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -18,10 +25,11 @@ public class BsonJavaScriptWithScopeConverter implements BobBsonConverter<BsonJa
   }
 
   @Override
-  public @Nullable BsonJavaScriptWithScope read(BsonReader bsonReader) {
+  public @Nullable BsonJavaScriptWithScope readValue(BsonReader bsonReader, BsonType type) {
     var codeWithScope = bsonReader.readCodeWithScope();
     BsonReader reader =
-        new BsonReader(ByteBuffer.wrap(codeWithScope.getScope()).order(ByteOrder.LITTLE_ENDIAN));
+        new StackBsonReader(
+            ByteBuffer.wrap(codeWithScope.getScope()).order(ByteOrder.LITTLE_ENDIAN));
     BsonDocument document;
     try {
       document = bobBson.deserialise(BsonDocument.class, reader);
@@ -36,48 +44,14 @@ public class BsonJavaScriptWithScopeConverter implements BobBsonConverter<BsonJa
   }
 
   @Override
-  public void write(
-      @NonNull BsonWriter bsonWriter,
-      byte @Nullable [] key,
-      @NonNull BsonJavaScriptWithScope value) {
+  public void writeValue(@NonNull BsonWriter bsonWriter, BsonJavaScriptWithScope value) {
     var code = value.getCode();
     var scope = value.getScope();
 
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new ByteBufferBobBsonBuffer(new byte[size]));
+    BobBsonBufferPool pool =
+        new NoopBobBsonBufferPool((size) -> new ByteBufferBobBsonBuffer(new byte[size]));
     DynamicBobBsonBuffer buffer = new DynamicBobBsonBuffer(pool);
-    BsonWriter writer = new BsonWriter(buffer);
-
-    byte[] scopeBytes;
-
-    try {
-      bobBson.serialise(scope, BsonDocument.class, writer);
-
-      ByteArrayOutputStream os = new ByteArrayOutputStream();
-      buffer.pipe(os);
-      os.flush();
-      os.close();
-      scopeBytes = os.toByteArray();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-
-    if (key == null) {
-      bsonWriter.writeCodeWithScope(code, scopeBytes);
-    } else {
-      bsonWriter.writeCodeWithScope(key, code, scopeBytes);
-    }
-  }
-
-  @Override
-  public void write(@NonNull BsonWriter bsonWriter, @NonNull BsonJavaScriptWithScope value) {
-    var code = value.getCode();
-    var scope = value.getScope();
-
-    BufferDataPool pool =
-        new NoopBufferDataPool((size) -> new ByteBufferBobBsonBuffer(new byte[size]));
-    DynamicBobBsonBuffer buffer = new DynamicBobBsonBuffer(pool);
-    BsonWriter writer = new BsonWriter(buffer);
+    BsonWriter writer = new StackBsonWriter(buffer);
 
     byte[] scopeBytes;
 

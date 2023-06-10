@@ -1,0 +1,33 @@
+plugins {
+    id 'bobbson.java-conventions'
+    id 'java-library'
+    id 'maven-publish'
+}
+
+dependencies {
+    implementation project(':bobbson')
+    implementation project(':activej')
+    implementation group: 'io.activej', name: 'activej-bytebuf', version: '5.1'
+
+}
+
+jacocoTestReport {
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it,
+                    exclude: ['**/io/**', 'io.*', 'io/*'])
+        }))
+    }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = 'org.bobstuff.bobbson'
+            artifactId = 'activej'
+            version = '1.0'
+
+            from components.java
+        }
+    }
+}
