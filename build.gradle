@@ -2,6 +2,11 @@
 //    id 'bobbson.java-conventions'
 //}
 
+allprojects {
+    version = "0.9"
+    group = 'com.github.bobthekingofegypt.bobbson'
+}
+
 subprojects {
     apply plugin: 'java'
     apply plugin: 'maven-publish'
