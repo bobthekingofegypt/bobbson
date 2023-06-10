@@ -1,7 +1,8 @@
 rootProject.name = 'bobbson-parent'
 
 // production code projects
-include 'example', 'bobbson', 'experimental', 'bobbson-mongodb', 'processor', 'activej', 'integration-tests'
+include 'example', 'benchmarks', 'bobbson', 'experimental', 'bobbson-mongodb', 'processor', 'activej', 'integration-tests'
 
 // reporting utility projects
 include 'code-coverage-report'
+
