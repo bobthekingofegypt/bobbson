@@ -3,8 +3,12 @@
 //}
 
 allprojects {
-    version = "0.9"
-    group = 'com.github.bobthekingofegypt.bobbson'
+//    version = "0.9"
+//    if (hasProperty('version')) {
+//        // Accessing the value, throws if not present
+//        version = property('version')
+//    }
+    group = 'com.github.bobthekingofegypt'
 }
 
 subprojects {
