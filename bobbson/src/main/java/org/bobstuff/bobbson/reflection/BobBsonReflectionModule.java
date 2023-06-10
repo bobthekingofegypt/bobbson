@@ -13,6 +13,7 @@ public class BobBsonReflectionModule implements BobBsonConvertersModule {
 
   static {
     registeredFactories = new ArrayList<>();
+    registeredFactories.add(new EnumConverterFactory<>());
     registeredFactories.add(new CollectionConverterFactory<>());
     registeredFactories.add(new MapConverterFactory<>());
     registeredFactories.add(new ObjectConverterFactory<>());
