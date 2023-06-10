@@ -4,10 +4,9 @@
 
 allprojects {
     version = "0.9"
-//    if (hasProperty('version')) {
-//        // Accessing the value, throws if not present
-//        version = property('version')
-//    }
+    if (hasProperty('version')) {
+        version = property('version')
+    }
     group = 'com.github.bobthekingofegypt'
 }
 
