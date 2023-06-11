@@ -30,6 +30,10 @@ dependencies {
 }
 ```
 
+## Usage
+
+* [User Guide](docs/userguide.md)
+
 ## Performance
 
 Project contains a jmh benchmarks module.  Benchmarks can be run on your own machine by checking out the project and running:
