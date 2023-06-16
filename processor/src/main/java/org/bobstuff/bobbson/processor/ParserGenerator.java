@@ -497,6 +497,9 @@ public class ParserGenerator {
         .addParameter(BsonType.class, "type")
         .addParameter(int.class, "fieldsRead")
         .returns(type)
+        .beginControlFlow("if (type == $T" + END_OF_DOCUMENT_POST + ")", BsonType.class)
+        .addStatement("return result")
+        .endControlFlow()
         .addStatement("var range = reader.getFieldName()")
         .addCode(generateParserCode(structInfo))
         .beginControlFlow(
