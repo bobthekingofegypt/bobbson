@@ -23,6 +23,7 @@ import org.bobstuff.bobbson.writer.BsonWriter;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class ParserGenerator {
   public static final String CONVERTER_PRE = "converter_";
   public static final String ESCAPED_DOT = "\\.";
@@ -499,7 +500,7 @@ public class ParserGenerator {
         .returns(type)
         .beginControlFlow("if (type == $T" + END_OF_DOCUMENT_POST + ")", BsonType.class)
         .addStatement("reader.readEndDocument()")
-         .addStatement("return result")
+        .addStatement("return result")
         .endControlFlow()
         .addStatement("var range = reader.getFieldName()")
         .addCode(generateParserCode(structInfo))
@@ -508,7 +509,7 @@ public class ParserGenerator {
             BsonType.class)
         .addCode(generateParserCode(structInfo))
         .endControlFlow()
-         .addStatement("reader.readEndDocument()")
+        .addStatement("reader.readEndDocument()")
         .addStatement(RETURN_RESULT)
         .build();
   }
