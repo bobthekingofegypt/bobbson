@@ -413,6 +413,11 @@ public class ParserGenerator {
         block.add(generateParserCollectionCode(HashSet.class, attribute));
       } else if (attribute.isMap() && attribute.getConverterType() == null) {
         block.add(generateParserMapCode(attribute));
+      } else if (attribute.getConverterType() != null) {
+        block.addStatement(
+            "result.$N($N.read(reader))",
+            attribute.writeMethod.getSimpleName(),
+            attribute.getConverterName());
       } else if (attribute.isPrimitive()) {
         if (attribute.getDeclaredType().getKind() == TypeKind.INT) {
           block.addStatement(
@@ -443,15 +448,9 @@ public class ParserGenerator {
             attribute.writeMethod.getSimpleName(),
             StringBsonConverter.class);
       } else {
-        if (attribute.getConverterType() != null) {
-          block.addStatement(
-              "result.$N($N.read(reader))",
-              attribute.writeMethod.getSimpleName(),
-              attribute.getConverterName());
-        } else {
-          block.addStatement(
-              "result.$N($N().read(reader))", attribute.writeMethod.getSimpleName(), fieldName);
-        }
+
+        block.addStatement(
+            "result.$N($N().read(reader))", attribute.writeMethod.getSimpleName(), fieldName);
       }
     }
     block.nextControlFlow("else").addStatement("reader.skipValue()");

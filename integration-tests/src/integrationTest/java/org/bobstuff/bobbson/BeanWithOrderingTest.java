@@ -55,6 +55,6 @@ public class BeanWithOrderingTest {
     Assertions.assertEquals("fieldFive", fieldName.value());
     reader.readString();
     reader.readBsonType();
-    Assertions.assertEquals("fieldSixjjk", fieldName.value());
+    Assertions.assertEquals("fieldSix", fieldName.value());
   }
 }

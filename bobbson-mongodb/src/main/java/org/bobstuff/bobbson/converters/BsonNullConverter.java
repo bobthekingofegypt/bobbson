@@ -10,9 +10,14 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class BsonNullConverter implements BobBsonConverter<BsonNull> {
   @Override
-  public @Nullable BsonNull readValue(BsonReader bsonReader, BsonType type) {
+  public BsonNull read(BsonReader bsonReader) {
     bsonReader.readNull();
     return new BsonNull();
+  }
+
+  @Override
+  public @Nullable BsonNull readValue(BsonReader bsonReader, BsonType type) {
+    throw new UnsupportedOperationException("should never be called directly");
   }
 
   @Override
