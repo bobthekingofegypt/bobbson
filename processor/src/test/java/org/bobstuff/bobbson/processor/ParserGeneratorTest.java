@@ -423,7 +423,7 @@ public class ParserGeneratorTest {
         """
                     if (range.equalsArray(nameBytes, 417)) {
                       fieldsRead += 1;
-                      result.setName(org.bobstuff.bobbson.converters.StringBsonConverter.readString(reader));
+                      result.setName(converter_name.read(reader));
                     } else {
                       reader.skipValue();
                     }

@@ -136,7 +136,7 @@ public class InputStreamBobBsonBuffer implements BobBsonBuffer {
       bufferIndex = available;
       fillBuffer();
 
-      System.arraycopy(buffer, bufferIndex, bytes, 0, size - read);
+      System.arraycopy(buffer, bufferIndex, bytes, read, size - read);
       bufferIndex += size - read;
     } else {
       int retrieved = 0;

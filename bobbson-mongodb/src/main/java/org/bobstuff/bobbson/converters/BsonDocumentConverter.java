@@ -68,7 +68,8 @@ public class BsonDocumentConverter implements BobBsonConverter<BsonDocument> {
       }
       var value = converter.read(bsonReader);
       if (value == null) {
-        throw new IllegalStateException(String.format("Decoded BSONValue value is null"));
+        throw new IllegalStateException(
+            String.format("Decoded BSONValue value is null for field " + fieldName));
       }
       keyValuePairs.add(new BsonElement(fieldName, (BsonValue) value));
     }
