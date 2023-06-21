@@ -150,6 +150,7 @@ public class InputStreamBobBsonBufferTest {
 
     Assertions.assertEquals(0, input.getReadRemaining());
   }
+
   @Test
   public void testReadBytesRequiresRollButFitsBuffer() {
     byte[] data = new byte[2048 * 2];
@@ -157,10 +158,7 @@ public class InputStreamBobBsonBufferTest {
     var writer = new StackBsonWriter(buffer);
     writer.writeStartDocument();
     writer.writeLong("names", 23L);
-    writer.writeBinary(
-            "key1",
-            (byte) 2,
-            "value 12".getBytes(StandardCharsets.UTF_8));
+    writer.writeBinary("key1", (byte) 2, "value 12".getBytes(StandardCharsets.UTF_8));
     writer.writeEndDocument();
 
     var stream = new ByteArrayInputStream(buffer.toByteArray());
@@ -169,14 +167,11 @@ public class InputStreamBobBsonBufferTest {
     var reader = new StackBsonReader(input);
     reader.readStartDocument();
     reader.readBsonType();
-    Assertions.assertEquals(
-            23L,
-            reader.readInt64());
+    Assertions.assertEquals(23L, reader.readInt64());
 
     reader.readBsonType();
     Assertions.assertEquals(
-            "value 12",
-            new String(reader.readBinary().getData(), StandardCharsets.UTF_8));
+        "value 12", new String(reader.readBinary().getData(), StandardCharsets.UTF_8));
     reader.readEndDocument();
 
     Assertions.assertEquals(0, input.getReadRemaining());
