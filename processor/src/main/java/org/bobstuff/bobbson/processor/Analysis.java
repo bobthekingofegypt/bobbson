@@ -5,6 +5,8 @@ import static org.bobstuff.bobbson.processor.BeanUtils.findGetter;
 import static org.bobstuff.bobbson.processor.BeanUtils.findSetter;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
@@ -43,8 +45,24 @@ public class Analysis {
     this.writerOptionsType = types.getDeclaredType(writerOptionsElement);
   }
 
+  private Map<String, AttributeResult> getFieldAttributes(List<VariableElement> fields) {
+    var results = new HashMap<String, AttributeResult>();
+
+    for (var field : fields) {
+      var modifiers = field.getModifiers();
+      if ((modifiers.contains(Modifier.NATIVE)
+              || modifiers.contains(Modifier.STATIC)
+              || modifiers.contains(Modifier.TRANSIENT))) {
+        continue;
+      }
+
+    }
+
+    return results;
+  }
+
   @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
-  public Map<String, AttributeResult> getAttributes(TypeElement typeElement) {
+  public Map<String, AttributeResult> getAttributes(TypeElement typeElement, boolean isRecord) {
     if (typeElement == null) {
       return Collections.emptyMap();
     }
@@ -54,10 +72,10 @@ public class Analysis {
     var fields = ElementFilter.fieldsIn(typeElement.getEnclosedElements());
 
     for (var field : fields) {
-      var modifiers = field.getModifiers();
-      if (!(modifiers.contains(Modifier.NATIVE)
-          || modifiers.contains(Modifier.STATIC)
-          || modifiers.contains(Modifier.TRANSIENT))) {
+//      var modifiers = field.getModifiers();
+//      if (!(modifiers.contains(Modifier.NATIVE)
+//          || modifiers.contains(Modifier.STATIC)
+//          || modifiers.contains(Modifier.TRANSIENT))) {
         messager.debug("field type - " + field.asType());
         TypeMirror t = field.asType();
 
@@ -110,7 +128,6 @@ public class Analysis {
 
               TypeElement element = elements.getTypeElement(clazz);
               DeclaredType type = types.getDeclaredType(element);
-
               messager.debug("found converter");
               messager.debug(clazz);
               messager.debug(type.toString());
@@ -143,7 +160,8 @@ public class Analysis {
           continue;
         }
 
-        if (getter == null || setter == null) {
+        if (getter == null || (setter == null && !isRecord)) {
+          // TODO write better error message
           messager.debug(
               "Field (" + field.getSimpleName() + ") excluded due to missing getter or setter");
           continue;
@@ -215,7 +233,7 @@ public class Analysis {
 
       var setter = findSetter(methods, propertyName, method.getReturnType());
 
-      if (setter == null) {
+      if (setter == null && !isRecord) {
         messager.debug("Field (" + propertyName + ") excluded due to missing setter");
         continue;
       }
@@ -239,6 +257,88 @@ public class Analysis {
     return results;
   }
 
+  public Map<String, AttributeResult> getRecordAttributes(TypeElement el) {
+    var recordComponents = el.getRecordComponents();
+
+    var fields = ElementFilter.fieldsIn(el.getEnclosedElements());
+//    var recordMap = recordComponents.stream().collect(Collectors.toMap(RecordComponentElement::getSimpleName, Function.identity()));
+    var fieldsMap = fields.stream().collect(Collectors.toMap(VariableElement::getSimpleName, Function.identity()));
+
+    var results = new LinkedHashMap<String, AttributeResult>();
+    for (var recordComponent : recordComponents) {
+      var field = fieldsMap.get(recordComponent.getSimpleName());
+      if (field == null) {
+        throw new UnsupportedOperationException("cant have missing params on record");
+      }
+      messager.debug("field type - " + field.asType());
+
+      // collection identification etc
+      var annotation = findAnnotationMirror(field, attributeType, types);
+      var converter = findAnnotationMirror(field, converterType, types);
+      var writerOptions = findAnnotationMirror(field, writerOptionsType, types);
+      TypeMirror converterType = null;
+      if (converter != null) {
+        for (ExecutableElement ee : converter.getElementValues().keySet()) {
+          if (ee.toString().equals("value()")) {
+            messager.debug(converter.getElementValues().get(ee).getValue().toString());
+            String clazz = converter.getElementValues().get(ee).getValue().toString();
+
+            TypeElement element = elements.getTypeElement(clazz);
+            DeclaredType type = types.getDeclaredType(element);
+            messager.debug("found converter");
+            messager.debug(clazz);
+            messager.debug(type.toString());
+            var m = ElementFilter.methodsIn(element.getEnclosedElements());
+            for (ExecutableElement e : m) {
+              messager.debug(e.toString());
+              if (e.getSimpleName().toString().equals("readValue")) {
+                if (types.isAssignable(e.getReturnType(), field.asType())) {
+                  messager.debug("matching return types");
+                  converterType = type;
+                } else {
+                  messager.debug("need to look at this more");
+                }
+              }
+            }
+          }
+        }
+      }
+
+        var ignore = false;
+        if (annotation != null) {
+          for (ExecutableElement ee : annotation.getElementValues().keySet()) {
+            if (ee.toString().equals("ignore()")) {
+              ignore = (Boolean) annotation.getElementValues().get(ee).getValue();
+            }
+          }
+        }
+
+        if (ignore) {
+          continue;
+        }
+
+        var getter = recordComponent.getAccessor();
+
+        results.put(
+                field.getSimpleName().toString(),
+                new AttributeResult(
+                        field.getSimpleName().toString(),
+                        getter,
+                        null,
+                        //                field,
+                        field.asType(),
+                        false,
+                        false,
+                        false,
+                        annotation,
+                        converter,
+                        writerOptions,
+                        converterType));
+    }
+
+    return results;
+  }
+
   public Map<String, StructInfo> analyse(Set<? extends Element> compiledBsonInstances) {
     Map<String, StructInfo> structs = new HashMap<>();
 
@@ -248,6 +348,10 @@ public class Analysis {
       if (!(el instanceof TypeElement)) {
         continue;
       }
+
+      var isRecord = el.getKind() == ElementKind.RECORD;
+      messager.debug("Element is a record: " + isRecord);
+
 
       var element = (TypeElement) el;
       var annotation = findAnnotationMirror(element, compileType, types);
@@ -260,12 +364,18 @@ public class Analysis {
       messager.debug("Binary name: " + elements.getBinaryName(element));
       messager.debug("Qualified name: " + elements.getName(element.getQualifiedName()));
 
-      var attributes = getAttributes(element);
+      Map<String, AttributeResult> attributes;
+      if (isRecord) {
+        attributes = getRecordAttributes((TypeElement) el);
+      } else {
+        attributes = getAttributes(element, isRecord);
+      }
 
       messager.debug("Found attributes: ");
       for (var attribute : attributes.entrySet()) {
         messager.debug(attribute.getKey() + ": " + attribute.getValue());
       }
+
 
       StructInfo structInfo =
           new StructInfo(

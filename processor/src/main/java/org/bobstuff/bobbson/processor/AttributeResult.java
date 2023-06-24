@@ -18,7 +18,7 @@ public class AttributeResult {
   public static final String ARRAY_TEXT = "_array_";
   public final String name;
   public final ExecutableElement readMethod;
-  public final ExecutableElement writeMethod;
+  public final @Nullable ExecutableElement writeMethod;
   public final TypeMirror type;
   public final boolean list;
   public final boolean set;
@@ -33,7 +33,7 @@ public class AttributeResult {
   public AttributeResult(
       String name,
       ExecutableElement readMethod,
-      ExecutableElement writeMethod,
+      @Nullable ExecutableElement writeMethod,
       TypeMirror type,
       boolean list,
       boolean set,
@@ -137,7 +137,12 @@ public class AttributeResult {
   }
 
   public ExecutableElement getWriteMethod() {
-    return writeMethod;
+    // TODO fix this later, just stopping checkerframework
+    var wm = writeMethod;
+    if (wm == null) {
+      throw new IllegalStateException("no write method here");
+    }
+    return wm;
   }
 
   public boolean isMap() {

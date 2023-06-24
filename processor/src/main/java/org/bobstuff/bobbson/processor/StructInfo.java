@@ -34,6 +34,10 @@ public class StructInfo {
         element.getTypeParameters() != null && !element.getTypeParameters().isEmpty();
   }
 
+  public boolean isRecord() {
+    return element.getKind() == ElementKind.RECORD;
+  }
+
   public String getClassName() {
     int dotIndex = binaryName.lastIndexOf('.');
     return binaryName.substring(dotIndex + 1);

@@ -28,7 +28,7 @@ public class CompiledBsonAnnotationProcessor extends AbstractProcessor {
         new BobMessager(
             processingEnv.getMessager(),
             Boolean.parseBoolean(
-                processingEnv.getOptions().getOrDefault("bobbsonprocessorlogging", "false")));
+                processingEnv.getOptions().getOrDefault("bobbsonprocessorlogging", "true")));
     types = processingEnv.getTypeUtils();
     elements = processingEnv.getElementUtils();
   }
