@@ -138,16 +138,7 @@ public class ParserGeneratorTest {
     var code = sut.generateParserMapCode(sampleCollectionsStructInfo.attributes.get("map"));
     assertEquals(
         """
-    {
-     var map = new java.util.HashMap<java.lang.String, java.lang.String>();
-     reader.readStartDocument();
-     var type_i = org.bobstuff.bobbson.BsonType.NOT_SET;
-     while ((type_i = reader.readBsonType()) != org.bobstuff.bobbson.BsonType.END_OF_DOCUMENT) {
-       map.put(reader.currentFieldName(), converter_java_lang_String().read(reader));
-     }
-     reader.readEndDocument();
-     result.setMap(map);
-   }
+   result.setMap(org.bobstuff.bobbson.converters.CollectionConverters.readMap(reader, type, converter_java_lang_String()));
                          """,
         code.toString());
   }
@@ -157,16 +148,7 @@ public class ParserGeneratorTest {
     var code = sut.generateParserMapCode(sampleCollectionsStructInfo.attributes.get("mapDouble"));
     assertEquals(
         """
-    {
-     var map = new java.util.HashMap<java.lang.String, java.lang.Double>();
-     reader.readStartDocument();
-     var type_i = org.bobstuff.bobbson.BsonType.NOT_SET;
-     while ((type_i = reader.readBsonType()) != org.bobstuff.bobbson.BsonType.END_OF_DOCUMENT) {
-       map.put(reader.currentFieldName(), converter_java_lang_Double().read(reader));
-     }
-     reader.readEndDocument();
-     result.setMapDouble(map);
-   }
+   result.setMapDouble(org.bobstuff.bobbson.converters.CollectionConverters.readMap(reader, type, converter_java_lang_Double()));
                          """,
         code.toString());
   }
@@ -178,16 +160,7 @@ public class ParserGeneratorTest {
             ArrayList.class, sampleCollectionsStructInfo.attributes.get("list"));
     assertEquals(
         """
-      {
-       var list = new java.util.ArrayList<java.lang.String>(4);
-       reader.readStartArray();
-       var type_i = org.bobstuff.bobbson.BsonType.NOT_SET;
-       while ((type_i = reader.readBsonType()) != org.bobstuff.bobbson.BsonType.END_OF_DOCUMENT) {
-         list.add(converter_java_lang_String().read(reader));
-       }
-       reader.readEndArray();
-       result.setList(list);
-     }
+      result.setList(org.bobstuff.bobbson.converters.CollectionConverters.readList(reader, type, converter_java_lang_String()));
                          """,
         code.toString());
   }
@@ -199,16 +172,7 @@ public class ParserGeneratorTest {
             ArrayList.class, sampleCollectionsStructInfo.attributes.get("listDouble"));
     assertEquals(
         """
-    {
-     var list = new java.util.ArrayList<java.lang.Double>(4);
-     reader.readStartArray();
-     var type_i = org.bobstuff.bobbson.BsonType.NOT_SET;
-     while ((type_i = reader.readBsonType()) != org.bobstuff.bobbson.BsonType.END_OF_DOCUMENT) {
-       list.add(converter_java_lang_Double().read(reader));
-     }
-     reader.readEndArray();
-     result.setListDouble(list);
-   }
+    result.setListDouble(org.bobstuff.bobbson.converters.CollectionConverters.readList(reader, type, converter_java_lang_Double()));
                          """,
         code.toString());
   }
@@ -220,16 +184,7 @@ public class ParserGeneratorTest {
             HashSet.class, sampleCollectionsStructInfo.attributes.get("set"));
     assertEquals(
         """
-    {
-     var list = new java.util.HashSet<java.lang.String>(4);
-     reader.readStartArray();
-     var type_i = org.bobstuff.bobbson.BsonType.NOT_SET;
-     while ((type_i = reader.readBsonType()) != org.bobstuff.bobbson.BsonType.END_OF_DOCUMENT) {
-       list.add(converter_java_lang_String().read(reader));
-     }
-     reader.readEndArray();
-     result.setSet(list);
-   }
+    result.setSet(org.bobstuff.bobbson.converters.CollectionConverters.readList(reader, type, converter_java_lang_String()));
                          """,
         code.toString());
   }
@@ -241,16 +196,7 @@ public class ParserGeneratorTest {
             HashSet.class, sampleCollectionsStructInfo.attributes.get("setDouble"));
     assertEquals(
         """
-    {
-     var list = new java.util.HashSet<java.lang.Double>(4);
-     reader.readStartArray();
-     var type_i = org.bobstuff.bobbson.BsonType.NOT_SET;
-     while ((type_i = reader.readBsonType()) != org.bobstuff.bobbson.BsonType.END_OF_DOCUMENT) {
-       list.add(converter_java_lang_Double().read(reader));
-     }
-     reader.readEndArray();
-     result.setSetDouble(list);
-   }
+    result.setSetDouble(org.bobstuff.bobbson.converters.CollectionConverters.readList(reader, type, converter_java_lang_Double()));
                          """,
         code.toString());
   }
@@ -332,87 +278,33 @@ public class ParserGeneratorTest {
     var code = sut.generateParserCode(sampleCollectionsStructInfo);
     assertEquals(
         """
-                    if (range.equalsArray(setDoubleBytes, 935)) {
-                      fieldsRead += 1;
-                       {
-                        var list = new java.util.HashSet<java.lang.Double>(4);
-                        reader.readStartArray();
-                        var type_i = org.bobstuff.bobbson.BsonType.NOT_SET;
-                        while ((type_i = reader.readBsonType()) != org.bobstuff.bobbson.BsonType.END_OF_DOCUMENT) {
-                          list.add(converter_java_lang_Double().read(reader));
-                        }
-                        reader.readEndArray();
-                        result.setSetDouble(list);
-                      }
-                    } else if (range.equalsArray(setBytes, 332)) {
-                      fieldsRead += 1;
-                       {
-                        var list = new java.util.HashSet<java.lang.String>(4);
-                        reader.readStartArray();
-                        var type_i = org.bobstuff.bobbson.BsonType.NOT_SET;
-                        while ((type_i = reader.readBsonType()) != org.bobstuff.bobbson.BsonType.END_OF_DOCUMENT) {
-                          list.add(converter_java_lang_String().read(reader));
-                        }
-                        reader.readEndArray();
-                        result.setSet(list);
-                      }
-                    } else if (range.equalsArray(mapDoubleBytes, 921)) {
-                      fieldsRead += 1;
-                       {
-                        var map = new java.util.HashMap<java.lang.String, java.lang.Double>();
-                        reader.readStartDocument();
-                        var type_i = org.bobstuff.bobbson.BsonType.NOT_SET;
-                        while ((type_i = reader.readBsonType()) != org.bobstuff.bobbson.BsonType.END_OF_DOCUMENT) {
-                          map.put(reader.currentFieldName(), converter_java_lang_Double().read(reader));
-                        }
-                        reader.readEndDocument();
-                        result.setMapDouble(map);
-                      }
-                    } else if (range.equalsArray(listBytes, 444)) {
-                      fieldsRead += 1;
-                       {
-                        var list = new java.util.ArrayList<java.lang.String>(4);
-                        reader.readStartArray();
-                        var type_i = org.bobstuff.bobbson.BsonType.NOT_SET;
-                        while ((type_i = reader.readBsonType()) != org.bobstuff.bobbson.BsonType.END_OF_DOCUMENT) {
-                          list.add(converter_java_lang_String().read(reader));
-                        }
-                        reader.readEndArray();
-                        result.setList(list);
-                      }
-                    } else if (range.equalsArray(listDoubleBytes, 1047)) {
-                      fieldsRead += 1;
-                       {
-                        var list = new java.util.ArrayList<java.lang.Double>(4);
-                        reader.readStartArray();
-                        var type_i = org.bobstuff.bobbson.BsonType.NOT_SET;
-                        while ((type_i = reader.readBsonType()) != org.bobstuff.bobbson.BsonType.END_OF_DOCUMENT) {
-                          list.add(converter_java_lang_Double().read(reader));
-                        }
-                        reader.readEndArray();
-                        result.setListDouble(list);
-                      }
-                    } else if (range.equalsArray(mapBytes, 318)) {
-                      fieldsRead += 1;
-                       {
-                        var map = new java.util.HashMap<java.lang.String, java.lang.String>();
-                        reader.readStartDocument();
-                        var type_i = org.bobstuff.bobbson.BsonType.NOT_SET;
-                        while ((type_i = reader.readBsonType()) != org.bobstuff.bobbson.BsonType.END_OF_DOCUMENT) {
-                          map.put(reader.currentFieldName(), converter_java_lang_String().read(reader));
-                        }
-                        reader.readEndDocument();
-                        result.setMap(map);
-                      }
-                    } else {
-                      reader.skipValue();
-                    }
-                    if (fieldsRead == EXPECTED_FIELD_COUNT) {
-                      reader.skipContext();
-                      reader.readEndDocument();
-                      return result;
-                    }
-                            """,
+       if (range.equalsArray(setDoubleBytes, 935)) {
+         fieldsRead += 1;
+         result.setSetDouble(org.bobstuff.bobbson.converters.CollectionConverters.readSet(reader, type, converter_java_lang_Double()));
+       } else if (range.equalsArray(setBytes, 332)) {
+         fieldsRead += 1;
+         result.setSet(org.bobstuff.bobbson.converters.CollectionConverters.readSet(reader, type, converter_java_lang_String()));
+       } else if (range.equalsArray(mapDoubleBytes, 921)) {
+         fieldsRead += 1;
+         result.setMapDouble(org.bobstuff.bobbson.converters.CollectionConverters.readMap(reader, type, converter_java_lang_Double()));
+       } else if (range.equalsArray(listBytes, 444)) {
+         fieldsRead += 1;
+         result.setList(org.bobstuff.bobbson.converters.CollectionConverters.readList(reader, type, converter_java_lang_String()));
+       } else if (range.equalsArray(listDoubleBytes, 1047)) {
+         fieldsRead += 1;
+         result.setListDouble(org.bobstuff.bobbson.converters.CollectionConverters.readList(reader, type, converter_java_lang_Double()));
+       } else if (range.equalsArray(mapBytes, 318)) {
+         fieldsRead += 1;
+         result.setMap(org.bobstuff.bobbson.converters.CollectionConverters.readMap(reader, type, converter_java_lang_String()));
+       } else {
+         reader.skipValue();
+       }
+       if (fieldsRead == EXPECTED_FIELD_COUNT) {
+         reader.skipContext();
+         reader.readEndDocument();
+         return result;
+       }
+                                """,
         code.toString());
   }
 
@@ -523,14 +415,9 @@ public class ParserGeneratorTest {
     var result = sut.generateWriterMapCode(sampleCollectionsStructInfo.attributes.get("map"));
     assertEquals(
         """
-      {
-       writer.writeStartDocument(mapBytes);
-       for (var e : obj.getMap().entrySet()) {
-         converter_java_lang_String().write(writer, e.getKey(), e.getValue());
-       }
-       writer.writeEndDocument();
-     }
-                         """,
+            writer.writeName(mapBytes);
+            org.bobstuff.bobbson.converters.CollectionConverters.writeMap(writer, obj.getMap(), converter_java_lang_String());
+                                       """,
         result.toString());
   }
 
@@ -539,13 +426,8 @@ public class ParserGeneratorTest {
     var result = sut.generateWriterMapCode(sampleCollectionsStructInfo.attributes.get("mapDouble"));
     assertEquals(
         """
-        {
-         writer.writeStartDocument(mapDoubleBytes);
-         for (var e : obj.getMapDouble().entrySet()) {
-           converter_java_lang_Double().write(writer, e.getKey(), e.getValue());
-         }
-         writer.writeEndDocument();
-       }
+        writer.writeName(mapDoubleBytes);
+        org.bobstuff.bobbson.converters.CollectionConverters.writeMap(writer, obj.getMapDouble(), converter_java_lang_Double());
                          """,
         result.toString());
   }
@@ -556,15 +438,9 @@ public class ParserGeneratorTest {
         sut.generateWriterCollectionCode(sampleCollectionsStructInfo.attributes.get("list"));
     assertEquals(
         """
-                        {
-                         writer.writeStartArray(listBytes);
-                         var col = obj.getList();
-                         for (var i = 0; i < col.size(); i += 1) {
-                           converter_java_lang_String().write(writer, col.get(i));
-                         }
-                         writer.writeEndArray();
-                       }
-                                           """,
+            writer.writeName(listBytes);
+            org.bobstuff.bobbson.converters.CollectionConverters.writeList(writer, obj.getList(), converter_java_lang_String());
+                                               """,
         result.toString());
   }
 
@@ -574,14 +450,8 @@ public class ParserGeneratorTest {
         sut.generateWriterCollectionCode(sampleCollectionsStructInfo.attributes.get("listDouble"));
     assertEquals(
         """
-                          {
-                           writer.writeStartArray(listDoubleBytes);
-                           var col = obj.getListDouble();
-                           for (var i = 0; i < col.size(); i += 1) {
-                             converter_java_lang_Double().write(writer, col.get(i));
-                           }
-                           writer.writeEndArray();
-                         }
+        writer.writeName(listDoubleBytes);
+        org.bobstuff.bobbson.converters.CollectionConverters.writeList(writer, obj.getListDouble(), converter_java_lang_Double());
                                            """,
         result.toString());
   }
@@ -592,15 +462,9 @@ public class ParserGeneratorTest {
         sut.generateWriterCollectionCode(sampleCollectionsStructInfo.attributes.get("set"));
     assertEquals(
         """
-                        {
-                         writer.writeStartArray(setBytes);
-                         var col = obj.getSet();
-                         for (var i = 0; i < col.size(); i += 1) {
-                           converter_java_lang_String().write(writer, col.get(i));
-                         }
-                         writer.writeEndArray();
-                       }
-                                           """,
+            writer.writeName(setBytes);
+            org.bobstuff.bobbson.converters.CollectionConverters.writeList(writer, obj.getSet(), converter_java_lang_String());
+                                               """,
         result.toString());
   }
 
@@ -610,14 +474,8 @@ public class ParserGeneratorTest {
         sut.generateWriterCollectionCode(sampleCollectionsStructInfo.attributes.get("setDouble"));
     assertEquals(
         """
-                    {
-                     writer.writeStartArray(setDoubleBytes);
-                     var col = obj.getSetDouble();
-                     for (var i = 0; i < col.size(); i += 1) {
-                       converter_java_lang_Double().write(writer, col.get(i));
-                     }
-                     writer.writeEndArray();
-                   }
+        writer.writeName(setDoubleBytes);
+        org.bobstuff.bobbson.converters.CollectionConverters.writeList(writer, obj.getSetDouble(), converter_java_lang_Double());
                                                """,
         result.toString());
   }
