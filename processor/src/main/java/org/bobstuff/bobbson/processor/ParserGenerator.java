@@ -16,6 +16,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import org.bobstuff.bobbson.*;
+import org.bobstuff.bobbson.converters.CollectionConverters;
 import org.bobstuff.bobbson.converters.PrimitiveConverters;
 import org.bobstuff.bobbson.converters.StringBsonConverter;
 import org.bobstuff.bobbson.reader.BsonReader;
@@ -137,40 +138,35 @@ public class ParserGenerator {
 
   protected CodeBlock generateWriterCollectionCode(AttributeResult attribute) {
     return CodeBlock.builder()
-        .beginControlFlow("")
-        .addStatement("writer.writeStartArray($NBytes)", attribute.getName())
-        .addStatement("var col = obj.$N()", attribute.readMethod.getSimpleName())
-        .beginControlFlow(
-            "for (var i = 0; i < col.size(); i += 1)", attribute.readMethod.getSimpleName())
-        .addStatement("$N().write(writer, col.get(i))", attribute.getConverterFieldName())
-        .endControlFlow()
-        .addStatement("writer.writeEndArray()")
-        .endControlFlow()
+        //        .beginControlFlow("")
+        .addStatement("writer.writeName($NBytes)", attribute.getName())
+        .addStatement(
+            "$T.writeList(writer, obj.$N(), $N())",
+            CollectionConverters.class,
+            attribute.readMethod.getSimpleName(),
+            attribute.getConverterFieldName())
         .build();
   }
 
-  protected CodeBlock generateWriterCollectionIteratorCode(AttributeResult attribute) {
+  protected CodeBlock generateWriterSetCode(AttributeResult attribute) {
     return CodeBlock.builder()
-        .beginControlFlow("")
-        .addStatement("writer.writeStartArray($NBytes)", attribute.getName())
-        .beginControlFlow("for (var e : obj.$N())", attribute.readMethod.getSimpleName())
-        .addStatement("$N().write(writer, e)", attribute.getConverterFieldName())
-        .endControlFlow()
-        .addStatement("writer.writeEndArray()")
-        .endControlFlow()
+        .addStatement("writer.writeName($NBytes)", attribute.getName())
+        .addStatement(
+            "$T.writeSet(writer, obj.$N(), $N())",
+            CollectionConverters.class,
+            attribute.readMethod.getSimpleName(),
+            attribute.getConverterFieldName())
         .build();
   }
 
   protected CodeBlock generateWriterMapCode(AttributeResult attribute) {
     return CodeBlock.builder()
-        .beginControlFlow("")
-        .addStatement("writer.writeStartDocument($NBytes)", attribute.getName())
-        .beginControlFlow("for (var e : obj.$N().entrySet())", attribute.readMethod.getSimpleName())
+        .addStatement("writer.writeName($NBytes)", attribute.getName())
         .addStatement(
-            "$N().write(writer, e.getKey(), e.getValue())", attribute.getConverterFieldName())
-        .endControlFlow()
-        .addStatement("writer.writeEndDocument()")
-        .endControlFlow()
+            "$T.writeMap(writer, obj.$N(), $N())",
+            CollectionConverters.class,
+            attribute.readMethod.getSimpleName(),
+            attribute.getConverterFieldName())
         .build();
   }
 
@@ -204,7 +200,7 @@ public class ParserGenerator {
       if ((attribute.isList()) && attribute.getConverterType() == null) {
         block.add(generateWriterCollectionCode(attribute));
       } else if ((attribute.isSet()) && attribute.getConverterType() == null) {
-        block.add(generateWriterCollectionIteratorCode(attribute));
+        block.add(generateWriterSetCode(attribute));
       } else if (attribute.isPrimitive()) {
         if (attribute.getDeclaredType().getKind() == TypeKind.INT) {
           block.addStatement(
@@ -255,40 +251,33 @@ public class ParserGenerator {
     return block.build();
   }
 
+  protected CodeBlock generateParserSetCode(Class<?> clazz, AttributeResult attribute) {
+    return CodeBlock.builder()
+        .addStatement(
+            "result.$N($T.readSet(reader, type, $N()))",
+            attribute.writeMethod.getSimpleName(),
+            CollectionConverters.class,
+            attribute.getConverterFieldName())
+        .build();
+  }
+
   protected CodeBlock generateParserCollectionCode(Class<?> clazz, AttributeResult attribute) {
     return CodeBlock.builder()
-        .beginControlFlow("")
-        .addStatement("var list = new $T<$N>(4)", clazz, attribute.getParam())
-        .addStatement("reader.readStartArray()")
-        .addStatement("var type_i = $T.NOT_SET", BsonType.class)
-        .beginControlFlow(
-            "while ((type_i = reader.readBsonType()) != $T" + END_OF_DOCUMENT_POST + ")",
-            BsonType.class)
-        .addStatement("list.add($N().read(reader))", attribute.getConverterFieldName())
-        .endControlFlow()
-        .addStatement("reader.readEndArray()")
-        .addStatement("result.$N(list)", attribute.writeMethod.getSimpleName())
-        .endControlFlow()
+        .addStatement(
+            "result.$N($T.readList(reader, type, $N()))",
+            attribute.writeMethod.getSimpleName(),
+            CollectionConverters.class,
+            attribute.getConverterFieldName())
         .build();
   }
 
   protected CodeBlock generateParserMapCode(AttributeResult attribute) {
     return CodeBlock.builder()
-        .beginControlFlow("")
         .addStatement(
-            "var map = new $T<$T, $N>()", HashMap.class, String.class, attribute.getParam())
-        .addStatement("reader.readStartDocument()")
-        .addStatement("var type_i = $T.NOT_SET", BsonType.class)
-        .beginControlFlow(
-            "while ((type_i = reader.readBsonType()) != $T" + END_OF_DOCUMENT_POST + ")",
-            BsonType.class)
-        .addStatement(
-            "map.put(reader.currentFieldName(), $N().read(reader))",
+            "result.$N($T.readMap(reader, type, $N()))",
+            attribute.writeMethod.getSimpleName(),
+            CollectionConverters.class,
             attribute.getConverterFieldName())
-        .endControlFlow()
-        .addStatement("reader.readEndDocument()")
-        .addStatement("result.$N(map)", attribute.writeMethod.getSimpleName())
-        .endControlFlow()
         .build();
   }
 
@@ -327,7 +316,7 @@ public class ParserGenerator {
       if (attribute.isList() && attribute.getConverterType() == null) {
         block.add(generateParserCollectionCode(ArrayList.class, attribute));
       } else if (attribute.isSet() && attribute.getConverterType() == null) {
-        block.add(generateParserCollectionCode(HashSet.class, attribute));
+        block.add(generateParserSetCode(HashSet.class, attribute));
       } else if (attribute.isMap() && attribute.getConverterType() == null) {
         block.add(generateParserMapCode(attribute));
       } else if (attribute.isPrimitive()) {
@@ -410,7 +399,7 @@ public class ParserGenerator {
       if (attribute.isList() && attribute.getConverterType() == null) {
         block.add(generateParserCollectionCode(ArrayList.class, attribute));
       } else if (attribute.isSet() && attribute.getConverterType() == null) {
-        block.add(generateParserCollectionCode(HashSet.class, attribute));
+        block.add(generateParserSetCode(HashSet.class, attribute));
       } else if (attribute.isMap() && attribute.getConverterType() == null) {
         block.add(generateParserMapCode(attribute));
       } else if (attribute.getConverterType() != null) {
@@ -454,8 +443,6 @@ public class ParserGenerator {
       }
     }
     block.nextControlFlow("else").addStatement("reader.skipValue()");
-    //
-    // block.nextControlFlow("else").addStatement("System.out.println(range.name())").addStatement("reader.skipValue()");
     block.endControlFlow();
 
     block
@@ -465,11 +452,6 @@ public class ParserGenerator {
         .addStatement(RETURN_RESULT)
         .endControlFlow();
 
-    //    block.beginControlFlow(
-    //        "if (!readAllValues && $L)", structInfo.getAttributeReadAllBooleanLogic());
-    //    block.addStatement("reader.skipContext()");
-    //    block.addStatement("break");
-    //    block.endControlFlow();
     return block.build();
   }
 
@@ -488,8 +470,6 @@ public class ParserGenerator {
 
   protected MethodSpec generateReadSlowMethod(StructInfo structInfo, Types types) {
     var type = TypeName.get(structInfo.element.asType());
-    ClassName model = ClassName.get(structInfo.element);
-
     return MethodSpec.methodBuilder("readSlow")
         .addModifiers(Modifier.PRIVATE)
         .addParameter(BsonReader.class, "reader")
@@ -515,19 +495,11 @@ public class ParserGenerator {
 
   protected MethodSpec generateReadMethod(StructInfo structInfo, Types types) {
     var type = TypeName.get(structInfo.element.asType());
-    ClassName model = ClassName.get(structInfo.element);
-
     return MethodSpec.methodBuilder("readValue")
-        //        .addAnnotation(Nullable.class)
         .addModifiers(Modifier.PUBLIC)
         .addParameter(BsonReader.class, "reader")
         .addParameter(BsonType.class, "outerType")
         .returns(type)
-        //        .beginControlFlow("if (reader.getCurrentBsonType() == BsonType.NULL)",
-        // BsonType.class)
-        //        .addStatement("reader.readNull()")
-        //        .addStatement("return null")
-        //        .endControlFlow()
         .addStatement("var fieldsRead = 0", type, type)
         .addStatement("$T result = new $T()", type, type)
         .addStatement("reader.readStartDocument()")
@@ -536,12 +508,6 @@ public class ParserGenerator {
         .beginControlFlow("if (type != $T.END_OF_DOCUMENT)", BsonType.class)
         .addStatement("reader.skipContext()")
         .endControlFlow()
-        //        .addCode(generateParserPreamble(structInfo, types))
-        //        .beginControlFlow(
-        //            "while ((type = reader.readBsonType()) != $T" + END_OF_DOCUMENT_POST + ")",
-        //            BsonType.class)
-        //        .addCode(generateParserCode(structInfo))
-        //        .endControlFlow()
         .addStatement("reader.readEndDocument()")
         .addStatement(RETURN_RESULT)
         .build();
@@ -549,30 +515,11 @@ public class ParserGenerator {
 
   protected MethodSpec generateWriteMethodWithKey(
       StructInfo structInfo, TypeName model, Types types) {
-
-    TypeName arrayTypeName = ArrayTypeName.of(byte.class);
-    //    TypeName annotatedTypeName =
-    //        arrayTypeName.annotated(AnnotationSpec.builder(Nullable.class).build());
-
     return MethodSpec.methodBuilder("writeValue")
         .addModifiers(Modifier.PUBLIC)
         .addParameter(BsonWriter.class, "writer")
-        //        .addParameter(ParameterSpec.builder(arrayTypeName, "key").build())
-        //        .addParameter(byte[].class, "key")
         .addParameter(model, "obj")
-        //        .beginControlFlow("if (obj == null)")
-        //        .beginControlFlow("if (key == null)")
-        //        .addStatement("throw new $T(\"key and object cannot be null\")",
-        // RuntimeException.class)
-        //        .endControlFlow()
-        //        .addStatement("writer.writeNull(key)")
-        //        .addStatement("return")
-        //        .endControlFlow()
-        //        .beginControlFlow("if (key != null)")
         .addStatement("writer.writeStartDocument()")
-        //        .nextControlFlow("else")
-        //        .addStatement("writer.writeStartDocument()")
-        //        .endControlFlow()
         .addCode(generateWriterCode(structInfo))
         .addStatement("writer.writeEndDocument()")
         .build();
