@@ -28,7 +28,7 @@ public class ObjectConverterFactory<@Nullable T>
       return null;
     }
 
-    // lets try to instantiate the class so we get an exception straight await if we can't
+    // lets try to instantiate the class so we get an exception straight away if we can't
     clazz.getConstructor().newInstance();
 
     var beanFields = ReflectionTools.parseBeanFields(clazz, bobBson);

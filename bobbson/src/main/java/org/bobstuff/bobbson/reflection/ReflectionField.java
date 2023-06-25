@@ -27,10 +27,11 @@ public class ReflectionField<Model, Field> {
   private final String alias;
   private final String fieldName;
   private final Type type;
-  private final transient BiConsumer<Model, Field> biConsumerSetter;
+  private final transient @Nullable BiConsumer<Model, Field> biConsumerSetter;
   private final transient Function<Model, Field> getterFunction;
   private final transient @Nullable BobBsonConverter<Field> converter;
   private boolean writeNull = true;
+  private int index;
 
   @SuppressWarnings("unchecked")
   public ReflectionField(
@@ -39,9 +40,33 @@ public class ReflectionField<Model, Field> {
       @Nullable BsonAttribute bsonAttribute,
       @Nullable BsonWriterOptions bsonWriterOptions,
       @Nullable BsonConverter customConverter,
-      BiConsumer<Model, Field> biConsumerSetter,
+      @Nullable BiConsumer<Model, Field> biConsumerSetter,
       Function<Model, Field> getterFunction,
       BobBson bobBson) {
+    this(
+        0,
+        fieldName,
+        type,
+        bsonAttribute,
+        bsonWriterOptions,
+        customConverter,
+        biConsumerSetter,
+        getterFunction,
+        bobBson);
+  }
+
+  @SuppressWarnings("unchecked")
+  public ReflectionField(
+      int index,
+      String fieldName,
+      Type type,
+      @Nullable BsonAttribute bsonAttribute,
+      @Nullable BsonWriterOptions bsonWriterOptions,
+      @Nullable BsonConverter customConverter,
+      @Nullable BiConsumer<Model, Field> biConsumerSetter,
+      Function<Model, Field> getterFunction,
+      BobBson bobBson) {
+    this.index = index;
     this.biConsumerSetter = biConsumerSetter;
     this.getterFunction = getterFunction;
     this.fieldName = fieldName;
@@ -83,6 +108,10 @@ public class ReflectionField<Model, Field> {
     }
   }
 
+  public int getIndex() {
+    return index;
+  }
+
   public String getName() {
     return fieldName;
   }
@@ -107,7 +136,7 @@ public class ReflectionField<Model, Field> {
     return (Class<?>) type;
   }
 
-  public BiConsumer<Model, Field> getBiConsumerSetter() {
+  public @Nullable BiConsumer<Model, Field> getBiConsumerSetter() {
     return biConsumerSetter;
   }
 

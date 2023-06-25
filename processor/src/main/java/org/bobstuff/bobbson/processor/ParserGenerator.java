@@ -24,7 +24,7 @@ import org.bobstuff.bobbson.writer.BsonWriter;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "dereference.of.nullable"})
 public class ParserGenerator {
   public static final String CONVERTER_PRE = "converter_";
   public static final String ESCAPED_DOT = "\\.";
@@ -52,7 +52,6 @@ public class ParserGenerator {
   }
 
   protected static class LookupData {
-    //    public Map<AttributeResult, ConverterTypeWrapper> converterLookups = new HashMap<>();
     public Map<String, MethodSpec> lookupMethods = new HashMap<>();
     public List<FieldSpec> fields = new ArrayList<>();
   }
@@ -173,15 +172,7 @@ public class ParserGenerator {
   public CodeBlock generateWriterCode(StructInfo structInfo) {
     CodeBlock.Builder block = CodeBlock.builder();
 
-    Map<String, AttributeResult> result =
-        structInfo.attributes.entrySet().stream()
-            .sorted(Comparator.comparingInt(a -> a.getValue().getOrder()))
-            .collect(
-                Collectors.toMap(
-                    Map.Entry::getKey,
-                    Map.Entry::getValue,
-                    (oldValue, newValue) -> oldValue,
-                    LinkedHashMap::new));
+    Map<String, AttributeResult> result = structInfo.attributesByOrder();
 
     for (var entry : result.entrySet()) {
       var attribute = entry.getValue();
@@ -261,11 +252,42 @@ public class ParserGenerator {
         .build();
   }
 
+  protected CodeBlock generateRecordParserSetCode(Class<?> clazz, AttributeResult attribute) {
+    return CodeBlock.builder()
+        .addStatement(
+            "_$N = $T.readSet(reader, type, $N())",
+            attribute.getName(),
+            CollectionConverters.class,
+            attribute.getConverterFieldName())
+        .build();
+  }
+
   protected CodeBlock generateParserCollectionCode(Class<?> clazz, AttributeResult attribute) {
     return CodeBlock.builder()
         .addStatement(
             "result.$N($T.readList(reader, type, $N()))",
             attribute.writeMethod.getSimpleName(),
+            CollectionConverters.class,
+            attribute.getConverterFieldName())
+        .build();
+  }
+
+  protected CodeBlock generateRecordParserCollectionCode(
+      Class<?> clazz, AttributeResult attribute) {
+    return CodeBlock.builder()
+        .addStatement(
+            "_$N = $T.readList(reader, type, $N())",
+            attribute.getName(),
+            CollectionConverters.class,
+            attribute.getConverterFieldName())
+        .build();
+  }
+
+  protected CodeBlock generateRecordParserMapCode(AttributeResult attribute) {
+    return CodeBlock.builder()
+        .addStatement(
+            "_$N = $T.readMap(reader, type, $N())",
+            attribute.getName(),
             CollectionConverters.class,
             attribute.getConverterFieldName())
         .build();
@@ -493,6 +515,153 @@ public class ParserGenerator {
         .build();
   }
 
+  private CodeBlock generateLocalVariables(StructInfo structInfo) {
+    CodeBlock.Builder block = CodeBlock.builder();
+
+    if (structInfo.attributes.size() == 0) {
+      return block.build();
+    }
+
+    var orderedAttributes = structInfo.attributesByOrder();
+
+    for (var entry : orderedAttributes.entrySet()) {
+      var key = entry.getKey();
+      var value = entry.getValue();
+
+      if (value.isPrimitive()) {
+        block.addStatement("$T _$N = $N", value.getType(), key, primitiveDefault(value));
+      } else {
+        block.addStatement("$T _$N = null", value.getType(), key);
+      }
+    }
+
+    return block.build();
+  }
+
+  private String primitiveDefault(AttributeResult attribute) {
+    var kind = attribute.getDeclaredType().getKind();
+    if (kind == TypeKind.INT
+        || kind == TypeKind.DOUBLE
+        || kind == TypeKind.LONG
+        || kind == TypeKind.FLOAT
+        || kind == TypeKind.BYTE) {
+      return "0";
+    }
+
+    throw new UnsupportedOperationException("primitive kind " + kind + " is not currently handled");
+  }
+
+  protected CodeBlock generateRecordParserCode(StructInfo structInfo) {
+    CodeBlock.Builder block = CodeBlock.builder();
+
+    if (structInfo.attributes.size() == 0) {
+      return block.build();
+    }
+
+    var attributes = structInfo.attributesByOrder();
+
+    var first = true;
+    for (var entry : attributes.entrySet()) {
+      var attribute = entry.getValue();
+      var attributeName = entry.getKey();
+      String fieldName = attribute.getConverterFieldName();
+
+      if (fieldName == null) {
+        throw new RuntimeException("broken fieldName is null");
+      }
+
+      int hash = HashUtils.generateHash(attribute.getAliasName());
+
+      if (first) {
+        block.beginControlFlow("if (range.equalsArray($NBytes, $L))", attributeName, hash);
+        first = false;
+      } else {
+        block.nextControlFlow("else if (range.equalsArray($NBytes, $L))", attributeName, hash);
+      }
+
+      block.addStatement("fieldsRead += 1");
+
+      if (attribute.isList() && attribute.getConverterType() == null) {
+        block.add(generateRecordParserCollectionCode(ArrayList.class, attribute));
+      } else if (attribute.isSet() && attribute.getConverterType() == null) {
+        block.add(generateRecordParserSetCode(HashSet.class, attribute));
+      } else if (attribute.isMap() && attribute.getConverterType() == null) {
+        block.add(generateRecordParserMapCode(attribute));
+      } else if (attribute.getConverterType() != null) {
+        block.addStatement(
+            "_$N = $N.read(reader)", attribute.getName(), attribute.getConverterName());
+      } else if (attribute.isPrimitive()) {
+        if (attribute.getDeclaredType().getKind() == TypeKind.INT) {
+          block.addStatement(
+              "_$N = $T.parseInteger(reader)", attribute.getName(), PrimitiveConverters.class);
+        } else if (attribute.getDeclaredType().getKind() == TypeKind.DOUBLE) {
+          block.addStatement(
+              "_$N = $T.parseDouble(reader)", attribute.getName(), PrimitiveConverters.class);
+        } else if (attribute.getDeclaredType().getKind() == TypeKind.LONG) {
+          block.addStatement(
+              "_$N = $T.parseLong(reader)", attribute.getName(), PrimitiveConverters.class);
+        } else if (attribute.getDeclaredType().getKind() == TypeKind.BOOLEAN) {
+          block.addStatement(
+              "_$N = $T.parseBoolean(reader)", attribute.getName(), PrimitiveConverters.class);
+        } else {
+          throw new RuntimeException("Attempting to read unknown primitive type " + attribute);
+        }
+      } else if (ClassName.get(attribute.getType()).toString().equals("java.lang.String")) {
+        block.addStatement(
+            "_$N = $T.readString(reader)", attribute.getName(), StringBsonConverter.class);
+      } else {
+
+        block.addStatement("_$N = $N().read(reader)", attribute.getName(), fieldName);
+      }
+    }
+    block.nextControlFlow("else").addStatement("reader.skipValue()");
+    block.endControlFlow();
+
+    block
+        .beginControlFlow("if (fieldsRead == EXPECTED_FIELD_COUNT)")
+        .addStatement("reader.skipContext()")
+        .addStatement("reader.readEndDocument()")
+        .add(generateReturnConstructor(structInfo))
+        .endControlFlow();
+
+    return block.build();
+  }
+
+  protected MethodSpec generateReadRecordMethod(StructInfo structInfo, Types types) {
+    var type = TypeName.get(structInfo.element.asType());
+    return MethodSpec.methodBuilder("readValue")
+        .addModifiers(Modifier.PUBLIC)
+        .addParameter(BsonReader.class, "reader")
+        .addParameter(BsonType.class, "type")
+        .returns(type)
+        .addCode(generateLocalVariables(structInfo))
+        .addStatement("var fieldsRead = 0")
+        .addStatement("reader.readStartDocument()")
+        .addStatement("var range = reader.getFieldName()")
+        .beginControlFlow(
+            "while ((type = reader.readBsonType()) != $T" + END_OF_DOCUMENT_POST + ")",
+            BsonType.class)
+        .addCode(generateRecordParserCode(structInfo))
+        .endControlFlow()
+        .addStatement("reader.readEndDocument()")
+        .addCode(generateReturnConstructor(structInfo))
+        .build();
+  }
+
+  private CodeBlock generateReturnConstructor(StructInfo structInfo) {
+    var codeBlock = CodeBlock.builder();
+    var type = TypeName.get(structInfo.element.asType());
+
+    var args =
+        structInfo.attributes.values().stream()
+            .map(attribute -> "_" + attribute.getName())
+            .collect(Collectors.joining(","));
+
+    codeBlock.addStatement("return new $T($N)", type, args);
+
+    return codeBlock.build();
+  }
+
   protected MethodSpec generateReadMethod(StructInfo structInfo, Types types) {
     var type = TypeName.get(structInfo.element.asType());
     return MethodSpec.methodBuilder("readValue")
@@ -533,13 +702,17 @@ public class ParserGenerator {
             .collect(toList());
     TypeName type = TypeName.get(structInfo.element.asType());
     ClassName model = ClassName.get(structInfo.element);
-    MethodSpec readMethod = generateReadMethod(structInfo, types);
+    messager.debug("!!!!! " + structInfo.isRecord());
+    MethodSpec readMethod =
+        structInfo.isRecord()
+            ? generateReadRecordMethod(structInfo, types)
+            : generateReadMethod(structInfo, types);
     var writeMethodWithKey = generateWriteMethodWithKey(structInfo, type, types);
 
     var keyByteArrays = generateKeyByteArrays(structInfo);
     var lookupData = generateConverterLookupMethods(structInfo, types);
 
-    TypeSpec innerStruct =
+    TypeSpec.Builder innerStructBuilder =
         TypeSpec.classBuilder("_" + structInfo.getClassName() + "_BobBsonConverter")
             .addTypeVariables(typevars)
             .addAnnotation(
@@ -552,7 +725,6 @@ public class ParserGenerator {
                 FieldSpec.builder(
                         int.class, "EXPECTED_FIELD_COUNT", Modifier.PRIVATE, Modifier.STATIC)
                     .initializer(String.valueOf(structInfo.attributes.size()))
-                    //                    .initializer(String.valueOf(100000))
                     .build())
             .addFields(lookupData.fields)
             .addFields(keyByteArrays)
@@ -567,10 +739,14 @@ public class ParserGenerator {
                     .addParameter(BobBson.class, "bobBson")
                     .addStatement("this.bobBson = bobBson")
                     .build())
-            .addMethod(generateReadSlowMethod(structInfo, types))
+            //            .addMethod(generateReadSlowMethod(structInfo, types))
             .addMethod(readMethod)
-            .addMethod(writeMethodWithKey)
-            .build();
+            .addMethod(writeMethodWithKey);
+
+    if (!structInfo.isRecord()) {
+      innerStructBuilder.addMethod(generateReadSlowMethod(structInfo, types));
+    }
+    var innerStruct = innerStructBuilder.build();
 
     TypeSpec struct =
         TypeSpec.classBuilder("_" + structInfo.getClassName() + "_BobBsonConverterRegister")

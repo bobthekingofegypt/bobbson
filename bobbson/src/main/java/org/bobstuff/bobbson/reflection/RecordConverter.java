@@ -1,31 +1,37 @@
 package org.bobstuff.bobbson.reflection;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.ParameterizedType;
+import java.util.Arrays;
 import java.util.List;
-import org.bobstuff.bobbson.*;
+import java.util.stream.Stream;
+import org.bobstuff.bobbson.BobBson;
+import org.bobstuff.bobbson.BobBsonConverter;
+import org.bobstuff.bobbson.BsonType;
 import org.bobstuff.bobbson.buffer.BobBsonBuffer;
 import org.bobstuff.bobbson.reader.BsonReader;
 import org.bobstuff.bobbson.writer.BsonWriter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * ObjectConverter handles reflection based read/write of objects with no specific registered
+ * RecordConverter handles reflection based read/write of records with no specific registered
  * converters.
  */
-public class ObjectConverter<@Nullable T> implements BobBsonConverter<T> {
+public class RecordConverter<@Nullable T> implements BobBsonConverter<T> {
   private final BobBson bobBson;
   private final List<ReflectionField> fields;
   private final Class<?> instanceClazz;
 
   /**
-   * Construct a new object converter. Object converter will ask bobBson instance for converters for
+   * Construct a new record converter. Record converter will ask bobBson instance for converters for
    * each field of the bean as required to read/write its values.
    *
    * @param bobBson instance to query for field converters
    * @param instanceClazz type of class to be read/writen
    * @param fields list of fields on the bean
    */
-  public ObjectConverter(BobBson bobBson, Class<?> instanceClazz, List<ReflectionField> fields) {
+  public RecordConverter(BobBson bobBson, Class<?> instanceClazz, List<ReflectionField> fields) {
     this.bobBson = bobBson;
     this.fields = fields;
     this.instanceClazz = instanceClazz;
@@ -52,19 +58,24 @@ public class ObjectConverter<@Nullable T> implements BobBsonConverter<T> {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "assignment"})
   public @Nullable T readValue(BsonReader bsonReader, BsonType type) {
-    T instance = null;
-    try {
-      instance = (T) instanceClazz.getConstructor().newInstance();
-    } catch (InvocationTargetException
-        | InstantiationException
-        | IllegalAccessException
-        | NoSuchMethodException e) {
-      throw new RuntimeException("failed to initialise instance " + instanceClazz, e);
-    }
-
     bsonReader.readStartDocument();
+
+    // TODO should probably move this to the factory
+    var args = new Object[fields.size()];
+    var i = 0;
+    for (var field : fields) {
+      if (!(field.getType() instanceof ParameterizedType) && field.getClazz().isPrimitive()) {
+        if (field.getClazz() == boolean.class) {
+          args[i++] = false;
+        } else {
+          args[i++] = 0;
+        }
+      } else {
+        i++;
+      }
+    }
 
     BobBsonBuffer.ByteRangeComparator nameComparator = bsonReader.getFieldName();
     while (bsonReader.readBsonType() != BsonType.END_OF_DOCUMENT) {
@@ -83,11 +94,8 @@ public class ObjectConverter<@Nullable T> implements BobBsonConverter<T> {
             throw new IllegalStateException("broken because no converter for type");
           }
 
-          var setter = field.getBiConsumerSetter();
-          if (setter == null) {
-            throw new IllegalStateException("setter cannot be null in object converter");
-          }
-          setter.accept(instance, converter.read(bsonReader));
+          args[field.getIndex()] = converter.read(bsonReader);
+          //          field.getBiConsumerSetter().accept(instance, converter.read(bsonReader));
           found = true;
           break;
         }
@@ -98,6 +106,21 @@ public class ObjectConverter<@Nullable T> implements BobBsonConverter<T> {
     }
 
     bsonReader.readEndDocument();
+
+    T instance = null;
+
+    List<?> componentTypes =
+        Stream.of(instanceClazz.getRecordComponents()).map(rc -> rc.getType()).toList();
+
+    for (Constructor<?> c : instanceClazz.getDeclaredConstructors())
+      if (Arrays.asList(c.getParameterTypes()).equals(componentTypes)) {
+
+        try {
+          instance = (T) c.newInstance(args);
+        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+          throw new RuntimeException("failed to initialise instance " + instanceClazz, e);
+        }
+      }
 
     return instance;
   }

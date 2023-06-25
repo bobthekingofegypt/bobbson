@@ -5,7 +5,6 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
-import org.bobstuff.bobbson.annotations.BsonAttribute;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -18,49 +17,40 @@ public class AttributeResult {
   public static final String ARRAY_TEXT = "_array_";
   public final String name;
   public final ExecutableElement readMethod;
-  public final ExecutableElement writeMethod;
+  public final @Nullable ExecutableElement writeMethod;
   public final TypeMirror type;
-  public final boolean list;
-  public final boolean set;
-  public final boolean map;
-  public final @Nullable AnnotationMirror annotation;
-  public final @Nullable AnnotationMirror converter;
-  public final @MonotonicNonNull AnnotationMirror writerOptions;
-  public final @Nullable TypeMirror converterType;
+  public final FieldType fieldType;
+  public final AttributeAnnotation attributeAnnotation;
+  public final @Nullable ConverterAnnotation converterAnnotation;
+  public final @MonotonicNonNull AnnotationMirror writerOptionsAnnotation;
   public final String converterFieldName;
   public final String param;
 
   public AttributeResult(
       String name,
       ExecutableElement readMethod,
-      ExecutableElement writeMethod,
+      @Nullable ExecutableElement writeMethod,
       TypeMirror type,
-      boolean list,
-      boolean set,
-      boolean map,
-      @Nullable AnnotationMirror annotation,
-      @Nullable AnnotationMirror converter,
-      @Nullable AnnotationMirror writerOptions,
-      @Nullable TypeMirror converterType) {
+      FieldType fieldType,
+      AttributeAnnotation attributeAnnotation,
+      @Nullable ConverterAnnotation converterAnnotation,
+      @Nullable AnnotationMirror writerOptionsAnnotation) {
     this.name = name;
     this.readMethod = readMethod;
     this.writeMethod = writeMethod;
     this.type = type;
-    this.list = list;
-    this.set = set;
-    this.map = map;
-    this.annotation = annotation;
-    this.converter = converter;
-    this.writerOptions = writerOptions;
-    this.converterType = converterType;
+    this.fieldType = fieldType;
+    this.attributeAnnotation = attributeAnnotation;
+    this.converterAnnotation = converterAnnotation;
+    this.writerOptionsAnnotation = writerOptionsAnnotation;
 
     String fieldName1 = null;
     String param1 = null;
 
-    if (list || map || set) {
+    if (fieldType == FieldType.LIST || fieldType == FieldType.MAP || fieldType == FieldType.SET) {
       var dclt = (DeclaredType) type;
       var typeArguments = dclt.getTypeArguments();
-      if (list) {
+      if (fieldType == FieldType.LIST) {
         if (typeArguments.size() == AttributeResult.SINGLE_GENERIC_PARAMATER) {
           fieldName1 =
               CONVERTER_PRE
@@ -71,7 +61,7 @@ public class AttributeResult {
                       .replace("[]", ARRAY_TEXT);
           param1 = typeArguments.get(0).toString();
         }
-      } else if (map) {
+      } else if (fieldType == FieldType.MAP) {
         if (typeArguments.size() == AttributeResult.TWO_GENERIC_PARAMETERS) {
           fieldName1 =
               CONVERTER_PRE
@@ -82,7 +72,7 @@ public class AttributeResult {
                       .replace("[]", ARRAY_TEXT);
           param1 = typeArguments.get(1).toString();
         }
-      } else if (set) {
+      } else if (fieldType == FieldType.SET) {
         if (typeArguments.size() == AttributeResult.SINGLE_GENERIC_PARAMATER) {
           fieldName1 =
               CONVERTER_PRE
@@ -109,7 +99,7 @@ public class AttributeResult {
     }
 
     this.param = param1;
-    if (converter != null) {
+    if (converterAnnotation != null) {
       this.converterFieldName = CONVERTER_PRE + name;
     } else {
       this.converterFieldName = fieldName1;
@@ -137,11 +127,16 @@ public class AttributeResult {
   }
 
   public ExecutableElement getWriteMethod() {
-    return writeMethod;
+    // TODO fix this later, just stopping checkerframework
+    var wm = writeMethod;
+    if (wm == null) {
+      throw new IllegalStateException("no write method here");
+    }
+    return wm;
   }
 
   public boolean isMap() {
-    return map;
+    return fieldType == FieldType.MAP;
   }
 
   public TypeMirror getType() {
@@ -149,12 +144,12 @@ public class AttributeResult {
   }
 
   public TypeMirror getDeclaredType() {
-    if ((isList() || isSet()) && converterType == null) {
+    if ((isList() || isSet()) && converterAnnotation == null) {
       DeclaredType dclt = (DeclaredType) type;
       if (dclt.getTypeArguments().size() == SINGLE_GENERIC_PARAMATER) {
         return dclt.getTypeArguments().get(0);
       }
-    } else if (isMap() && converterType == null) {
+    } else if (isMap() && converterAnnotation == null) {
       DeclaredType dclt = (DeclaredType) type;
       if (dclt.getTypeArguments().size() == TWO_GENERIC_PARAMETERS) {
         return dclt.getTypeArguments().get(1);
@@ -163,16 +158,8 @@ public class AttributeResult {
     return getType();
   }
 
-  public @Nullable AnnotationMirror getAnnotation() {
-    return annotation;
-  }
-
-  public @Nullable AnnotationMirror getConverter() {
-    return converter;
-  }
-
   public @Nullable TypeMirror getConverterType() {
-    return converterType;
+    return converterAnnotation == null ? null : converterAnnotation.getType();
   }
 
   public boolean isPrimitive() {
@@ -180,30 +167,17 @@ public class AttributeResult {
   }
 
   public String getAliasName() {
-    if (annotation == null) {
-      return name;
-    }
-
-    for (ExecutableElement ee : annotation.getElementValues().keySet()) {
-      if (ee.toString().equals("value()")) {
-        var value = annotation.getElementValues().get(ee).getValue().toString();
-        if (!BsonAttribute.DEFAULT_NON_VALID_ALIAS.equals(value)) {
-          return annotation.getElementValues().get(ee).getValue().toString();
-        }
-      }
-    }
-
-    return name;
+    return attributeAnnotation.getAlias();
   }
 
   public boolean writerOptionWriteNull() {
-    if (writerOptions == null) {
+    if (writerOptionsAnnotation == null) {
       return true;
     }
 
-    for (ExecutableElement ee : writerOptions.getElementValues().keySet()) {
+    for (ExecutableElement ee : writerOptionsAnnotation.getElementValues().keySet()) {
       if (ee.toString().equals("writeNull()")) {
-        return (boolean) writerOptions.getElementValues().get(ee).getValue();
+        return (boolean) writerOptionsAnnotation.getElementValues().get(ee).getValue();
       }
     }
 
@@ -211,25 +185,15 @@ public class AttributeResult {
   }
 
   public int getOrder() {
-    if (annotation == null) {
-      return Integer.MAX_VALUE;
-    }
-
-    for (ExecutableElement ee : annotation.getElementValues().keySet()) {
-      if (ee.toString().equals("order()")) {
-        return (int) annotation.getElementValues().get(ee).getValue();
-      }
-    }
-
-    return Integer.MAX_VALUE;
+    return attributeAnnotation.getOrder();
   }
 
   public boolean isList() {
-    return list;
+    return fieldType == FieldType.LIST;
   }
 
   public boolean isSet() {
-    return set;
+    return fieldType == FieldType.SET;
   }
 
   @Override
@@ -246,14 +210,6 @@ public class AttributeResult {
         //        + field
         + ", type="
         + type
-        + ", list="
-        + list
-        + ", set="
-        + set
-        + ", annotation="
-        + annotation
-        + ", converter="
-        + converter
         + '}';
   }
 }
