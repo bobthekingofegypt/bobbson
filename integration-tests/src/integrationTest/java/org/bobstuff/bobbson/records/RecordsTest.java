@@ -48,6 +48,25 @@ public class RecordsTest {
 
   @ParameterizedTest(name = "{0}")
   @ArgumentsSource(BobBsonProvider.class)
+  public void testRecordNormalMissingFieldInBson(
+      BobBsonProvider.BobBsonImplProvider configurationProvider) throws Exception {
+    var bean = new RecordPlain(null, 12, 0);
+
+    BobBson bobBson = configurationProvider.provide();
+    BsonWriter writer = new StackBsonWriter(buffer);
+    writer.writeStartDocument();
+    writer.writeInteger("age", 12);
+    writer.writeEndDocument();
+
+    var bytes = buffer.toByteArray();
+
+    BsonReader reader = new StackBsonReader(new ByteBufferBobBsonBuffer(bytes));
+    var result = bobBson.deserialise(RecordPlain.class, reader);
+    Assertions.assertEquals(bean, result);
+  }
+
+  @ParameterizedTest(name = "{0}")
+  @ArgumentsSource(BobBsonProvider.class)
   public void testRecordList(BobBsonProvider.BobBsonImplProvider configurationProvider)
       throws Exception {
     var bean = new RecordWithList(Arrays.asList("bob", "john", "fred"));

@@ -2,6 +2,7 @@ package org.bobstuff.bobbson.reflection;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
@@ -57,11 +58,24 @@ public class RecordConverter<@Nullable T> implements BobBsonConverter<T> {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "assignment"})
   public @Nullable T readValue(BsonReader bsonReader, BsonType type) {
     bsonReader.readStartDocument();
 
+    // TODO should probably move this to the factory
     var args = new Object[fields.size()];
+    var i = 0;
+    for (var field : fields) {
+      if (!(field.getType() instanceof ParameterizedType) && field.getClazz().isPrimitive()) {
+        if (field.getClazz() == boolean.class) {
+          args[i++] = false;
+        } else {
+          args[i++] = 0;
+        }
+      } else {
+        i++;
+      }
+    }
 
     BobBsonBuffer.ByteRangeComparator nameComparator = bsonReader.getFieldName();
     while (bsonReader.readBsonType() != BsonType.END_OF_DOCUMENT) {
@@ -100,7 +114,6 @@ public class RecordConverter<@Nullable T> implements BobBsonConverter<T> {
 
     for (Constructor<?> c : instanceClazz.getDeclaredConstructors())
       if (Arrays.asList(c.getParameterTypes()).equals(componentTypes)) {
-        System.out.println(c);
 
         try {
           instance = (T) c.newInstance(args);
