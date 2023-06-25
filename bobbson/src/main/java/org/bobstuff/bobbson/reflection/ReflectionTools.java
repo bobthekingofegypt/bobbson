@@ -60,8 +60,7 @@ public class ReflectionTools {
       }
 
       var name = field.getName();
-      var capitalisedName =
-          name.substring(0, 1).toUpperCase(Locale.getDefault()) + name.substring(1);
+      var capitalisedName = casedVariableName(name);
       Method getter = null;
       Method setter = null;
       for (Method method : methods) {
@@ -110,8 +109,7 @@ public class ReflectionTools {
         continue;
       }
 
-      var capitalisedName =
-          fieldName.substring(0, 1).toUpperCase(Locale.getDefault()) + fieldName.substring(1);
+      var capitalisedName = casedVariableName(fieldName);
       Method setter = null;
       for (Method otherMethod : methods) {
         // TODO check public and return types etc
@@ -145,6 +143,17 @@ public class ReflectionTools {
     beanFields.sort(Comparator.comparing(ReflectionField::getOrder));
 
     return beanFields;
+  }
+
+  @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
+  private static String casedVariableName(String field) {
+    if (field.length() > 1) {
+      if (Character.isLowerCase(field.charAt(0)) && Character.isUpperCase(field.charAt(1))) {
+        return field;
+      }
+      return field.substring(0, 1).toUpperCase(Locale.getDefault()) + field.substring(1);
+    }
+    return field.toUpperCase(Locale.getDefault());
   }
 
   public static <T> List<ReflectionField> parseRecordFields(Class<T> clazz, BobBson bobBson)

@@ -1,5 +1,6 @@
 package org.bobstuff.bobbson.processor;
 
+import java.beans.Introspector;
 import java.util.List;
 import java.util.Locale;
 import javax.lang.model.element.ExecutableElement;
@@ -19,11 +20,8 @@ public class BeanUtils {
           && !modifiers.contains(Modifier.TRANSIENT)
           && !modifiers.contains(Modifier.ABSTRACT)
           && method.getReturnType().getKind().equals(type.getKind())
-          && ((method.getSimpleName().toString().equals("get" + StringUtils.capitalize(fieldName))
-                  || method
-                      .getSimpleName()
-                      .toString()
-                      .equals("is" + StringUtils.capitalize(fieldName)))
+          && ((method.getSimpleName().toString().equals("get" + casedVariableName(fieldName))
+                  || method.getSimpleName().toString().equals("is" + casedVariableName(fieldName)))
               || (fieldName.startsWith("is")
                   && method.getSimpleName().toString().equals(fieldName)))) {
         return method;
@@ -38,6 +36,17 @@ public class BeanUtils {
     return null;
   }
 
+  @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
+  private static String casedVariableName(String field) {
+    if (field.length() > 1) {
+      if (Character.isLowerCase(field.charAt(0)) && Character.isUpperCase(field.charAt(1))) {
+        return field;
+      }
+      return StringUtils.capitalize(field);
+    }
+    return field.toUpperCase(Locale.getDefault());
+  }
+
   public static @Nullable ExecutableElement findSetter(
       List<ExecutableElement> methods, String fieldName, TypeMirror type) {
     for (var method : methods) {
@@ -47,12 +56,12 @@ public class BeanUtils {
           && !modifiers.contains(Modifier.TRANSIENT)
           && !modifiers.contains(Modifier.ABSTRACT)
           && method.getReturnType().getKind() == TypeKind.VOID
-          && (method.getSimpleName().toString().equals("set" + StringUtils.capitalize(fieldName))
+          && (method.getSimpleName().toString().equals("set" + casedVariableName(fieldName))
               || (fieldName.startsWith("is")
                   && method
                       .getSimpleName()
                       .toString()
-                      .equals("set" + StringUtils.capitalize(fieldName.substring(2)))))) {
+                      .equals("set" + casedVariableName(fieldName.substring(2)))))) {
         return method;
       }
     }
@@ -63,23 +72,27 @@ public class BeanUtils {
   @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
   public static @Nullable String extractPropertyNameFromGetter(String methodName) {
     if (methodName.startsWith("get") && methodName.length() > 3) {
-      String propertySection = methodName.substring(3);
-      if (methodName.length() == 4) {
-        return propertySection.toLowerCase(Locale.getDefault());
-      } else {
-        return propertySection.toUpperCase(Locale.getDefault()).equals(propertySection)
-            ? propertySection
-            : Character.toLowerCase(propertySection.charAt(0)) + propertySection.substring(1);
-      }
+      return Introspector.decapitalize(methodName.substring(3));
+      //      String propertySection = methodName.substring(3);
+      //      if (methodName.length() == 4) {
+      //        return propertySection.toLowerCase(Locale.getDefault());
+      //      } else {
+      //        return propertySection.toUpperCase(Locale.getDefault()).equals(propertySection)
+      //            ? propertySection
+      //            : Character.toLowerCase(propertySection.charAt(0)) +
+      // propertySection.substring(1);
+      //      }
     } else if (methodName.startsWith("is") && methodName.length() > 2) {
-      String propertySection = methodName.substring(2);
-      if (methodName.length() == 3) {
-        return propertySection.toLowerCase(Locale.getDefault());
-      } else {
-        return propertySection.toUpperCase(Locale.getDefault()).equals(propertySection)
-            ? propertySection
-            : Character.toLowerCase(propertySection.charAt(0)) + propertySection.substring(1);
-      }
+      return Introspector.decapitalize(methodName.substring(2));
+      //      String propertySection = methodName.substring(2);
+      //      if (methodName.length() == 3) {
+      //        return propertySection.toLowerCase(Locale.getDefault());
+      //      } else {
+      //        return propertySection.toUpperCase(Locale.getDefault()).equals(propertySection)
+      //            ? propertySection
+      //            : Character.toLowerCase(propertySection.charAt(0)) +
+      // propertySection.substring(1);
+      //      }
     }
     return null;
   }
