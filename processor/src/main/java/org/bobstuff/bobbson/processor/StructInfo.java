@@ -1,5 +1,7 @@
 package org.bobstuff.bobbson.processor;
 
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -64,6 +66,17 @@ public class StructInfo {
       return "";
     }
     return binaryName.substring(0, dotIndex);
+  }
+
+  public Map<String, AttributeResult> attributesByOrder() {
+    return attributes.entrySet().stream()
+        .sorted(Comparator.comparingInt(a -> a.getValue().getOrder()))
+        .collect(
+            Collectors.toMap(
+                Map.Entry::getKey,
+                Map.Entry::getValue,
+                (oldValue, newValue) -> oldValue,
+                LinkedHashMap::new));
   }
 
   public String getAttributeReadAllBooleanLogic() {

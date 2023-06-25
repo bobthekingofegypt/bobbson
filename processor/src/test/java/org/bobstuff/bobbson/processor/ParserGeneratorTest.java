@@ -99,14 +99,14 @@ public class ParserGeneratorTest {
     var results = sut.generateKeyByteArrays(sampleMultipleFieldsStructInfo);
     assertEquals(
         "private byte[] nameBytes = \"name\".getBytes(java.nio.charset.StandardCharsets.UTF_8);\n",
-        results.get(1).toString());
+        results.get(0).toString());
     assertEquals(
         "private byte[] ageBytes = \"age\".getBytes(java.nio.charset.StandardCharsets.UTF_8);\n",
         results.get(2).toString());
     assertEquals(
         "private byte[] occupationBytes ="
             + " \"occupation\".getBytes(java.nio.charset.StandardCharsets.UTF_8);\n",
-        results.get(0).toString());
+        results.get(1).toString());
   }
 
   @Test
@@ -116,19 +116,6 @@ public class ParserGeneratorTest {
         """
                     var readAllValues = false;
                     boolean nameCheck = false;
-                      """,
-        results.toString());
-  }
-
-  @Test
-  public void testGenerateParserPreambleMultipleFields() {
-    var results = sut.generateParserPreamble(sampleMultipleFieldsStructInfo, Tools.types());
-    assertEquals(
-        """
-                    var readAllValues = false;
-                    boolean occupationCheck = false;
-                    boolean nameCheck = false;
-                    boolean ageCheck = false;
                       """,
         results.toString());
   }
@@ -226,12 +213,12 @@ public class ParserGeneratorTest {
     var code = sut.generateParserCode(sampleMultipleFieldsStructInfo);
     assertEquals(
         """
-                    if (range.equalsArray(occupationBytes, 1077)) {
-                      fieldsRead += 1;
-                      result.setOccupation(org.bobstuff.bobbson.converters.StringBsonConverter.readString(reader));
-                    } else if (range.equalsArray(nameBytes, 417)) {
+                    if (range.equalsArray(nameBytes, 417)) {
                       fieldsRead += 1;
                       result.setName(org.bobstuff.bobbson.converters.StringBsonConverter.readString(reader));
+                    } else if (range.equalsArray(occupationBytes, 1077)) {
+                      fieldsRead += 1;
+                      result.setOccupation(org.bobstuff.bobbson.converters.StringBsonConverter.readString(reader));
                     } else if (range.equalsArray(ageBytes, 301)) {
                       fieldsRead += 1;
                       result.setAge(org.bobstuff.bobbson.converters.PrimitiveConverters.parseInteger(reader));

@@ -147,6 +147,55 @@ public class ReflectionTools {
     return beanFields;
   }
 
+  public static <T> List<ReflectionField> parseRecordFields(Class<T> clazz, BobBson bobBson)
+      throws Exception {
+    var beanFields = new ArrayList<ReflectionField>();
+    var fields = clazz.getDeclaredFields();
+    var recordComponents = clazz.getRecordComponents();
+
+    // first check fields with getters and setters
+    int index = 0;
+    for (var recordComponent : recordComponents) {
+      var fieldOptional =
+          Arrays.stream(fields)
+              .filter(f -> f.getName().equals(recordComponent.getName()))
+              .findFirst();
+      if (fieldOptional.isEmpty()) {
+        continue;
+      }
+      var field = fieldOptional.get();
+
+      var bsonAttribute = field.getAnnotation(BsonAttribute.class);
+      var bsonWriterOptions = field.getAnnotation(BsonWriterOptions.class);
+      var customConverter = field.getAnnotation(BsonConverter.class);
+
+      if (bsonAttribute != null && bsonAttribute.ignore()) {
+        continue;
+      }
+
+      var name = field.getName();
+      Method getter = recordComponent.getAccessor();
+      var lookup = MethodHandles.lookup();
+      var getterLambda = createLabdaFactoryGetter(clazz, field.getType(), getter, lookup);
+
+      beanFields.add(
+          new ReflectionField(
+              index++,
+              name,
+              field.getGenericType(),
+              bsonAttribute,
+              bsonWriterOptions,
+              customConverter,
+              null,
+              getterLambda,
+              bobBson));
+    }
+
+    beanFields.sort(Comparator.comparing(ReflectionField::getOrder));
+
+    return beanFields;
+  }
+
   /**
    * Extract a field name from its getter method name.
    *

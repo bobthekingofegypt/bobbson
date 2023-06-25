@@ -1,6 +1,7 @@
 package org.bobstuff.bobbson.processor;
 
 import java.util.List;
+import java.util.Locale;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.type.TypeKind;
@@ -56,6 +57,30 @@ public class BeanUtils {
       }
     }
 
+    return null;
+  }
+
+  @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
+  public static @Nullable String extractPropertyNameFromGetter(String methodName) {
+    if (methodName.startsWith("get") && methodName.length() > 3) {
+      String propertySection = methodName.substring(3);
+      if (methodName.length() == 4) {
+        return propertySection.toLowerCase(Locale.getDefault());
+      } else {
+        return propertySection.toUpperCase(Locale.getDefault()).equals(propertySection)
+            ? propertySection
+            : Character.toLowerCase(propertySection.charAt(0)) + propertySection.substring(1);
+      }
+    } else if (methodName.startsWith("is") && methodName.length() > 2) {
+      String propertySection = methodName.substring(2);
+      if (methodName.length() == 3) {
+        return propertySection.toLowerCase(Locale.getDefault());
+      } else {
+        return propertySection.toUpperCase(Locale.getDefault()).equals(propertySection)
+            ? propertySection
+            : Character.toLowerCase(propertySection.charAt(0)) + propertySection.substring(1);
+      }
+    }
     return null;
   }
 }

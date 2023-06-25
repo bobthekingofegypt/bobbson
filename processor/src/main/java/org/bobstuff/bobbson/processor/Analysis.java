@@ -45,17 +45,78 @@ public class Analysis {
     this.writerOptionsType = types.getDeclaredType(writerOptionsElement);
   }
 
-  private Map<String, AttributeResult> getFieldAttributes(List<VariableElement> fields) {
+  private FieldType fieldType(TypeMirror type) {
+    TypeMirror listType = types.erasure(elements.getTypeElement(List.class.getName()).asType());
+    TypeMirror setType = types.erasure(elements.getTypeElement(Set.class.getName()).asType());
+    TypeMirror mapType = types.erasure(elements.getTypeElement(Map.class.getName()).asType());
+
+    final String leftStr = type.toString();
+    final String rightStr = listType.toString();
+    if (leftStr.equals(rightStr)) {
+      messager.debug("raw collection match");
+    }
+    TypeMirror leftRaw = types.erasure(type);
+    if (types.isAssignable(listType, leftRaw)) {
+      messager.debug("type is a list");
+      return FieldType.LIST;
+    } else if (types.isAssignable(mapType, leftRaw)) {
+      messager.debug("type is a map");
+      return FieldType.MAP;
+    } else if (types.isAssignable(setType, leftRaw)) {
+      messager.debug("type is a set");
+      return FieldType.SET;
+    }
+
+    return FieldType.OBJECT;
+  }
+
+  private Map<String, AttributeResult> getFieldAttributes(
+      List<VariableElement> fields, List<ExecutableElement> methods) {
     var results = new HashMap<String, AttributeResult>();
 
     for (var field : fields) {
       var modifiers = field.getModifiers();
       if ((modifiers.contains(Modifier.NATIVE)
-              || modifiers.contains(Modifier.STATIC)
-              || modifiers.contains(Modifier.TRANSIENT))) {
+          || modifiers.contains(Modifier.STATIC)
+          || modifiers.contains(Modifier.TRANSIENT))) {
         continue;
       }
 
+      var simpleName = field.getSimpleName().toString();
+
+      messager.debug("field type - " + field.asType());
+      var fieldType = fieldType(field.asType());
+
+      var getter = findGetter(methods, simpleName, field.asType(), messager);
+
+      var setter = findSetter(methods, simpleName, field.asType());
+
+      var attributeAnnotation =
+          AttributeAnnotation.parse(field, attributeType, simpleName, types, elements, messager);
+      var converterAnnotation =
+          ConverterAnnotation.parse(field, converterType, types, elements, messager);
+      var writerOptionsAnnotation = findAnnotationMirror(field, writerOptionsType, types);
+
+      if (attributeAnnotation.isIgnore()) {
+        continue;
+      }
+
+      if (getter == null || setter == null) {
+        messager.debug("ignoring field due to missing getter/setter");
+        continue;
+      }
+
+      results.put(
+          simpleName,
+          new AttributeResult(
+              simpleName,
+              getter,
+              setter,
+              field.asType(),
+              fieldType,
+              attributeAnnotation,
+              converterAnnotation,
+              writerOptionsAnnotation));
     }
 
     return results;
@@ -67,173 +128,46 @@ public class Analysis {
       return Collections.emptyMap();
     }
 
-    var results = new HashMap<String, AttributeResult>();
     var methods = ElementFilter.methodsIn(typeElement.getEnclosedElements());
     var fields = ElementFilter.fieldsIn(typeElement.getEnclosedElements());
 
-    for (var field : fields) {
-//      var modifiers = field.getModifiers();
-//      if (!(modifiers.contains(Modifier.NATIVE)
-//          || modifiers.contains(Modifier.STATIC)
-//          || modifiers.contains(Modifier.TRANSIENT))) {
-        messager.debug("field type - " + field.asType());
-        TypeMirror t = field.asType();
+    var results = new HashMap<>(getFieldAttributes(fields, methods));
 
-        boolean isList = false;
-        boolean isSet = false;
-        boolean isMap = false;
-        TypeMirror listType = types.erasure(elements.getTypeElement(List.class.getName()).asType());
-        TypeMirror setType = types.erasure(elements.getTypeElement(Set.class.getName()).asType());
-        TypeMirror mapType = types.erasure(elements.getTypeElement(Map.class.getName()).asType());
-        final String leftStr = t.toString();
-        final String rightStr = listType.toString();
-        if (leftStr.equals(rightStr)) {
-          messager.debug("raw collection match");
-        }
-        if (t.getKind() != listType.getKind()) {
-          messager.debug("thing is not a list");
-        }
-        TypeMirror leftRaw = types.erasure(t);
-        if (types.isAssignable(listType, leftRaw)) {
-          messager.debug("type is a list");
-          isList = true;
-
-          DeclaredType dclt = (DeclaredType) t;
-          for (TypeMirror argument : dclt.getTypeArguments()) {
-            messager.debug(argument.toString());
-          }
-        } else if (types.isAssignable(mapType, leftRaw)) {
-          messager.debug("type is a map");
-          isMap = true;
-        } else if (types.isAssignable(setType, leftRaw)) {
-          messager.debug("type is a set");
-          isSet = true;
-        }
-
-        ExecutableElement getter =
-            findGetter(methods, field.getSimpleName().toString(), field.asType(), messager);
-
-        ExecutableElement setter =
-            findSetter(methods, field.getSimpleName().toString(), field.asType());
-
-        var annotation = findAnnotationMirror(field, attributeType, types);
-        var converter = findAnnotationMirror(field, converterType, types);
-        var writerOptions = findAnnotationMirror(field, writerOptionsType, types);
-        TypeMirror converterType = null;
-        if (converter != null) {
-          for (ExecutableElement ee : converter.getElementValues().keySet()) {
-            if (ee.toString().equals("value()")) {
-              messager.debug(converter.getElementValues().get(ee).getValue().toString());
-              String clazz = converter.getElementValues().get(ee).getValue().toString();
-
-              TypeElement element = elements.getTypeElement(clazz);
-              DeclaredType type = types.getDeclaredType(element);
-              messager.debug("found converter");
-              messager.debug(clazz);
-              messager.debug(type.toString());
-              var m = ElementFilter.methodsIn(element.getEnclosedElements());
-              for (ExecutableElement e : m) {
-                messager.debug(e.toString());
-                if (e.getSimpleName().toString().equals("readValue")) {
-                  if (types.isAssignable(e.getReturnType(), field.asType())) {
-                    messager.debug("matching return types");
-                    converterType = type;
-                  } else {
-                    messager.debug("need to look at this more");
-                  }
-                }
-              }
-            }
-          }
-        }
-
-        var ignore = false;
-        if (annotation != null) {
-          for (ExecutableElement ee : annotation.getElementValues().keySet()) {
-            if (ee.toString().equals("ignore()")) {
-              ignore = (Boolean) annotation.getElementValues().get(ee).getValue();
-            }
-          }
-        }
-
-        if (ignore) {
-          continue;
-        }
-
-        if (getter == null || (setter == null && !isRecord)) {
-          // TODO write better error message
-          messager.debug(
-              "Field (" + field.getSimpleName() + ") excluded due to missing getter or setter");
-          continue;
-        }
-
-        results.put(
-            field.getSimpleName().toString(),
-            new AttributeResult(
-                field.getSimpleName().toString(),
-                getter,
-                setter,
-                //                field,
-                field.asType(),
-                isList,
-                isSet,
-                isMap,
-                annotation,
-                converter,
-                writerOptions,
-                converterType));
-      }
-    }
-
+    messager.debug("results" + results);
     for (var method : methods) {
+      // TODO ignore if already found in fields
       var annotation = findAnnotationMirror(method, attributeType, types);
-      var writerOptions = findAnnotationMirror(method, writerOptionsType, types);
+      //      var writerOptions = findAnnotationMirror(method, writerOptionsType, types);
       var methodName = method.getSimpleName().toString();
+      messager.debug("METHOD NAME: " + methodName);
       if (annotation == null) {
         // method doesn't have an annotation so ignore it for now
         continue;
       }
 
-      var propertyName = "";
-      if (methodName.startsWith("get") && methodName.length() > 3) {
-        String propertySection = methodName.substring(3);
-        if (methodName.length() == 4) {
-          propertyName = propertySection.toLowerCase(Locale.getDefault());
-        } else {
-          propertyName =
-              propertySection.toUpperCase(Locale.getDefault()).equals(propertySection)
-                  ? propertySection
-                  : Character.toLowerCase(propertySection.charAt(0)) + propertySection.substring(1);
-        }
-      } else if (methodName.startsWith("is") && methodName.length() > 2) {
-        String propertySection = methodName.substring(2);
-        if (methodName.length() == 3) {
-          propertyName = propertySection.toLowerCase(Locale.getDefault());
-        } else {
-          propertyName =
-              propertySection.toUpperCase(Locale.getDefault()).equals(propertySection)
-                  ? propertySection
-                  : Character.toLowerCase(propertySection.charAt(0)) + propertySection.substring(1);
-        }
-      } else {
+      var fieldType = fieldType(method.getReturnType());
 
+      messager.debug("fieldtype " + fieldType);
+
+      var propertyName = BeanUtils.extractPropertyNameFromGetter(methodName);
+      if (propertyName == null) {
         continue;
       }
+      messager.debug("PROPERTY NAME: " + propertyName);
 
-      var ignore = false;
-      for (ExecutableElement ee : annotation.getElementValues().keySet()) {
-        if (ee.toString().equals("ignore()")) {
-          ignore = (Boolean) annotation.getElementValues().get(ee).getValue();
-        }
-      }
+      var attributeAnnotation =
+          AttributeAnnotation.parse(method, attributeType, propertyName, types, elements, messager);
+      var converterAnnotation =
+          ConverterAnnotation.parse(method, converterType, types, elements, messager);
+      var writerOptionsAnnotation = findAnnotationMirror(method, writerOptionsType, types);
 
-      if (ignore) {
+      if (attributeAnnotation.isIgnore()) {
         continue;
       }
 
       var setter = findSetter(methods, propertyName, method.getReturnType());
 
-      if (setter == null && !isRecord) {
+      if (setter == null) {
         messager.debug("Field (" + propertyName + ") excluded due to missing setter");
         continue;
       }
@@ -244,15 +178,11 @@ public class Analysis {
               propertyName,
               method,
               setter,
-              //                      null,
               method.getReturnType(),
-              false,
-              false,
-              false,
-              annotation,
-              null,
-              writerOptions,
-              null));
+              fieldType,
+              attributeAnnotation,
+              converterAnnotation,
+              writerOptionsAnnotation));
     }
     return results;
   }
@@ -261,8 +191,9 @@ public class Analysis {
     var recordComponents = el.getRecordComponents();
 
     var fields = ElementFilter.fieldsIn(el.getEnclosedElements());
-//    var recordMap = recordComponents.stream().collect(Collectors.toMap(RecordComponentElement::getSimpleName, Function.identity()));
-    var fieldsMap = fields.stream().collect(Collectors.toMap(VariableElement::getSimpleName, Function.identity()));
+    var fieldsMap =
+        fields.stream()
+            .collect(Collectors.toMap(VariableElement::getSimpleName, Function.identity()));
 
     var results = new LinkedHashMap<String, AttributeResult>();
     for (var recordComponent : recordComponents) {
@@ -273,67 +204,32 @@ public class Analysis {
       messager.debug("field type - " + field.asType());
 
       // collection identification etc
-      var annotation = findAnnotationMirror(field, attributeType, types);
-      var converter = findAnnotationMirror(field, converterType, types);
-      var writerOptions = findAnnotationMirror(field, writerOptionsType, types);
-      TypeMirror converterType = null;
-      if (converter != null) {
-        for (ExecutableElement ee : converter.getElementValues().keySet()) {
-          if (ee.toString().equals("value()")) {
-            messager.debug(converter.getElementValues().get(ee).getValue().toString());
-            String clazz = converter.getElementValues().get(ee).getValue().toString();
+      var name = field.getSimpleName().toString();
+      var fieldType = fieldType(field.asType());
 
-            TypeElement element = elements.getTypeElement(clazz);
-            DeclaredType type = types.getDeclaredType(element);
-            messager.debug("found converter");
-            messager.debug(clazz);
-            messager.debug(type.toString());
-            var m = ElementFilter.methodsIn(element.getEnclosedElements());
-            for (ExecutableElement e : m) {
-              messager.debug(e.toString());
-              if (e.getSimpleName().toString().equals("readValue")) {
-                if (types.isAssignable(e.getReturnType(), field.asType())) {
-                  messager.debug("matching return types");
-                  converterType = type;
-                } else {
-                  messager.debug("need to look at this more");
-                }
-              }
-            }
-          }
-        }
+      var attributeAnnotation =
+          AttributeAnnotation.parse(field, attributeType, name, types, elements, messager);
+      var converterAnnotation =
+          ConverterAnnotation.parse(field, converterType, types, elements, messager);
+      var writerOptionsAnnotation = findAnnotationMirror(field, writerOptionsType, types);
+
+      if (attributeAnnotation.isIgnore()) {
+        continue;
       }
 
-        var ignore = false;
-        if (annotation != null) {
-          for (ExecutableElement ee : annotation.getElementValues().keySet()) {
-            if (ee.toString().equals("ignore()")) {
-              ignore = (Boolean) annotation.getElementValues().get(ee).getValue();
-            }
-          }
-        }
+      var getter = recordComponent.getAccessor();
 
-        if (ignore) {
-          continue;
-        }
-
-        var getter = recordComponent.getAccessor();
-
-        results.put(
-                field.getSimpleName().toString(),
-                new AttributeResult(
-                        field.getSimpleName().toString(),
-                        getter,
-                        null,
-                        //                field,
-                        field.asType(),
-                        false,
-                        false,
-                        false,
-                        annotation,
-                        converter,
-                        writerOptions,
-                        converterType));
+      results.put(
+          field.getSimpleName().toString(),
+          new AttributeResult(
+              field.getSimpleName().toString(),
+              getter,
+              null,
+              field.asType(),
+              fieldType,
+              attributeAnnotation,
+              converterAnnotation,
+              writerOptionsAnnotation));
     }
 
     return results;
@@ -351,7 +247,6 @@ public class Analysis {
 
       var isRecord = el.getKind() == ElementKind.RECORD;
       messager.debug("Element is a record: " + isRecord);
-
 
       var element = (TypeElement) el;
       var annotation = findAnnotationMirror(element, compileType, types);
@@ -375,7 +270,6 @@ public class Analysis {
       for (var attribute : attributes.entrySet()) {
         messager.debug(attribute.getKey() + ": " + attribute.getValue());
       }
-
 
       StructInfo structInfo =
           new StructInfo(
